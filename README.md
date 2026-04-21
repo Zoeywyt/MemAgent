@@ -110,6 +110,10 @@ python test_case.py
 - 心理关系图谱
 - 督导分析报告
 - 系统执行日志
+- 
+<img width="1472" height="922" alt="image" src="https://github.com/user-attachments/assets/22b658d4-1132-45d7-a9da-22b6527583ec" />
+<img width="1494" height="1080" alt="image" src="https://github.com/user-attachments/assets/89e03938-8718-4bf2-a105-2990e8948195" />
+<img width="1241" height="1167" alt="image" src="https://github.com/user-attachments/assets/75a3f92f-368b-4366-aaa1-6f37698c5e1e" />
 
 ---
 
