@@ -1,0 +1,2174 @@
+{
+  "user_id": "CP1033_小杰及陪同母亲",
+  "status": "completed",
+  "completed_sessions": [
+    "Session1",
+    "Session2",
+    "Session3",
+    "Session4",
+    "Session5_三个月后回访与巩固"
+  ],
+  "session_results": [
+    {
+      "session_label": "Session1",
+      "run_session_id": "CP1033_小杰及陪同母亲_Session1",
+      "initial_l1_summary": null,
+      "l3_records": [
+        {
+          "turn_index": 1,
+          "user": "小杰：我不想来，是我妈非要我来的。学校也不让我回去了。",
+          "assistant": "[接纳与开放式提问] 我知道被带来这里可能并不轻松。你愿意先告诉我，学校为什么暂时不让你回去吗？",
+          "l3_memory_result": {
+            "facts": [
+              "The user said they did not want to come and that their mother insisted they do so.",
+              "The user said their school is currently not allowing them to return."
+            ],
+            "actions": [
+              {
+                "id": "temp_1",
+                "text": "The user said they did not want to come and that their mother insisted they do so.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp_2",
+                "text": "The user said their school is currently not allowing them to return.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 2
+          }
+        },
+        {
+          "turn_index": 2,
+          "user": "小杰：我跟数学老师顶起来了。他当着全班说我没写作业，我就撞了他。",
+          "assistant": "[具体化] 当时那股气一下子冲上来了。老师批评你之前，你心里还压着什么吗？",
+          "l3_memory_result": {
+            "facts": [],
+            "actions": [],
+            "stored": 0
+          }
+        },
+        {
+          "turn_index": 3,
+          "user": "小杰：我本来就烦。回家他们老吵架，我爸有时候还打我妈，我气得不行。",
+          "assistant": "[共情与连接] 听起来，你在学校里的爆发，不只是因为作业，而是把家里攒下来的愤怒也一起带出来了。",
+          "l3_memory_result": {
+            "facts": [
+              "用户家里父母经常吵架。",
+              "用户的父亲有时会对母亲实施家暴。",
+              "用户因家庭冲突长期感到愤怒和烦躁。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user's parents often argue at home.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The user's father sometimes commits domestic violence against their mother.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-3",
+                "text": "The user has long felt angry and irritable due to family conflict.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 3
+          }
+        },
+        {
+          "turn_index": 4,
+          "user": "小杰：对，我看见我爸打我妈的时候特别恨他。我想帮我妈，可我又打不过他。",
+          "assistant": "[命名情绪] 那是一种又愤怒、又无力、又心疼妈妈的感觉。这样的压力压在一个 11 岁孩子身上，真的很重。",
+          "l3_memory_result": {
+            "facts": [
+              "用户的父亲会殴打用户的母亲。",
+              "用户因父亲殴打母亲而对父亲怀有强烈恨意。",
+              "用户想保护母亲，但在面对父亲的暴力时感到无力。"
+            ],
+            "actions": [
+              {
+                "id": "af7ff9c4-4df2-43bb-8354-27904407879f",
+                "text": "The user's father beats their mother.",
+                "event": "UPDATE",
+                "old_memory": "The user's father sometimes commits domestic violence against their mother."
+              },
+              {
+                "id": "temp-1",
+                "text": "The user harbors strong hatred toward their father because he beats their mother.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The user wants to protect their mother but feels powerless in the face of their father's violence.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 3
+          }
+        },
+        {
+          "turn_index": 5,
+          "user": "小杰：有时候同学碰我一下，我都想打回去。打完我又后悔。",
+          "assistant": "[初步目标] 所以我们先不急着讲大道理，先一起帮你学会在那股火冲上来的时候，把它慢一点。",
+          "l3_memory_result": {
+            "facts": [
+              "用户有时在同学碰到自己时会冲动地想打回去，事后会后悔。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user sometimes has impulsive aggressive urges toward classmates when physically bumped, and later regrets it.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 6,
+          "user": "母亲：我知道是家里的事影响了孩子，但他爸爸根本不听。",
+          "assistant": "[家庭支持] 您已经意识到家庭环境是关键，这很重要。后面我们也会一起想，怎样在不激化冲突的前提下保护孩子。",
+          "l3_memory_result": {
+            "facts": [
+              "用户认为家里的问题正在影响孩子。",
+              "孩子的父亲不愿意倾听或配合沟通。"
+            ],
+            "actions": [
+              {
+                "id": "tmp-1",
+                "text": "The user believes the problems at home are affecting the child.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "tmp-2",
+                "text": "The child's father is unwilling to listen or cooperate in communication.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 2
+          }
+        }
+      ],
+      "end_result": {
+        "graph_data": {
+          "entities": [
+            {
+              "entity": "CP1033_小杰及陪同母亲",
+              "entity_type": "user"
+            },
+            {
+              "entity": "assistant",
+              "entity_type": "assistant"
+            },
+            {
+              "entity": "学校暂时不让回去",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "与数学老师发生冲突",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "老师当着全班说没写作业",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "撞老师",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "父母经常吵架",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "父亲打母亲",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "烦躁",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "愤怒",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "无力",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "心疼妈妈",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "想帮妈妈",
+              "entity_type": "goal"
+            },
+            {
+              "entity": "打不过父亲",
+              "entity_type": "cognition"
+            },
+            {
+              "entity": "被同学碰一下就想打回去",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "后悔",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "让愤怒慢下来",
+              "entity_type": "goal"
+            },
+            {
+              "entity": "在不激化冲突的前提下保护孩子",
+              "entity_type": "strategy"
+            }
+          ],
+          "relations": [
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "reports",
+              "destination": "学校暂时不让回去"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "reports",
+              "destination": "与数学老师发生冲突"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "老师当着全班说没写作业"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "撞老师"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "父母经常吵架"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "父亲打母亲"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "烦躁"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "愤怒"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "无力"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "心疼妈妈"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "wants",
+              "destination": "想帮妈妈"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "believes",
+              "destination": "打不过父亲"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "被同学碰一下就想打回去"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "后悔"
+            },
+            {
+              "source": "父母经常吵架",
+              "relation": "causes",
+              "destination": "烦躁"
+            },
+            {
+              "source": "父亲打母亲",
+              "relation": "causes",
+              "destination": "愤怒"
+            },
+            {
+              "source": "父亲打母亲",
+              "relation": "causes",
+              "destination": "无力"
+            },
+            {
+              "source": "父亲打母亲",
+              "relation": "causes",
+              "destination": "心疼妈妈"
+            },
+            {
+              "source": "愤怒",
+              "relation": "causes",
+              "destination": "撞老师"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "让愤怒慢下来"
+            },
+            {
+              "source": "assistant",
+              "relation": "applies",
+              "destination": "在不激化冲突的前提下保护孩子"
+            }
+          ]
+        },
+        "l1_summary": {
+          "主题": [
+            "冲动攻击行为",
+            "家庭暴力压力"
+          ],
+          "背景": "来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。",
+          "会话总结": "本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。"
+        },
+        "treatment_report": {
+          "emotion_trend": "来访者的核心情绪轨迹表现为：从初次来访时因被动就诊而呈现明显抗拒、防御和不情愿，逐渐在被接纳和理解后，开始从表层的学校冲突转向表达更深层的愤怒、委屈、无力感以及对母亲的心疼。其情绪体验已从单纯以攻击行为外化，发展到能够初步识别“被刺激后很快被点燃、事后又后悔”的内部过程，说明情绪觉察开始形成，但整体仍处于高警觉、易激惹和易冲动状态，尚未稳定。",
+          "key_progress": [
+            "咨询关系已初步建立，来访者从最初明显抵触和防御，发展为能够讲述学校冲突经过，并进一步谈及家庭暴力目击经历及相关感受。",
+            "对问题的理解有所深化，已不再仅将事件视为“学校打人”或单一纪律问题，而开始把攻击爆发与长期家庭冲突、愤怒积压、无力感联系起来。",
+            "来访者初步具备情绪反思能力，能够识别自己在被碰触或被刺激时容易迅速失控，并意识到“打完会后悔”；同时母亲已开始意识到家庭环境对孩子的影响，具备一定合作与支持意愿。"
+          ],
+          "risk_note": "当前仍存在中高水平风险，主要包括：1）冲动攻击风险持续存在，既往已对老师发生肢体冲突，也报告对同伴触碰存在立即反击冲动；2）家庭暴力暴露风险持续存在，父母高冲突及父亲对母亲的暴力行为可能继续触发来访者的高警觉、愤怒和失控反应。现阶段未报告自伤、自杀意念或明确伤人计划，但由于其年龄小、情绪调节能力弱、环境应激持续，风险尚未明显下降，需继续动态评估校园行为风险及家庭安全状况。",
+          "treatment_phase": "探索问题",
+          "next_focus": "下一阶段建议重点放在三个方向：第一，继续巩固安全、稳定的咨询关系，帮助来访者更细致识别愤怒爆发前的身体信号、触发情境与内在感受；第二，尽快开展适合儿童的情绪调节与冲动控制训练，如暂停、离开刺激现场、呼吸放松、情绪命名和替代性表达；第三，加强家长工作，协助母亲提升对孩子情绪状态的观察与回应能力，并优先评估和降低家庭暴力暴露，减少来访者再次处于高冲突场景中的机会。必要时可进一步与学校沟通复学支持及行为管理方案。"
+        }
+      }
+    },
+    {
+      "session_label": "Session2",
+      "run_session_id": "CP1033_小杰及陪同母亲_Session2",
+      "initial_l1_summary": {
+        "主题": [
+          "冲动攻击行为",
+          "家庭暴力压力"
+        ],
+        "背景": "来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。",
+        "会话总结": "本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。"
+      },
+      "l3_records": [
+        {
+          "turn_index": 1,
+          "user": "小杰：这周我试了你说的数五个数，有一次真忍住了。",
+          "assistant": "[积极强化] 这很了不起。你能讲讲当时发生了什么，以及你是怎么做到的吗？",
+          "l3_memory_result": {
+            "facts": [
+              "用户最近在尝试用“数五个数”的方法来克制自己的冲动反应，并且已经有一次成功忍住了。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user has recently been trying a \"count to five\" technique to control impulsive reactions and has successfully used it at least once.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 2,
+          "user": "小杰：同学拿我橡皮不还，我本来想推他。后来数到三的时候，我改成叫他还给我，他就还了。",
+          "assistant": "[强化自我效能] 你这次没有用拳头，而是用话把事情解决了，这说明你是能管住自己的。",
+          "l3_memory_result": {
+            "facts": [
+              "用户名叫小杰。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user's name is 小杰.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 3,
+          "user": "小杰：可是回家听见我爸又吼我妈，我还是把枕头砸了好几下，然后跑出去。",
+          "assistant": "[正常化] 这不算失败。面对那样的场面，你把愤怒发泄在枕头上，而且选择先离开，已经比直接冲上去更安全。",
+          "l3_memory_result": {
+            "facts": [
+              "用户家中存在父亲对母亲大吼的家庭冲突，这会引发用户强烈愤怒和逃离反应。"
+            ],
+            "actions": [
+              {
+                "id": "temp_1",
+                "text": "The user's father yelling at their mother triggers intense anger and a desire to escape.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 4,
+          "user": "小杰：我跑到楼下花园，看蚂蚁搬家，看着看着心里就没那么堵了。",
+          "assistant": "[发现资源] 这就是你的自我安抚资源。除了看蚂蚁，还有什么事能让你安静下来？",
+          "l3_memory_result": {
+            "facts": [
+              "用户在情绪压抑时，会通过去楼下花园看蚂蚁来让自己平静一些。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "When feeling emotionally overwhelmed, the user calms themselves by going to the garden downstairs to watch ants.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 5,
+          "user": "小杰：拼乐高。我拼的时候就什么都不想了。",
+          "assistant": "[资源巩固] 很好。那我们把‘数五个数、离开现场、看蚂蚁、拼乐高’都放进你的工具箱里。",
+          "l3_memory_result": {
+            "facts": [
+              "用户通过拼乐高来放空自己、缓解思绪。"
+            ],
+            "actions": [
+              {
+                "id": "temp_1",
+                "text": "The user sometimes relaxes and clears their mind by building Lego.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 6,
+          "user": "母亲：这周他爸确实没当着孩子面和我吵，但平时还是特别惯着孩子。",
+          "assistant": "[家长引导] 这已经是一个微小但重要的改变。接下来我们可以慢慢增加孩子自己做事的机会，让他找回掌控感。",
+          "l3_memory_result": {
+            "facts": [
+              "用户是孩子的母亲。",
+              "孩子的父亲平时比较惯着孩子。",
+              "孩子的父亲曾当着孩子的面与用户发生争吵。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user is the child's mother.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The child's father usually indulges the child.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-3",
+                "text": "The child's father has argued with the user in front of the child.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 3
+          }
+        }
+      ],
+      "end_result": {
+        "graph_data": {
+          "entities": [
+            {
+              "entity": "CP1033_小杰及陪同母亲",
+              "entity_type": "user"
+            },
+            {
+              "entity": "assistant",
+              "entity_type": "assistant"
+            },
+            {
+              "entity": "数五个数",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "同学拿橡皮不还",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "想推同学",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "叫同学还橡皮",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "父亲吼母亲",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "愤怒",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "砸枕头",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "跑出去",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "看蚂蚁搬家",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "心里发堵",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "拼乐高",
+              "entity_type": "interest"
+            },
+            {
+              "entity": "离开现场",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "自我安抚工具箱",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "父亲不当着孩子面和母亲吵",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "父亲特别惯着孩子",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "让孩子自己做事的机会",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "找回掌控感",
+              "entity_type": "goal"
+            }
+          ],
+          "relations": [
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "applies",
+              "destination": "数五个数"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "同学拿橡皮不还"
+            },
+            {
+              "source": "同学拿橡皮不还",
+              "relation": "causes",
+              "destination": "想推同学"
+            },
+            {
+              "source": "数五个数",
+              "relation": "relieves",
+              "destination": "想推同学"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "叫同学还橡皮"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "父亲吼母亲"
+            },
+            {
+              "source": "父亲吼母亲",
+              "relation": "causes",
+              "destination": "愤怒"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "砸枕头"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "跑出去"
+            },
+            {
+              "source": "跑出去",
+              "relation": "supports",
+              "destination": "离开现场"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "applies",
+              "destination": "看蚂蚁搬家"
+            },
+            {
+              "source": "看蚂蚁搬家",
+              "relation": "relieves",
+              "destination": "心里发堵"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "interested_in",
+              "destination": "拼乐高"
+            },
+            {
+              "source": "拼乐高",
+              "relation": "relieves",
+              "destination": "心里发堵"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "自我安抚工具箱"
+            },
+            {
+              "source": "自我安抚工具箱",
+              "relation": "supports",
+              "destination": "数五个数"
+            },
+            {
+              "source": "自我安抚工具箱",
+              "relation": "supports",
+              "destination": "离开现场"
+            },
+            {
+              "source": "自我安抚工具箱",
+              "relation": "supports",
+              "destination": "看蚂蚁搬家"
+            },
+            {
+              "source": "自我安抚工具箱",
+              "relation": "supports",
+              "destination": "拼乐高"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "reports",
+              "destination": "父亲不当着孩子面和母亲吵"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "reports",
+              "destination": "父亲特别惯着孩子"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "让孩子自己做事的机会"
+            },
+            {
+              "source": "让孩子自己做事的机会",
+              "relation": "supports",
+              "destination": "找回掌控感"
+            }
+          ]
+        },
+        "l1_summary": {
+          "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为",
+          "背景": "来访者小杰，11岁，最初并非主动求助，而是在母亲要求下来访。此前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校而进入咨询。进一步了解发现，其长期处于家庭高冲突环境中，父母经常争吵，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，也更容易在被刺激、被碰触或感到不公时迅速被点燃并出现攻击冲动。母亲已开始意识到家庭环境对孩子的影响并愿意配合支持。近期小杰开始尝试使用数数、离开现场、观察自然、拼乐高等方式调节情绪，显示出一定反思能力和初步自我控制资源。",
+          "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露、高冲突环境下的情绪积压与冲动调节困难。前期会谈中，咨询师通过接纳、共情、具体化和情绪命名，帮助其从抗拒来访过渡到能够表达学校冲突背后的家庭愤怒、挫败与无力，并初步识别自己“被激到就动手、事后后悔”的模式。最新会话中，小杰在冲动控制上出现积极变化：在学校被同学拿走橡皮不还时，原本想推人，但能主动用“数五个数”中断冲动，转而口头表达需求并成功解决问题，说明其开始把调节策略应用到现实场景中，自我效能有所提升。与此同时，家庭仍是主要诱发源，回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，并通过砸枕头、跑出家门等方式宣泄和脱离现场，之后在楼下花园通过观察蚂蚁搬家逐渐平静，提示其虽仍受家庭刺激影响明显，但已开始形成若干替代性降温方式。母亲反馈父亲本周未当着孩子面争吵，家庭暴露程度似有轻微改善，但家庭功能问题尚未根本缓解，仍需持续关注父亲的行为方式及其对孩子情绪与边界感的影响。当前阶段可见，小杰已从单纯事后后悔，发展到在部分情境中能事中中断冲动、选择替代行为；后续工作重点仍包括巩固愤怒预警信号识别、练习更稳定的降温与表达方式、减少其暴露于家庭冲突场景，并持续评估家庭安全及校园冲动攻击风险。"
+        },
+        "treatment_report": {
+          "emotion_trend": "小杰的核心情绪轨迹表现为：从初次会谈时因被动来访而抗拒、防御，伴随高强度愤怒、委屈、无力和压抑，逐步过渡到能够在咨询中表达自己对父亲的愤怒、对母亲的心疼，以及无法保护母亲的挫败感。其情绪仍易在被刺激、被碰触或感到不公时迅速升高，但已开始从“事后后悔”发展到部分情境下能够在冲动发生过程中觉察并中断，情绪调节能力出现初步提升。总体上，学校情境中的失控有所缓解，自我效能感增强；家庭冲突相关情绪仍然最强烈，且存在反复。",
+          "key_progress": [
+            "从最初抗拒来访、仅停留于学校冲突表面，发展为能够讲述家庭暴力目击经历，并识别自己长期积累的愤怒、无力和心疼母亲等核心情绪。",
+            "开始觉察自身“被激到就动手、事后后悔”的冲动模式，并初步识别愤怒触发因素，如被碰触、被刺激、感到不公平等。",
+            "已将调节策略应用到现实场景中：在学校与同学冲突时能用“数五个数”中断推人冲动，改为口头表达；在家庭冲突后也开始尝试通过离开现场、看蚂蚁搬家、拼乐高等替代方式降温。"
+          ],
+          "risk_note": "当前仍存在中等水平的冲动攻击风险与持续家庭暴力暴露风险。积极变化在于：小杰已出现事中中断冲动和使用替代行为的能力，学校场景下的即时自控有所提升，风险较初始阶段略有下降。持续风险在于：家庭仍是主要诱发源，父亲对母亲吼叫及既往殴打行为对小杰构成持续情绪刺激，回家后仍可出现强烈愤怒、砸枕头、跑出家门等反应。当前未见自伤、自杀或明确预谋性伤人信息，但需继续动态评估家庭安全、离家冲动行为及校园再攻击风险。",
+          "treatment_phase": "探索问题向行为改变过渡阶段",
+          "next_focus": "下一阶段建议重点放在：持续巩固愤怒预警信号识别与事中降温技能，提高替代行为的稳定性和泛化；练习更清晰、非攻击性的表达需求与界限方式；与母亲协作减少其暴露于父母冲突场景，持续评估并强化家庭安全保护；同时关注父亲行为方式及家庭互动对孩子情绪调节和边界感发展的影响，必要时增加家庭支持与家长指导工作。"
+        }
+      }
+    },
+    {
+      "session_label": "Session3",
+      "run_session_id": "CP1033_小杰及陪同母亲_Session3",
+      "initial_l1_summary": {
+        "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为",
+        "背景": "来访者小杰，11岁，最初并非主动求助，而是在母亲要求下来访。此前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校而进入咨询。进一步了解发现，其长期处于家庭高冲突环境中，父母经常争吵，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，也更容易在被刺激、被碰触或感到不公时迅速被点燃并出现攻击冲动。母亲已开始意识到家庭环境对孩子的影响并愿意配合支持。近期小杰开始尝试使用数数、离开现场、观察自然、拼乐高等方式调节情绪，显示出一定反思能力和初步自我控制资源。",
+        "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露、高冲突环境下的情绪积压与冲动调节困难。前期会谈中，咨询师通过接纳、共情、具体化和情绪命名，帮助其从抗拒来访过渡到能够表达学校冲突背后的家庭愤怒、挫败与无力，并初步识别自己“被激到就动手、事后后悔”的模式。最新会话中，小杰在冲动控制上出现积极变化：在学校被同学拿走橡皮不还时，原本想推人，但能主动用“数五个数”中断冲动，转而口头表达需求并成功解决问题，说明其开始把调节策略应用到现实场景中，自我效能有所提升。与此同时，家庭仍是主要诱发源，回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，并通过砸枕头、跑出家门等方式宣泄和脱离现场，之后在楼下花园通过观察蚂蚁搬家逐渐平静，提示其虽仍受家庭刺激影响明显，但已开始形成若干替代性降温方式。母亲反馈父亲本周未当着孩子面争吵，家庭暴露程度似有轻微改善，但家庭功能问题尚未根本缓解，仍需持续关注父亲的行为方式及其对孩子情绪与边界感的影响。当前阶段可见，小杰已从单纯事后后悔，发展到在部分情境中能事中中断冲动、选择替代行为；后续工作重点仍包括巩固愤怒预警信号识别、练习更稳定的降温与表达方式、减少其暴露于家庭冲突场景，并持续评估家庭安全及校园冲动攻击风险。"
+      },
+      "l3_records": [
+        {
+          "turn_index": 1,
+          "user": "小杰：老师，我回学校了。刚开始挺紧张的，后来还行。",
+          "assistant": "[积极关注] 能回学校本身就是进步。是什么让你觉得‘后来还行’？",
+          "l3_memory_result": {
+            "facts": [],
+            "actions": [],
+            "stored": 0
+          }
+        },
+        {
+          "turn_index": 2,
+          "user": "小杰：以前那个跟我闹过矛盾的同学主动跟我说话了，我就跟他聊奥特曼。",
+          "assistant": "[社会连接强化] 当你不再用打人的方式保护自己，别人就更容易靠近你。",
+          "l3_memory_result": {
+            "facts": [
+              "用户喜欢奥特曼。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user likes Ultraman.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 3,
+          "user": "小杰：还有，我这周找到了好多舒服的时候。比如拼了个新乐高车，还帮我妈浇花。",
+          "assistant": "[例外扩大] 这些舒服的时刻说明，你的生活里已经不只有生气和害怕了。",
+          "l3_memory_result": {
+            "facts": [],
+            "actions": [],
+            "stored": 0
+          }
+        },
+        {
+          "turn_index": 4,
+          "user": "小杰：有一天我爸不在家，我自己挤牙膏、收书包，我妈还夸我了。那天上课我都没走神。",
+          "assistant": "[连接链条] 自己能做事带来成就感，成就感让你心情稳定，心情稳定又帮助你上课专心，这条链条特别重要。",
+          "l3_memory_result": {
+            "facts": [
+              "用户是学生。"
+            ],
+            "actions": [
+              {
+                "id": "17092454-78ec-47d5-9926-82d66e39425c",
+                "text": "The user is a student.",
+                "event": "NONE",
+                "old_memory": "The user said their school is currently not allowing them to return."
+              }
+            ],
+            "stored": 0
+          }
+        },
+        {
+          "turn_index": 5,
+          "user": "小杰：我希望以后家里别老打架，我也想和同学一起玩。",
+          "assistant": "[目标具体化] 那我们就继续朝两个方向走：一个是让家里更安全，一个是让你在学校更能和人靠近。",
+          "l3_memory_result": {
+            "facts": [
+              "用户希望家里以后不要总是打架。",
+              "用户希望能和同学一起玩。"
+            ],
+            "actions": [
+              {
+                "id": "0dd85dd4-3e58-4dda-86a7-ce64795cbde5",
+                "text": "The user's parents often argue at home.",
+                "event": "NONE",
+                "old_memory": "The user's parents often argue at home."
+              },
+              {
+                "id": "temp-1",
+                "text": "The user wants to be able to play with classmates.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 6,
+          "user": "母亲：我现在也尽量不和他爸硬顶了，能避开就先避开。",
+          "assistant": "[赋能] 您的‘先避开’不是软弱，而是在帮家庭减少升级的机会，也是在给小杰示范一种更稳的处理方式。",
+          "l3_memory_result": {
+            "facts": [
+              "用户是母亲。",
+              "用户目前尽量避免与孩子的父亲正面冲突，能避开就先避开。"
+            ],
+            "actions": [
+              {
+                "id": "52cb0ab6-4686-4d55-a4bf-92367411b408",
+                "text": "The user wants to protect their mother but feels powerless in the face of their father's violence.",
+                "event": "DELETE",
+                "old_memory": "The user wants to protect their mother but feels powerless in the face of their father's violence."
+              },
+              {
+                "id": "2d193ef7-16b0-4165-819c-80dcb83d2b39",
+                "text": "The user's father beats their mother.",
+                "event": "DELETE",
+                "old_memory": "The user's father beats their mother."
+              },
+              {
+                "id": "15fe6f7d-3b10-401b-a0f5-723c103db19b",
+                "text": "The user's father yelling at their mother triggers intense anger and a desire to escape.",
+                "event": "DELETE",
+                "old_memory": "The user's father yelling at their mother triggers intense anger and a desire to escape."
+              },
+              {
+                "id": "08759969-12e6-402e-814b-822b320135ac",
+                "text": "The user harbors strong hatred toward their father because he beats their mother.",
+                "event": "DELETE",
+                "old_memory": "The user harbors strong hatred toward their father because he beats their mother."
+              },
+              {
+                "id": "a0adf277-05e7-43c6-8baf-961909807485",
+                "text": "The user said they did not want to come and that their mother insisted they do so.",
+                "event": "DELETE",
+                "old_memory": "The user said they did not want to come and that their mother insisted they do so."
+              },
+              {
+                "id": "temp-1",
+                "text": "The user is the mother.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The user currently avoids direct conflict with the child's father when possible.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 2
+          }
+        }
+      ],
+      "end_result": {
+        "graph_data": {
+          "entities": [
+            {
+              "entity": "CP1033_小杰及陪同母亲",
+              "entity_type": "user"
+            },
+            {
+              "entity": "assistant",
+              "entity_type": "assistant"
+            },
+            {
+              "entity": "回学校",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "紧张",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "和曾闹过矛盾的同学聊天",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "与同学闹过矛盾",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "奥特曼",
+              "entity_type": "interest"
+            },
+            {
+              "entity": "打人的方式保护自己",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "舒服",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "拼乐高车",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "乐高车",
+              "entity_type": "interest"
+            },
+            {
+              "entity": "帮妈妈浇花",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "爸爸不在家",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "自己挤牙膏",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "收书包",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "被妈妈夸奖",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "上课专心",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "成就感",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "心情稳定",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "家里老打架",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "家里更安全",
+              "entity_type": "goal"
+            },
+            {
+              "entity": "和同学一起玩",
+              "entity_type": "goal"
+            },
+            {
+              "entity": "先避开，不和他爸硬顶",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "更稳的处理方式",
+              "entity_type": "strategy"
+            }
+          ],
+          "relations": [
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "reports",
+              "destination": "回学校"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "紧张"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "与同学闹过矛盾"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "和曾闹过矛盾的同学聊天"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "interested_in",
+              "destination": "奥特曼"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "打人的方式保护自己"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "舒服"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "拼乐高车"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "interested_in",
+              "destination": "乐高车"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "帮妈妈浇花"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "爸爸不在家"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "自己挤牙膏"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "收书包"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "被妈妈夸奖"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "上课专心"
+            },
+            {
+              "source": "自己挤牙膏",
+              "relation": "causes",
+              "destination": "成就感"
+            },
+            {
+              "source": "收书包",
+              "relation": "causes",
+              "destination": "成就感"
+            },
+            {
+              "source": "成就感",
+              "relation": "causes",
+              "destination": "心情稳定"
+            },
+            {
+              "source": "心情稳定",
+              "relation": "supports",
+              "destination": "上课专心"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "wants",
+              "destination": "家里更安全"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "wants",
+              "destination": "和同学一起玩"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "家里老打架"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "applies",
+              "destination": "先避开，不和他爸硬顶"
+            },
+            {
+              "source": "先避开，不和他爸硬顶",
+              "relation": "supports",
+              "destination": "家里更安全"
+            },
+            {
+              "source": "先避开，不和他爸硬顶",
+              "relation": "supports",
+              "destination": "更稳的处理方式"
+            }
+          ]
+        },
+        "l1_summary": {
+          "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为；返校适应；家庭与同伴关系改善",
+          "背景": "来访者小杰，11岁，最初是在母亲要求下来访，此前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校而进入咨询。进一步了解显示，其长期处于家庭高冲突环境中，父母经常争吵，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，也更容易在被刺激、被碰触或感到不公时迅速被点燃并出现攻击冲动。随着咨询推进，母亲开始意识到家庭环境对孩子的影响并愿意配合支持，近来还尝试通过回避正面冲突来降低家庭紧张。小杰已开始尝试使用数数、离开现场、观察自然、拼乐高等方式调节情绪，并在返校后逐步恢复与同学互动；同时，家务、自理行为、兴趣活动及母亲的肯定也逐渐成为其新的情绪稳定和自我效能来源。",
+          "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露、高冲突环境下的情绪积压、冲动调节困难以及由此延伸出的校园适应和人际防御模式。前期会谈中，咨询师通过接纳、共情、具体化和情绪命名，帮助其从抗拒来访过渡到能够表达学校冲突背后的家庭愤怒、挫败与无力，并初步识别自己“被激到就动手、事后后悔”的模式。随后，小杰在现实情境中开始尝试将调节策略付诸实践，如在学校被同学拿走橡皮不还时，能用“数五个数”中断冲动，转而口头表达需求；在家庭中听到父亲对母亲吼叫后，也会通过砸枕头、跑出家门、观察蚂蚁搬家等方式帮助自己降温，提示其已从单纯事后后悔，发展到部分情境下可事中中断冲动并寻找替代行为。\n\n最新阶段，小杰已完成返校，起初虽感到紧张警惕，但随着与曾有矛盾的同学恢复交流，逐渐放松并重新体验到与同伴连接的安全感。咨询中，咨询师通过强化返校这一进步和追问“后来还行”的原因，帮助其识别到：当自己减少以攻击方式保护自己时，他人更容易靠近，社会互动也会更顺畅。同时，本阶段还出现了多个积极例外经验——如拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包并获得表扬——这些经验使小杰感受到“舒服的时候”并不罕见，也让其逐渐形成“自己能做事—有成就感—情绪更稳定—上课更专心”的良性循环认识。其情绪资源已从单一的降温技巧，扩展到兴趣活动、主动交流、家务与自理带来的掌控感，以及母亲的积极反馈。\n\n在家庭系统层面，家庭冲突仍是主要压力源，小杰依然在意父母争执并希望家里不要总打架，但母亲已开始有意识地避免与父亲正面冲突，以减少升级并为孩子示范更稳的应对方式，显示家庭支持功能较前略有增强。当前来看，小杰在返校适应、同伴互动、情绪稳定、自理能力和自我效能感方面均有积极进展；其目标也逐渐从“不要打人”扩展为“在家更有安全感、在学校更能与同学靠近”。后续工作重点仍包括：继续巩固愤怒预警信号识别和替代性降温方式，强化非暴力表达与同伴互动练习，持续积累“舒服时刻”和成就体验，并继续关注家庭冲突暴露、冲动攻击风险及整体安全感变化。总体风险较前稳定，本次未见自伤、他伤或急性危机直接表达，但既往以打人方式自我保护的模式及家庭高冲突背景仍提示需持续观察。"
+        },
+        "treatment_report": {
+          "emotion_trend": "小杰的核心情绪轨迹呈现出从早期的防御、愤怒、紧绷和无力感，逐步转向能够表达、识别并部分调节情绪的变化。初期其主要表现为在被批评、被碰触或感到不公时迅速被点燃，以攻击方式自我保护，事后伴随后悔；随着咨询推进，他开始把学校中的爆发与家庭中长期目睹父母冲突、父亲对母亲的暴力所积累的愤怒、心疼和无能为力联系起来。中期开始，他已能在部分情境下识别冲动上升，并尝试通过数数、离开现场、砸枕头、观察自然、拼乐高等方式降温，情绪从“完全失控后后悔”发展为“部分情境中可事中中断”。近期返校后，虽然起初仍有警惕和紧张，但随着与同学恢复互动、获得母亲肯定并积累成就体验，其情绪状态进一步转向较稳定、轻松，安全感和自我效能感有所提升；不过对家庭争吵的敏感、担忧和压迫感仍未完全消退，遇到家庭冲突时仍可能出现明显波动。",
+          "key_progress": [
+            "从最初抗拒来访、将问题停留在学校打人事件，发展到能够主动表达家庭暴力暴露下的愤怒、无力、心疼母亲等核心情绪，并初步识别自己“被激到就动手、事后后悔”的冲动模式。",
+            "在行为调节层面出现实质进展：已能在学校被同学激怒时用“数五个数”中断推人冲动，改为口头表达；在家庭高压情境中也开始尝试离开现场、观察蚂蚁、拼乐高等替代性降温方式，说明从单纯事后反省进展到部分事中调节。",
+            "返校适应和社会功能明显改善：已完成返校，起初紧张后逐步放松，并与曾有矛盾的同学恢复互动；同时通过拼乐高、做家务、自理任务和获得母亲表扬，形成“能做事—有成就感—情绪更稳—更能专心”的积极循环，自我效能感和同伴靠近意愿增强。"
+          ],
+          "risk_note": "当前未见自伤、自杀或急性他伤计划的直接表达，整体风险较初期趋于稳定并有所下降，但仍存在持续观察必要。主要风险来源包括：既往已出现对老师的肢体攻击、在被刺激或感到不公时仍有较快被点燃的攻击倾向，以及持续处于家庭高冲突/家庭暴力暴露背景中。当前保护性因素较前增加，包括咨询关系建立、母亲配合度提升、替代性调节策略增多、返校后同伴互动恢复、成就体验增加。综合判断为：急性风险暂不突出，但冲动攻击风险和家庭环境相关风险仍属中等关注范围，需持续追踪家庭安全感、冲动预警信号及校园中的高刺激情境应对。",
+          "treatment_phase": "行为改变",
+          "next_focus": "下一阶段建议在已有进展基础上进入巩固与深化：继续强化愤怒预警信号识别和事中中断能力，反复练习非暴力表达、离场和求助等替代反应；扩大“舒服时刻”和成就经验的记录，持续把兴趣、家务、自理、同伴互动转化为稳定情绪资源；进一步支持返校后的同伴交往和冲突修复，减少以攻击维持安全感的防御模式；同时保持对家庭冲突暴露和安全感的持续评估，协助母亲巩固降级冲突、减少孩子卷入的做法，必要时进一步制定家庭情境中的安全应对方案。"
+        }
+      }
+    },
+    {
+      "session_label": "Session4",
+      "run_session_id": "CP1033_小杰及陪同母亲_Session4",
+      "initial_l1_summary": {
+        "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为；返校适应；家庭与同伴关系改善",
+        "背景": "来访者小杰，11岁，最初是在母亲要求下来访，此前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校而进入咨询。进一步了解显示，其长期处于家庭高冲突环境中，父母经常争吵，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，也更容易在被刺激、被碰触或感到不公时迅速被点燃并出现攻击冲动。随着咨询推进，母亲开始意识到家庭环境对孩子的影响并愿意配合支持，近来还尝试通过回避正面冲突来降低家庭紧张。小杰已开始尝试使用数数、离开现场、观察自然、拼乐高等方式调节情绪，并在返校后逐步恢复与同学互动；同时，家务、自理行为、兴趣活动及母亲的肯定也逐渐成为其新的情绪稳定和自我效能来源。",
+        "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露、高冲突环境下的情绪积压、冲动调节困难以及由此延伸出的校园适应和人际防御模式。前期会谈中，咨询师通过接纳、共情、具体化和情绪命名，帮助其从抗拒来访过渡到能够表达学校冲突背后的家庭愤怒、挫败与无力，并初步识别自己“被激到就动手、事后后悔”的模式。随后，小杰在现实情境中开始尝试将调节策略付诸实践，如在学校被同学拿走橡皮不还时，能用“数五个数”中断冲动，转而口头表达需求；在家庭中听到父亲对母亲吼叫后，也会通过砸枕头、跑出家门、观察蚂蚁搬家等方式帮助自己降温，提示其已从单纯事后后悔，发展到部分情境下可事中中断冲动并寻找替代行为。\n\n最新阶段，小杰已完成返校，起初虽感到紧张警惕，但随着与曾有矛盾的同学恢复交流，逐渐放松并重新体验到与同伴连接的安全感。咨询中，咨询师通过强化返校这一进步和追问“后来还行”的原因，帮助其识别到：当自己减少以攻击方式保护自己时，他人更容易靠近，社会互动也会更顺畅。同时，本阶段还出现了多个积极例外经验——如拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包并获得表扬——这些经验使小杰感受到“舒服的时候”并不罕见，也让其逐渐形成“自己能做事—有成就感—情绪更稳定—上课更专心”的良性循环认识。其情绪资源已从单一的降温技巧，扩展到兴趣活动、主动交流、家务与自理带来的掌控感，以及母亲的积极反馈。\n\n在家庭系统层面，家庭冲突仍是主要压力源，小杰依然在意父母争执并希望家里不要总打架，但母亲已开始有意识地避免与父亲正面冲突，以减少升级并为孩子示范更稳的应对方式，显示家庭支持功能较前略有增强。当前来看，小杰在返校适应、同伴互动、情绪稳定、自理能力和自我效能感方面均有积极进展；其目标也逐渐从“不要打人”扩展为“在家更有安全感、在学校更能与同学靠近”。后续工作重点仍包括：继续巩固愤怒预警信号识别和替代性降温方式，强化非暴力表达与同伴互动练习，持续积累“舒服时刻”和成就体验，并继续关注家庭冲突暴露、冲动攻击风险及整体安全感变化。总体风险较前稳定，本次未见自伤、他伤或急性危机直接表达，但既往以打人方式自我保护的模式及家庭高冲突背景仍提示需持续观察。"
+      },
+      "l3_records": [
+        {
+          "turn_index": 1,
+          "user": "小杰：老师，我参加踢毽子了！虽然踢得不好，但他们没有笑我。",
+          "assistant": "[强化改变] 从不敢加入到真的加入，这一步比踢得好不好更重要。你被接纳的时候是什么感觉？",
+          "l3_memory_result": {
+            "facts": [],
+            "actions": [],
+            "stored": 0
+          }
+        },
+        {
+          "turn_index": 2,
+          "user": "小杰：特别好。我发现好像不是所有人都讨厌我。",
+          "assistant": "[认知修正] 是的，关系有时不是别人先变，而是你先换了一种方式和世界相处。",
+          "l3_memory_result": {
+            "facts": [
+              "用户曾担心别人都讨厌自己，对他人是否喜欢自己较敏感。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user has been sensitive to whether others like them and has worried that people might dislike them.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 3,
+          "user": "小杰：还有一件事。前几天我爸又跟我妈吵，我没冲上去，我打了 110。警察来了之后他就停了。",
+          "assistant": "[高度肯定] 你这次没有用暴力对抗暴力，而是用了更安全、更成熟的方式保护妈妈和自己。",
+          "l3_memory_result": {
+            "facts": [
+              "用户的父母存在严重冲突，父亲会和母亲发生激烈争吵。",
+              "用户曾在父母冲突时报警（110）以保护母亲和自己。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user's parents have severe conflict, and the father has intense arguments with the mother.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The user has called the police during parental conflicts to protect the mother and themself.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 2
+          }
+        },
+        {
+          "turn_index": 4,
+          "user": "小杰：我其实很怕，可是我更怕他打我妈。后来我妈说，对不起让我一个小孩操心这些。",
+          "assistant": "[关系修复] 你妈妈那句道歉，说明她开始看见你的辛苦了。你不再只是被卷进去的孩子，你也在长出保护自己的能力。",
+          "l3_memory_result": {
+            "facts": [
+              "用户曾经历家庭暴力相关的恐惧，担心某个男性会打自己的母亲。",
+              "用户的母亲曾为让用户一个孩子操心家庭问题而向其道歉。"
+            ],
+            "actions": [
+              {
+                "id": "tmp-1",
+                "text": "The user has experienced fear related to domestic violence and has worried that a male family member might hit their mother.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "tmp-2",
+                "text": "The user's mother once apologized for making the user, as an only child, carry worry about family problems.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 2
+          }
+        },
+        {
+          "turn_index": 5,
+          "user": "小杰：我心里好像没以前那么堵了，而且我也有朋友了。",
+          "assistant": "[总结进展] 你从一个容易被怒气推着走的孩子，慢慢变成了能停下来、能求助、能交朋友的人。",
+          "l3_memory_result": {
+            "facts": [
+              "用户表示自己现在心里没有以前那么堵了，情绪状态有所改善。",
+              "用户表示自己现在有朋友了。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user's emotional state has improved compared with before.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The user now has friends.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 2
+          }
+        }
+      ],
+      "end_result": {
+        "graph_data": {
+          "entities": [
+            {
+              "entity": "CP1033_小杰及陪同母亲",
+              "entity_type": "user"
+            },
+            {
+              "entity": "assistant",
+              "entity_type": "assistant"
+            },
+            {
+              "entity": "参加踢毽子",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "特别好",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "不是所有人都讨厌我",
+              "entity_type": "cognition"
+            },
+            {
+              "entity": "父亲与母亲争吵",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "拨打110",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "害怕",
+              "entity_type": "emotion"
+            },
+            {
+              "entity": "父亲打母亲",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "母亲道歉",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "心里没以前那么堵了",
+              "entity_type": "symptom"
+            },
+            {
+              "entity": "有朋友了",
+              "entity_type": "life_event"
+            }
+          ],
+          "relations": [
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "参加踢毽子"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "特别好"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "believes",
+              "destination": "不是所有人都讨厌我"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "父亲与母亲争吵"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "拨打110"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "feels",
+              "destination": "害怕"
+            },
+            {
+              "source": "父亲打母亲",
+              "relation": "causes",
+              "destination": "害怕"
+            },
+            {
+              "source": "拨打110",
+              "relation": "relieves",
+              "destination": "父亲与母亲争吵"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "母亲道歉"
+            },
+            {
+              "source": "母亲道歉",
+              "relation": "supports",
+              "destination": "CP1033_小杰及陪同母亲"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "reports",
+              "destination": "心里没以前那么堵了"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "reports",
+              "destination": "有朋友了"
+            },
+            {
+              "source": "参加踢毽子",
+              "relation": "supports",
+              "destination": "有朋友了"
+            }
+          ]
+        },
+        "l1_summary": {
+          "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为；返校适应；家庭与同伴关系改善；社交尝试与被接纳；家庭冲突中的安全应对",
+          "背景": "来访者小杰，11岁，最初在母亲要求下来访，起因是在学校与数学老师发生肢体冲突并被学校暂时拒绝返校。进一步了解发现，其长期处于父母高冲突和家庭暴力暴露环境中，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，也因此在被刺激、被碰触或感到不公时容易迅速被点燃并出现攻击冲动。随着咨询推进，母亲开始意识到家庭环境对孩子的影响并愿意配合支持，尝试减少正面冲突；小杰也逐渐学习并使用数数、离开现场、观察自然、拼乐高等方式调节情绪。返校后，他逐步恢复与同学互动，近期开始主动参与同伴活动，体验到被接纳；同时，在家庭冲突再次升级时，他能够在害怕中选择报警求助而非直接卷入，显示其安全应对能力、自我控制和求助意识正在增强。家务、自理、兴趣活动、与朋友建立联系以及母亲的积极回应，正逐渐成为其情绪稳定和自我效能的重要资源。",
+          "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露和高冲突环境下的情绪积压、冲动调节困难，以及由此延伸出的校园适应和人际防御模式。前期会谈中，咨询师通过接纳、共情、具体化和情绪命名，帮助其从抗拒来访过渡到能够表达学校冲突背后的家庭愤怒、挫败与无力，并初步识别自己“被激到就动手、事后后悔”的模式。随后，小杰开始在现实情境中尝试调节策略，如通过数数、离开现场、观察蚂蚁搬家、拼乐高、做家务和自理活动等方式中断冲动、帮助自己降温，提示其已从单纯事后后悔，发展到部分情境下能够事中控制并寻找替代行为。\n\n在学校与同伴方面，小杰已完成返校，起初虽紧张警惕，但随着与曾有矛盾的同学恢复交流，逐渐体验到关系中的安全感和放松感。近期他进一步出现主动社交尝试，愿意加入踢毽子等同伴活动，虽然表现不佳，但发现同伴并未嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，增强了被接纳感、轻松感和社交信心，也开始形成“当我不再总用攻击保护自己，别人更容易靠近我”的新认识。其人际体验已从防御、警惕逐步转向试探性靠近，并开始建立朋友关系。\n\n在家庭系统层面，家庭冲突仍是最主要的压力源，但小杰在应对方式上出现了重要变化。与以往容易直接卷入、以暴制暴不同，最近在父母再次发生激烈争吵、父亲有继续施暴风险时，他能够在害怕中选择拨打110求助，成功阻止事态升级。咨询中，这一行为被强化为更安全、更成熟的自我保护方式，也表明他开始从被动卷入家庭冲突的孩子，转向能够识别危险、优先保护自己并寻求外部支持的人。事后母亲向其表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验，家庭支持功能较前有所增强。\n\n总体来看，小杰在返校适应、同伴互动、情绪稳定、自我控制、自理与家务参与、自我效能感以及危机求助能力等方面均有持续积极进展。他的目标也逐渐从“不要打人”扩展为“在家更安全、在学校更能被接纳并靠近同学”。后续工作重点仍包括：继续巩固愤怒预警信号识别和替代性降温方式，强化非暴力表达与同伴互动练习，持续积累“被接纳时刻”“成功应对时刻”和成就体验，并完善家庭冲突再发时的安全方案与求助路径。风险评估方面：当前未见自伤、他伤或急性失控直接表达，整体风险较既往下降；但鉴于家庭暴力风险尚未完全消失、既往存在以打人方式自我保护的模式，仍需持续关注家庭冲突暴露、冲动攻击风险及整体安全感变化。"
+        },
+        "treatment_report": {
+          "emotion_trend": "小杰的核心情绪轨迹呈现出从早期以愤怒、委屈、无力、警惕和被排斥感为主，逐步转向更可表达、可调节和更有希望感的状态。初期他主要表现为在被刺激、被碰触或感到不公时迅速被点燃，并将长期目睹家庭暴力积累的愤怒带入学校关系中；随着咨询推进，他开始能够识别“被激到就想动手、事后后悔”的模式，并逐渐说出对母亲的心疼、对父亲的愤怒以及自己的害怕和无助。中期在返校与家庭压力并存的背景下，他的情绪开始出现更多“舒服的时候”，例如在乐高、观察自然、做家务和自理中体验到轻松、稳定和成就感。近期则进一步出现被接纳感、轻松感、自我效能感和社交信心的提升，同时在家庭危机中虽仍有害怕，但已不再主要以冲动卷入回应，而能转向求助与自我保护，整体情绪调节能力和安全感较前改善。",
+          "key_progress": [
+            "问题理解从表面上的校园攻击事件，逐步深入到家庭暴力暴露、高冲突环境与情绪积压之间的联系；来访者已能表达愤怒、无力、心疼与害怕，并识别自己的冲动触发模式。",
+            "情绪与行为调节能力持续提升，已开始在现实情境中使用数数、离开现场、观察蚂蚁搬家、拼乐高、做家务和自理等替代行为，从“事后后悔”发展到部分情境下能够“事中降温、避免动手”。",
+            "返校适应和同伴关系明显改善：从最初紧张警惕、觉得别人都讨厌自己，发展到恢复与同学互动、主动参加踢毽子等活动，并体验到未被嘲笑和被接纳，社交信心增强。",
+            "家庭危机应对方式出现关键转变：面对父母激烈冲突和父亲可能施暴时，小杰能够在害怕中选择报警求助而非直接卷入，显示其安全意识、求助能力和自我控制显著提升。",
+            "亲子互动与支持资源有所增强：母亲更能理解家庭环境对孩子的影响，尝试避免正面冲突并给予表扬和回应，小杰也在家务、自理、兴趣活动和朋友关系中积累了更多稳定感与自我效能。"
+          ],
+          "risk_note": "当前未见明确自伤、自杀或急性他伤计划，整体风险较初期下降。既往冲动攻击行为已有改善，现实中出现替代性调节与求助行为，说明失控风险下降；但家庭暴力与父母高冲突风险尚未完全消失，仍可能触发其强烈愤怒、害怕及保护性攻击反应，因此仍需持续关注家庭冲突再发时的安全、校园中被刺激后的冲动控制，以及整体安全感变化。总体判断为：风险较前降低但未解除，需继续动态监测。",
+          "treatment_phase": "行为改变向巩固阶段过渡",
+          "next_focus": "下一阶段建议重点放在：继续巩固愤怒预警信号识别与替代性降温策略，提高其在高刺激情境下的稳定使用率；进一步练习非暴力表达、同伴互动和被接纳经验的积累，持续修正“别人都讨厌我”等负性信念；强化家庭冲突再发时的安全计划、求助路径与自我保护边界，减少其再次卷入父母暴力的可能；同时继续发展家务、自理、兴趣和友谊等保护性资源，帮助其把“我能控制自己、也能保护自己”转化为更稳定的自我认同。"
+        }
+      }
+    },
+    {
+      "session_label": "Session5_三个月后回访与巩固",
+      "run_session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+      "initial_l1_summary": {
+        "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为；返校适应；家庭与同伴关系改善；社交尝试与被接纳；家庭冲突中的安全应对",
+        "背景": "来访者小杰，11岁，最初在母亲要求下来访，起因是在学校与数学老师发生肢体冲突并被学校暂时拒绝返校。进一步了解发现，其长期处于父母高冲突和家庭暴力暴露环境中，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，也因此在被刺激、被碰触或感到不公时容易迅速被点燃并出现攻击冲动。随着咨询推进，母亲开始意识到家庭环境对孩子的影响并愿意配合支持，尝试减少正面冲突；小杰也逐渐学习并使用数数、离开现场、观察自然、拼乐高等方式调节情绪。返校后，他逐步恢复与同学互动，近期开始主动参与同伴活动，体验到被接纳；同时，在家庭冲突再次升级时，他能够在害怕中选择报警求助而非直接卷入，显示其安全应对能力、自我控制和求助意识正在增强。家务、自理、兴趣活动、与朋友建立联系以及母亲的积极回应，正逐渐成为其情绪稳定和自我效能的重要资源。",
+        "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露和高冲突环境下的情绪积压、冲动调节困难，以及由此延伸出的校园适应和人际防御模式。前期会谈中，咨询师通过接纳、共情、具体化和情绪命名，帮助其从抗拒来访过渡到能够表达学校冲突背后的家庭愤怒、挫败与无力，并初步识别自己“被激到就动手、事后后悔”的模式。随后，小杰开始在现实情境中尝试调节策略，如通过数数、离开现场、观察蚂蚁搬家、拼乐高、做家务和自理活动等方式中断冲动、帮助自己降温，提示其已从单纯事后后悔，发展到部分情境下能够事中控制并寻找替代行为。\n\n在学校与同伴方面，小杰已完成返校，起初虽紧张警惕，但随着与曾有矛盾的同学恢复交流，逐渐体验到关系中的安全感和放松感。近期他进一步出现主动社交尝试，愿意加入踢毽子等同伴活动，虽然表现不佳，但发现同伴并未嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，增强了被接纳感、轻松感和社交信心，也开始形成“当我不再总用攻击保护自己，别人更容易靠近我”的新认识。其人际体验已从防御、警惕逐步转向试探性靠近，并开始建立朋友关系。\n\n在家庭系统层面，家庭冲突仍是最主要的压力源，但小杰在应对方式上出现了重要变化。与以往容易直接卷入、以暴制暴不同，最近在父母再次发生激烈争吵、父亲有继续施暴风险时，他能够在害怕中选择拨打110求助，成功阻止事态升级。咨询中，这一行为被强化为更安全、更成熟的自我保护方式，也表明他开始从被动卷入家庭冲突的孩子，转向能够识别危险、优先保护自己并寻求外部支持的人。事后母亲向其表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验，家庭支持功能较前有所增强。\n\n总体来看，小杰在返校适应、同伴互动、情绪稳定、自我控制、自理与家务参与、自我效能感以及危机求助能力等方面均有持续积极进展。他的目标也逐渐从“不要打人”扩展为“在家更安全、在学校更能被接纳并靠近同学”。后续工作重点仍包括：继续巩固愤怒预警信号识别和替代性降温方式，强化非暴力表达与同伴互动练习，持续积累“被接纳时刻”“成功应对时刻”和成就体验，并完善家庭冲突再发时的安全方案与求助路径。风险评估方面：当前未见自伤、他伤或急性失控直接表达，整体风险较既往下降；但鉴于家庭暴力风险尚未完全消失、既往存在以打人方式自我保护的模式，仍需持续关注家庭冲突暴露、冲动攻击风险及整体安全感变化。"
+      },
+      "l3_records": [
+        {
+          "turn_index": 1,
+          "user": "小杰：老师，我现在是班里的体育委员了，同学们投票选的我。",
+          "assistant": "[惊喜与强化] 这说明大家已经开始信任你，也看到了你的变化。",
+          "l3_memory_result": {
+            "facts": [
+              "用户现在是班里的体育委员，是同学们投票选出来的。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user is the class sports representative and was elected by their classmates.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 2,
+          "user": "小杰：我现在不怎么打架了，还会帮老师搬器材。爸爸也变了点，说话声音没以前那么大。",
+          "assistant": "[系统视角] 你的改变带动了关系的改变，家庭和学校这两个系统都开始松动了。",
+          "l3_memory_result": {
+            "facts": [
+              "用户现在比以前更少打架了。",
+              "用户会帮老师搬器材。",
+              "用户觉得爸爸最近有些变化，说话声音没有以前那么大。"
+            ],
+            "actions": [
+              {
+                "id": "7a343ed9-93c1-4ba1-bb20-ee3869e58e44",
+                "text": "The user used to get into fights more often, but now fights less; they can still have impulsive aggressive urges toward classmates when physically bumped and later regret it.",
+                "event": "UPDATE",
+                "old_memory": "The user sometimes has impulsive aggressive urges toward classmates when physically bumped, and later regrets it."
+              },
+              {
+                "id": "temp-1",
+                "text": "The user helps teachers move equipment.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The user feels their father has changed somewhat recently and speaks less loudly than before.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 3
+          }
+        },
+        {
+          "turn_index": 3,
+          "user": "小杰：我这次期末数学考了 85，语文考了 90。我觉得我不是笨，我以前只是心太乱。",
+          "assistant": "[自我认知巩固] 对，你一直不是不行，而是过去太多痛苦占住了你的注意力。",
+          "l3_memory_result": {
+            "facts": [
+              "用户可能叫小杰。",
+              "用户认为自己并不笨，过去的情绪混乱影响了学习和注意力。"
+            ],
+            "actions": [
+              {
+                "id": "fae3e2d3-a58c-40fc-ba19-43b3f04a115b",
+                "text": "The user's name is 小杰.",
+                "event": "NONE",
+                "old_memory": "The user's name is 小杰."
+              },
+              {
+                "id": "temp-1",
+                "text": "The user believes they are not unintelligent; past emotional turmoil interfered with their learning and attention.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 1
+          }
+        },
+        {
+          "turn_index": 4,
+          "user": "小杰：如果以后我爸又发火，或者我又想打人，我该怎么办？",
+          "assistant": "[复发预防] 先把你的工具箱拿出来：数五个数、离开现场、看蚂蚁、拼乐高、找能帮你的人。工具箱不够的时候，就立刻求助。",
+          "l3_memory_result": {
+            "facts": [
+              "用户的父亲有时会发火。",
+              "用户曾出现过想打人的冲动，并担心再次发生。"
+            ],
+            "actions": [
+              {
+                "id": "temp-1",
+                "text": "The user's father sometimes loses his temper.",
+                "event": "ADD",
+                "old_memory": ""
+              },
+              {
+                "id": "temp-2",
+                "text": "The user has had impulses to hit someone and worries it could happen again.",
+                "event": "ADD",
+                "old_memory": ""
+              }
+            ],
+            "stored": 2
+          }
+        },
+        {
+          "turn_index": 5,
+          "user": "小杰：我记住了。谢谢您。",
+          "assistant": "[结束与祝福] 你已经长出了很多力量。以后就算再遇到风雨，你也比以前更知道怎样保护自己、照顾自己。",
+          "l3_memory_result": {
+            "facts": [],
+            "actions": [],
+            "stored": 0
+          }
+        }
+      ],
+      "end_result": {
+        "graph_data": {
+          "entities": [
+            {
+              "entity": "CP1033_小杰及陪同母亲",
+              "entity_type": "user"
+            },
+            {
+              "entity": "assistant",
+              "entity_type": "assistant"
+            },
+            {
+              "entity": "当选班里体育委员",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "不怎么打架了",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "帮老师搬器材",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "爸爸说话声音没以前那么大",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "期末数学考了85分",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "期末语文考了90分",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "我不是笨",
+              "entity_type": "cognition"
+            },
+            {
+              "entity": "以前只是心太乱",
+              "entity_type": "cognition"
+            },
+            {
+              "entity": "爸爸发火",
+              "entity_type": "life_event"
+            },
+            {
+              "entity": "想打人",
+              "entity_type": "behavior"
+            },
+            {
+              "entity": "数五个数",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "离开现场",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "看蚂蚁",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "拼乐高",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "找能帮你的人",
+              "entity_type": "strategy"
+            },
+            {
+              "entity": "立刻求助",
+              "entity_type": "strategy"
+            }
+          ],
+          "relations": [
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "当选班里体育委员"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "不怎么打架了"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "does",
+              "destination": "帮老师搬器材"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "爸爸说话声音没以前那么大"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "期末数学考了85分"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "experiences",
+              "destination": "期末语文考了90分"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "believes",
+              "destination": "我不是笨"
+            },
+            {
+              "source": "CP1033_小杰及陪同母亲",
+              "relation": "believes",
+              "destination": "以前只是心太乱"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "数五个数"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "离开现场"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "看蚂蚁"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "拼乐高"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "找能帮你的人"
+            },
+            {
+              "source": "assistant",
+              "relation": "supports",
+              "destination": "立刻求助"
+            },
+            {
+              "source": "数五个数",
+              "relation": "relieves",
+              "destination": "想打人"
+            },
+            {
+              "source": "离开现场",
+              "relation": "relieves",
+              "destination": "想打人"
+            },
+            {
+              "source": "看蚂蚁",
+              "relation": "relieves",
+              "destination": "想打人"
+            },
+            {
+              "source": "拼乐高",
+              "relation": "relieves",
+              "destination": "想打人"
+            },
+            {
+              "source": "找能帮你的人",
+              "relation": "relieves",
+              "destination": "想打人"
+            },
+            {
+              "source": "立刻求助",
+              "relation": "relieves",
+              "destination": "想打人"
+            }
+          ]
+        },
+        "l1_summary": {
+          "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为；返校适应；家庭与同伴关系改善；社交尝试与被接纳；家庭冲突中的安全应对；行为与情绪改善；复发预防",
+          "背景": "来访者小杰，11岁，最初在母亲要求下来访，起因是在学校与数学老师发生肢体冲突并被学校暂时拒绝返校。进一步了解发现，其长期暴露于父母高冲突和家庭暴力环境中，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，因此在被刺激、被碰触或感到不公时容易迅速被点燃并出现攻击冲动。随着咨询推进，母亲逐渐意识到家庭环境对孩子的影响并开始配合支持，家庭关系近期也有所缓和，父亲说话音量较以往降低。小杰逐步学习并使用数数、离开现场、观察自然、拼乐高、做家务、自理活动及寻求他人帮助等方式调节情绪；返校后恢复与同学互动，开始主动参与活动，并进一步在学校中获得接纳与信任，如被同学投票选为体育委员、主动帮助老师搬器材。学习方面，期末数学85分、语文90分，帮助其修正了“自己很笨”的旧有认知，开始理解过去更多是因内心混乱和痛苦影响了专注与发挥。此前在家庭冲突升级时，他也已能选择报警求助而非直接卷入，显示其安全应对、自我控制和求助意识持续增强。",
+          "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露和高冲突环境下的情绪积压、冲动调节困难，以及由此延伸出的校园适应、人际防御和自我评价受损。前期在咨询师的接纳、共情、具体化和情绪命名帮助下，他逐渐能够表达学校冲突背后的家庭愤怒、挫败与无力，并识别自己“被激到就动手、事后后悔”的模式；随后开始在现实情境中尝试以数数、离开现场、观察蚂蚁、拼乐高、做家务和自理活动等方式中断冲动、帮助自己降温，提示其已从单纯事后后悔发展到部分情境下能够事中控制并寻找替代行为。\n\n在学校与同伴方面，小杰已完成返校并逐步从警惕、防御转向试探性靠近与建立关系。除恢复与同学交流、主动加入踢毽子等活动并体验到“别人并没有嘲笑我”外，近期他进一步在班级中获得明确的信任与正向角色，被同学投票选为体育委员，也开始主动帮助老师搬器材。这些经历强化了其“自己值得被信任、能够对集体有贡献”的新体验，显著提升了被接纳感、自信心和社会效能感。学习方面，期末数学85分、语文90分，也帮助其修正了“自己很笨”的消极认知，开始认识到过去更多是因持续痛苦和混乱占据了注意力，而非能力不足。\n\n在家庭系统层面，家庭冲突仍是最主要的压力源，但小杰的应对方式已出现重要改变。此前在父母激烈争吵、父亲有继续施暴风险时，他能够在害怕中拨打110求助，成功阻止事态升级；近期家庭气氛较前有所缓和，父亲说话音量下降，母亲也更能给予理解和支持。咨询中持续强化其在危险来临时“优先保护自己、及时求助”而非直接卷入的安全原则，帮助其逐渐形成更成熟的自我保护模式。\n\n最新会谈重点转向对积极变化的巩固与复发预防。咨询师围绕其行为减少打架、情绪趋于稳定、在学校获得认可、学业进步及家庭关系松动等变化进行了强化，并从系统视角指出其改变已带动学校与家庭互动一并改善。针对来访者主动提出的担忧——若父亲再次发火或自己再次出现打人冲动怎么办——咨询师帮助其整合并明确“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者对这些建议接受良好，表现出更清晰的自我照顾和自我保护意识。\n\n总体来看，小杰在返校适应、同伴互动、角色责任感、学业表现、情绪稳定、自我控制、自我评价、自理与家务参与、自我效能感以及危机求助能力等方面均有持续积极进展，整体状态正从过去的冲动、混乱和易激惹转向稳定、自信和有掌控感。后续工作重点包括：继续巩固愤怒预警信号识别和“工具箱”式替代性降温方式，强化非暴力表达与同伴互动练习，持续积累“被接纳时刻”“成功应对时刻”和能力感经验，并完善家庭冲突再发时的安全方案与求助路径。风险评估方面：当前未见自伤、他伤或急性危机的直接表达，整体风险较既往下降；但鉴于家庭暴力风险尚未完全消失，且在父亲发火或自身情绪被触发时仍存在一定复发可能，仍需持续关注家庭冲突暴露、冲动攻击风险及整体安全感变化。"
+        },
+        "treatment_report": {
+          "emotion_trend": "来访者的核心情绪轨迹表现为：初期以强烈愤怒、委屈、无力感和高警觉为主，常在被刺激、被碰触或感到不公平时迅速被点燃，并以攻击或失控反应表达；随着咨询推进，他逐渐能够把学校中的爆发与家庭暴力暴露、对母亲的心疼及无法保护家人的挫败感联系起来，开始从单纯“发出来”转向“能说出来、能觉察到”；中期在返校、与同伴恢复互动及获得母亲肯定后，紧张、防御和被排斥感有所下降，出现更多轻松、开心、被接纳和有成就感的体验；近期整体情绪已由过去的冲动、混乱、易激惹，逐步转向较稳定、自信、可控和有掌控感，但在父亲发火或家庭冲突升级时仍可能被重新触发。",
+          "key_progress": [
+            "问题理解显著深化：从最初将困难表面化为校园打人事件，逐步澄清其核心与长期家庭冲突和家庭暴力暴露相关，来访者已能识别自己“被激到就动手、事后后悔”的模式，并开始觉察爆发前的情绪与触发点。",
+            "情绪调节与替代行为明显提升：已在真实情境中多次使用数五个数、离开现场、看蚂蚁、拼乐高、做家务和自理活动等方式中断冲动，部分场景下能从事后后悔发展到事中控制，并在学校冲突中尝试用口头表达替代推打。",
+            "学校与社会功能持续恢复：顺利返校后逐渐从警惕防御转向主动靠近同伴，参加踢毽子、恢复交流、获得朋友和被接纳体验，进一步被同学投票选为体育委员、主动帮助老师搬器材，社会效能感、自信心和责任感明显增强。",
+            "自我评价和能力感改善：通过期末数学85分、语文90分以及自理、家务中的成功经验，来访者开始修正“自己很笨”“大家都讨厌我”等消极认知，逐渐形成“我能做好一些事、我值得被信任”的新体验。",
+            "家庭危机应对更成熟：在父母激烈冲突时，来访者已能在害怕中选择报警求助，而非直接卷入或以暴制暴，显示其安全意识、求助能力和自我保护能力增强；母亲对家庭环境影响的认识和支持度也有所提升，家庭气氛较前缓和。"
+          ],
+          "risk_note": "当前未见自伤、自杀或明确他伤计划的直接表达，整体风险较初期明显下降。既往校园冲动攻击行为已减少，来访者也具备一定的事中调节和求助能力。但风险并未完全解除：家庭暴力/高冲突暴露仍是最主要风险源，在父亲情绪失控、父母冲突升级或来访者被强烈刺激时，仍存在愤怒失控、攻击冲动复发及安全感下降的可能。总体为“较前下降但仍需持续监测”的状态，尤其需继续关注家庭冲突再发时的安全方案执行情况。",
+          "treatment_phase": "巩固",
+          "next_focus": "下一阶段建议以巩固与复发预防为主：继续强化愤怒预警信号识别和“工具箱”式调节策略在高触发场景中的熟练使用；巩固非暴力表达、冲突降级和求助行为；持续积累学校中的被接纳经验、责任角色体验和能力感证据，以稳定新的自我认知；同时完善并反复演练家庭冲突再发时的安全计划，包括优先保护自己、离开危险现场、联系可信成人或报警等路径；必要时继续支持母亲提升保护性养育和家庭降冲突能力，以减少来访者再次暴露于高危环境。"
+        }
+      }
+    }
+  ],
+  "final_l1_summary": {
+    "主题": "冲动攻击行为；家庭暴力压力；愤怒控制与替代行为；返校适应；家庭与同伴关系改善；社交尝试与被接纳；家庭冲突中的安全应对；行为与情绪改善；复发预防",
+    "背景": "来访者小杰，11岁，最初在母亲要求下来访，起因是在学校与数学老师发生肢体冲突并被学校暂时拒绝返校。进一步了解发现，其长期暴露于父母高冲突和家庭暴力环境中，父亲曾殴打母亲，小杰长期目睹后积累了强烈愤怒、无力感和对母亲的心疼，因此在被刺激、被碰触或感到不公时容易迅速被点燃并出现攻击冲动。随着咨询推进，母亲逐渐意识到家庭环境对孩子的影响并开始配合支持，家庭关系近期也有所缓和，父亲说话音量较以往降低。小杰逐步学习并使用数数、离开现场、观察自然、拼乐高、做家务、自理活动及寻求他人帮助等方式调节情绪；返校后恢复与同学互动，开始主动参与活动，并进一步在学校中获得接纳与信任，如被同学投票选为体育委员、主动帮助老师搬器材。学习方面，期末数学85分、语文90分，帮助其修正了“自己很笨”的旧有认知，开始理解过去更多是因内心混乱和痛苦影响了专注与发挥。此前在家庭冲突升级时，他也已能选择报警求助而非直接卷入，显示其安全应对、自我控制和求助意识持续增强。",
+    "会话总结": "整体咨询进展显示，小杰的问题核心已从表面的校园攻击事件，逐步明确为家庭暴力暴露和高冲突环境下的情绪积压、冲动调节困难，以及由此延伸出的校园适应、人际防御和自我评价受损。前期在咨询师的接纳、共情、具体化和情绪命名帮助下，他逐渐能够表达学校冲突背后的家庭愤怒、挫败与无力，并识别自己“被激到就动手、事后后悔”的模式；随后开始在现实情境中尝试以数数、离开现场、观察蚂蚁、拼乐高、做家务和自理活动等方式中断冲动、帮助自己降温，提示其已从单纯事后后悔发展到部分情境下能够事中控制并寻找替代行为。\n\n在学校与同伴方面，小杰已完成返校并逐步从警惕、防御转向试探性靠近与建立关系。除恢复与同学交流、主动加入踢毽子等活动并体验到“别人并没有嘲笑我”外，近期他进一步在班级中获得明确的信任与正向角色，被同学投票选为体育委员，也开始主动帮助老师搬器材。这些经历强化了其“自己值得被信任、能够对集体有贡献”的新体验，显著提升了被接纳感、自信心和社会效能感。学习方面，期末数学85分、语文90分，也帮助其修正了“自己很笨”的消极认知，开始认识到过去更多是因持续痛苦和混乱占据了注意力，而非能力不足。\n\n在家庭系统层面，家庭冲突仍是最主要的压力源，但小杰的应对方式已出现重要改变。此前在父母激烈争吵、父亲有继续施暴风险时，他能够在害怕中拨打110求助，成功阻止事态升级；近期家庭气氛较前有所缓和，父亲说话音量下降，母亲也更能给予理解和支持。咨询中持续强化其在危险来临时“优先保护自己、及时求助”而非直接卷入的安全原则，帮助其逐渐形成更成熟的自我保护模式。\n\n最新会谈重点转向对积极变化的巩固与复发预防。咨询师围绕其行为减少打架、情绪趋于稳定、在学校获得认可、学业进步及家庭关系松动等变化进行了强化，并从系统视角指出其改变已带动学校与家庭互动一并改善。针对来访者主动提出的担忧——若父亲再次发火或自己再次出现打人冲动怎么办——咨询师帮助其整合并明确“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者对这些建议接受良好，表现出更清晰的自我照顾和自我保护意识。\n\n总体来看，小杰在返校适应、同伴互动、角色责任感、学业表现、情绪稳定、自我控制、自我评价、自理与家务参与、自我效能感以及危机求助能力等方面均有持续积极进展，整体状态正从过去的冲动、混乱和易激惹转向稳定、自信和有掌控感。后续工作重点包括：继续巩固愤怒预警信号识别和“工具箱”式替代性降温方式，强化非暴力表达与同伴互动练习，持续积累“被接纳时刻”“成功应对时刻”和能力感经验，并完善家庭冲突再发时的安全方案与求助路径。风险评估方面：当前未见自伤、他伤或急性危机的直接表达，整体风险较既往下降；但鉴于家庭暴力风险尚未完全消失，且在父亲发火或自身情绪被触发时仍存在一定复发可能，仍需持续关注家庭冲突暴露、冲动攻击风险及整体安全感变化。"
+  },
+  "all_l2_summaries": [
+    {
+      "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+      "topic": "行为与情绪改善, 复发预防",
+      "summary": "主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。",
+      "start_time": "2026-04-13T17:10:53.882651"
+    },
+    {
+      "session_id": "CP1033_小杰及陪同母亲_Session4",
+      "topic": [
+        "社交尝试与被接纳",
+        "家庭冲突中的安全应对"
+      ],
+      "summary": "主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。",
+      "start_time": "2026-04-13T17:07:19.330020"
+    },
+    {
+      "session_id": "CP1033_小杰及陪同母亲_Session3",
+      "topic": [
+        "返校适应",
+        "家庭与同伴关系改善"
+      ],
+      "summary": "主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。",
+      "start_time": "2026-04-13T17:02:41.279762"
+    },
+    {
+      "session_id": "CP1033_小杰及陪同母亲_Session2",
+      "topic": "未知",
+      "summary": "主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影",
+      "start_time": "2026-04-13T16:58:41.447639"
+    },
+    {
+      "session_id": "CP1033_小杰及陪同母亲_Session1",
+      "topic": [
+        "冲动攻击行为",
+        "家庭暴力压力"
+      ],
+      "summary": "主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。",
+      "start_time": "2026-04-13T16:55:19.871801"
+    }
+  ],
+  "latest_treatment_report": {
+    "emotion_trend": "来访者的核心情绪轨迹表现为：初期以强烈愤怒、委屈、无力感和高警觉为主，常在被刺激、被碰触或感到不公平时迅速被点燃，并以攻击或失控反应表达；随着咨询推进，他逐渐能够把学校中的爆发与家庭暴力暴露、对母亲的心疼及无法保护家人的挫败感联系起来，开始从单纯“发出来”转向“能说出来、能觉察到”；中期在返校、与同伴恢复互动及获得母亲肯定后，紧张、防御和被排斥感有所下降，出现更多轻松、开心、被接纳和有成就感的体验；近期整体情绪已由过去的冲动、混乱、易激惹，逐步转向较稳定、自信、可控和有掌控感，但在父亲发火或家庭冲突升级时仍可能被重新触发。",
+    "key_progress": [
+      "问题理解显著深化：从最初将困难表面化为校园打人事件，逐步澄清其核心与长期家庭冲突和家庭暴力暴露相关，来访者已能识别自己“被激到就动手、事后后悔”的模式，并开始觉察爆发前的情绪与触发点。",
+      "情绪调节与替代行为明显提升：已在真实情境中多次使用数五个数、离开现场、看蚂蚁、拼乐高、做家务和自理活动等方式中断冲动，部分场景下能从事后后悔发展到事中控制，并在学校冲突中尝试用口头表达替代推打。",
+      "学校与社会功能持续恢复：顺利返校后逐渐从警惕防御转向主动靠近同伴，参加踢毽子、恢复交流、获得朋友和被接纳体验，进一步被同学投票选为体育委员、主动帮助老师搬器材，社会效能感、自信心和责任感明显增强。",
+      "自我评价和能力感改善：通过期末数学85分、语文90分以及自理、家务中的成功经验，来访者开始修正“自己很笨”“大家都讨厌我”等消极认知，逐渐形成“我能做好一些事、我值得被信任”的新体验。",
+      "家庭危机应对更成熟：在父母激烈冲突时，来访者已能在害怕中选择报警求助，而非直接卷入或以暴制暴，显示其安全意识、求助能力和自我保护能力增强；母亲对家庭环境影响的认识和支持度也有所提升，家庭气氛较前缓和。"
+    ],
+    "risk_note": "当前未见自伤、自杀或明确他伤计划的直接表达，整体风险较初期明显下降。既往校园冲动攻击行为已减少，来访者也具备一定的事中调节和求助能力。但风险并未完全解除：家庭暴力/高冲突暴露仍是最主要风险源，在父亲情绪失控、父母冲突升级或来访者被强烈刺激时，仍存在愤怒失控、攻击冲动复发及安全感下降的可能。总体为“较前下降但仍需持续监测”的状态，尤其需继续关注家庭冲突再发时的安全方案执行情况。",
+    "treatment_phase": "巩固",
+    "next_focus": "下一阶段建议以巩固与复发预防为主：继续强化愤怒预警信号识别和“工具箱”式调节策略在高触发场景中的熟练使用；巩固非暴力表达、冲突降级和求助行为；持续积累学校中的被接纳经验、责任角色体验和能力感证据，以稳定新的自我认知；同时完善并反复演练家庭冲突再发时的安全计划，包括优先保护自己、离开危险现场、联系可信成人或报警等路径；必要时继续支持母亲提升保护性养育和家庭降冲突能力，以减少来访者再次暴露于高危环境。"
+  },
+  "last_error": null,
+  "retrieval_examples": {
+    "家庭暴力与愤怒": {
+      "context_text": "【相关历史会话摘要】\n- ['返校适应', '家庭与同伴关系改善']: 主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。\n- 行为与情绪改善, 复发预防: 主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。\n- ['社交尝试与被接纳', '家庭冲突中的安全应对']: 主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。\n- 未知: 主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影\n- ['冲动攻击行为', '家庭暴力压力']: 主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。\n【相关对话片段】\n[2026-04-13] The child's father usually indulges the child.\n[2026-04-13] The user has experienced fear related to domestic violence and has worried that a male family member might hit their mother.\n[2026-04-13] The user's mother once apologized for making the user, as an only child, carry worry about family problems.\n[2026-04-13] The user believes the problems at home are affecting the child.\n[2026-04-13] The user currently avoids direct conflict with the child's father when possible.\n【相关图记忆】\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 当选班里体育委员 (类型: life_event)\n- 不怎么打架了 (类型: behavior)\n- 帮老师搬器材 (类型: behavior)\n- 爸爸说话声音没以前那么大 (类型: life_event)\n- 期末数学考了85分 (类型: life_event)\n- 期末语文考了90分 (类型: life_event)\n- 我不是笨 (类型: cognition)\n- 以前只是心太乱 (类型: cognition)\n- 爸爸发火 (类型: life_event)\n- 想打人 (类型: behavior)\n- 数五个数 (类型: strategy)\n- 离开现场 (类型: strategy)\n- 看蚂蚁 (类型: strategy)\n- 拼乐高 (类型: strategy)\n- 找能帮你的人 (类型: strategy)\n- 立刻求助 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --experiences--> 当选班里体育委员\n- CP1033_小杰及陪同母亲 --does--> 不怎么打架了\n- CP1033_小杰及陪同母亲 --does--> 帮老师搬器材\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸说话声音没以前那么大\n- CP1033_小杰及陪同母亲 --experiences--> 期末数学考了85分\n- CP1033_小杰及陪同母亲 --experiences--> 期末语文考了90分\n- CP1033_小杰及陪同母亲 --believes--> 我不是笨\n- CP1033_小杰及陪同母亲 --believes--> 以前只是心太乱\n- assistant --supports--> 数五个数\n- assistant --supports--> 离开现场\n- assistant --supports--> 看蚂蚁\n- assistant --supports--> 拼乐高\n- assistant --supports--> 找能帮你的人\n- assistant --supports--> 立刻求助\n- 数五个数 --relieves--> 想打人\n- 离开现场 --relieves--> 想打人\n- 看蚂蚁 --relieves--> 想打人\n- 拼乐高 --relieves--> 想打人\n- 找能帮你的人 --relieves--> 想打人\n- 立刻求助 --relieves--> 想打人\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 数五个数 (类型: strategy)\n- 同学拿橡皮不还 (类型: life_event)\n- 想推同学 (类型: behavior)\n- 叫同学还橡皮 (类型: behavior)\n- 父亲吼母亲 (类型: life_event)\n- 愤怒 (类型: emotion)\n- 砸枕头 (类型: behavior)\n- 跑出去 (类型: behavior)\n- 看蚂蚁搬家 (类型: strategy)\n- 心里发堵 (类型: emotion)\n- 拼乐高 (类型: interest)\n- 离开现场 (类型: strategy)\n- 自我安抚工具箱 (类型: strategy)\n- 父亲不当着孩子面和母亲吵 (类型: life_event)\n- 父亲特别惯着孩子 (类型: life_event)\n- 让孩子自己做事的机会 (类型: strategy)\n- 找回掌控感 (类型: goal)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --applies--> 数五个数\n- CP1033_小杰及陪同母亲 --experiences--> 同学拿橡皮不还\n- 同学拿橡皮不还 --causes--> 想推同学\n- 数五个数 --relieves--> 想推同学\n- CP1033_小杰及陪同母亲 --does--> 叫同学还橡皮\n- CP1033_小杰及陪同母亲 --experiences--> 父亲吼母亲\n- 父亲吼母亲 --causes--> 愤怒\n- CP1033_小杰及陪同母亲 --does--> 砸枕头\n- CP1033_小杰及陪同母亲 --does--> 跑出去\n- 跑出去 --supports--> 离开现场\n- CP1033_小杰及陪同母亲 --applies--> 看蚂蚁搬家\n- 看蚂蚁搬家 --relieves--> 心里发堵\n- CP1033_小杰及陪同母亲 --interested_in--> 拼乐高\n- 拼乐高 --relieves--> 心里发堵\n- assistant --supports--> 自我安抚工具箱\n- 自我安抚工具箱 --supports--> 数五个数\n- 自我安抚工具箱 --supports--> 离开现场\n- 自我安抚工具箱 --supports--> 看蚂蚁搬家\n- 自我安抚工具箱 --supports--> 拼乐高\n- CP1033_小杰及陪同母亲 --reports--> 父亲不当着孩子面和母亲吵\n- CP1033_小杰及陪同母亲 --reports--> 父亲特别惯着孩子\n- assistant --supports--> 让孩子自己做事的机会\n- 让孩子自己做事的机会 --supports--> 找回掌控感\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 回学校 (类型: life_event)\n- 紧张 (类型: emotion)\n- 和曾闹过矛盾的同学聊天 (类型: behavior)\n- 与同学闹过矛盾 (类型: life_event)\n- 奥特曼 (类型: interest)\n- 打人的方式保护自己 (类型: behavior)\n- 舒服 (类型: emotion)\n- 拼乐高车 (类型: behavior)\n- 乐高车 (类型: interest)\n- 帮妈妈浇花 (类型: behavior)\n- 爸爸不在家 (类型: life_event)\n- 自己挤牙膏 (类型: behavior)\n- 收书包 (类型: behavior)\n- 被妈妈夸奖 (类型: life_event)\n- 上课专心 (类型: behavior)\n- 成就感 (类型: emotion)\n- 心情稳定 (类型: emotion)\n- 家里老打架 (类型: life_event)\n- 家里更安全 (类型: goal)\n- 和同学一起玩 (类型: goal)\n- 先避开，不和他爸硬顶 (类型: strategy)\n- 更稳的处理方式 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 回学校\n- CP1033_小杰及陪同母亲 --feels--> 紧张\n- CP1033_小杰及陪同母亲 --experiences--> 与同学闹过矛盾\n- CP1033_小杰及陪同母亲 --does--> 和曾闹过矛盾的同学聊天\n- CP1033_小杰及陪同母亲 --interested_in--> 奥特曼\n- CP1033_小杰及陪同母亲 --does--> 打人的方式保护自己\n- CP1033_小杰及陪同母亲 --feels--> 舒服\n- CP1033_小杰及陪同母亲 --does--> 拼乐高车\n- CP1033_小杰及陪同母亲 --interested_in--> 乐高车\n- CP1033_小杰及陪同母亲 --does--> 帮妈妈浇花\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸不在家\n- CP1033_小杰及陪同母亲 --does--> 自己挤牙膏\n- CP1033_小杰及陪同母亲 --does--> 收书包\n- CP1033_小杰及陪同母亲 --experiences--> 被妈妈夸奖\n- CP1033_小杰及陪同母亲 --does--> 上课专心\n- 自己挤牙膏 --causes--> 成就感\n- 收书包 --causes--> 成就感\n- 成就感 --causes--> 心情稳定\n- 心情稳定 --supports--> 上课专心\n- CP1033_小杰及陪同母亲 --wants--> 家里更安全\n- CP1033_小杰及陪同母亲 --wants--> 和同学一起玩\n- CP1033_小杰及陪同母亲 --experiences--> 家里老打架\n- CP1033_小杰及陪同母亲 --applies--> 先避开，不和他爸硬顶\n- 先避开，不和他爸硬顶 --supports--> 家里更安全\n- 先避开，不和他爸硬顶 --supports--> 更稳的处理方式\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 学校暂时不让回去 (类型: life_event)\n- 与数学老师发生冲突 (类型: life_event)\n- 老师当着全班说没写作业 (类型: life_event)\n- 撞老师 (类型: behavior)\n- 父母经常吵架 (类型: life_event)\n- 父亲打母亲 (类型: life_event)\n- 烦躁 (类型: emotion)\n- 愤怒 (类型: emotion)\n- 无力 (类型: emotion)\n- 心疼妈妈 (类型: emotion)\n- 想帮妈妈 (类型: goal)\n- 打不过父亲 (类型: cognition)\n- 被同学碰一下就想打回去 (类型: behavior)\n- 后悔 (类型: emotion)\n- 让愤怒慢下来 (类型: goal)\n- 在不激化冲突的前提下保护孩子 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 学校暂时不让回去\n- CP1033_小杰及陪同母亲 --reports--> 与数学老师发生冲突\n- CP1033_小杰及陪同母亲 --experiences--> 老师当着全班说没写作业\n- CP1033_小杰及陪同母亲 --does--> 撞老师\n- CP1033_小杰及陪同母亲 --experiences--> 父母经常吵架\n- CP1033_小杰及陪同母亲 --experiences--> 父亲打母亲\n- CP1033_小杰及陪同母亲 --feels--> 烦躁\n- CP1033_小杰及陪同母亲 --feels--> 愤怒\n- CP1033_小杰及陪同母亲 --feels--> 无力\n- CP1033_小杰及陪同母亲 --feels--> 心疼妈妈\n- CP1033_小杰及陪同母亲 --wants--> 想帮妈妈\n- CP1033_小杰及陪同母亲 --believes--> 打不过父亲\n- CP1033_小杰及陪同母亲 --does--> 被同学碰一下就想打回去\n- CP1033_小杰及陪同母亲 --feels--> 后悔\n- 父母经常吵架 --causes--> 烦躁\n- 父亲打母亲 --causes--> 愤怒\n- 父亲打母亲 --causes--> 无力\n- 父亲打母亲 --causes--> 心疼妈妈\n- 愤怒 --causes--> 撞老师\n- assistant --supports--> 让愤怒慢下来\n- assistant --applies--> 在不激化冲突的前提下保护孩子\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 参加踢毽子 (类型: behavior)\n- 特别好 (类型: emotion)\n- 不是所有人都讨厌我 (类型: cognition)\n- 父亲与母亲争吵 (类型: life_event)\n- 拨打110 (类型: behavior)\n- 害怕 (类型: emotion)\n- 父亲打母亲 (类型: life_event)\n- 母亲道歉 (类型: life_event)\n- 心里没以前那么堵了 (类型: symptom)\n- 有朋友了 (类型: life_event)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --does--> 参加踢毽子\n- CP1033_小杰及陪同母亲 --feels--> 特别好\n- CP1033_小杰及陪同母亲 --believes--> 不是所有人都讨厌我\n- CP1033_小杰及陪同母亲 --experiences--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --does--> 拨打110\n- CP1033_小杰及陪同母亲 --feels--> 害怕\n- 父亲打母亲 --causes--> 害怕\n- 拨打110 --relieves--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --experiences--> 母亲道歉\n- 母亲道歉 --supports--> CP1033_小杰及陪同母亲\n- CP1033_小杰及陪同母亲 --reports--> 心里没以前那么堵了\n- CP1033_小杰及陪同母亲 --reports--> 有朋友了\n- 参加踢毽子 --supports--> 有朋友了",
+      "l3_fragments": [
+        {
+          "memory": "The child's father usually indulges the child.",
+          "score": 1.164031744003296,
+          "session_id": "CP1033_小杰及陪同母亲_Session2",
+          "timestamp": "2026-04-13T17:00:16.114094",
+          "turn_index": 6
+        },
+        {
+          "memory": "The user has experienced fear related to domestic violence and has worried that a male family member might hit their mother.",
+          "score": 1.1523010730743408,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "timestamp": "2026-04-13T17:08:11.985468",
+          "turn_index": 4
+        },
+        {
+          "memory": "The user's mother once apologized for making the user, as an only child, carry worry about family problems.",
+          "score": 1.1519606113433838,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "timestamp": "2026-04-13T17:08:11.985468",
+          "turn_index": 4
+        },
+        {
+          "memory": "The user believes the problems at home are affecting the child.",
+          "score": 1.1417298316955566,
+          "session_id": "CP1033_小杰及陪同母亲_Session1",
+          "timestamp": "2026-04-13T16:56:48.609070",
+          "turn_index": 6
+        },
+        {
+          "memory": "The user currently avoids direct conflict with the child's father when possible.",
+          "score": 1.131029486656189,
+          "session_id": "CP1033_小杰及陪同母亲_Session3",
+          "timestamp": "2026-04-13T17:03:58.659856",
+          "turn_index": 6
+        }
+      ],
+      "l2_summaries": [
+        {
+          "memory": "主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。",
+          "score": 1.057159662246704,
+          "session_id": "CP1033_小杰及陪同母亲_Session3",
+          "topic": [
+            "返校适应",
+            "家庭与同伴关系改善"
+          ],
+          "start_time": "2026-04-13T17:02:41.279762",
+          "summary": "主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。"
+        },
+        {
+          "memory": "主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。",
+          "score": 0.8845154047012329,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+          "topic": "行为与情绪改善, 复发预防",
+          "start_time": "2026-04-13T17:10:53.882651",
+          "summary": "主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。"
+        },
+        {
+          "memory": "主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。",
+          "score": 0.8210957050323486,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "topic": [
+            "社交尝试与被接纳",
+            "家庭冲突中的安全应对"
+          ],
+          "start_time": "2026-04-13T17:07:19.330020",
+          "summary": "主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。"
+        },
+        {
+          "memory": "主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影",
+          "score": 0.7220221757888794,
+          "session_id": "CP1033_小杰及陪同母亲_Session2",
+          "topic": "未知",
+          "start_time": "2026-04-13T16:58:41.447639",
+          "summary": "主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影"
+        },
+        {
+          "memory": "主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。",
+          "score": 0.628476619720459,
+          "session_id": "CP1033_小杰及陪同母亲_Session1",
+          "topic": [
+            "冲动攻击行为",
+            "家庭暴力压力"
+          ],
+          "start_time": "2026-04-13T16:55:19.871801",
+          "summary": "主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。"
+        }
+      ],
+      "session_graphs": [
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 当选班里体育委员 (类型: life_event)\n- 不怎么打架了 (类型: behavior)\n- 帮老师搬器材 (类型: behavior)\n- 爸爸说话声音没以前那么大 (类型: life_event)\n- 期末数学考了85分 (类型: life_event)\n- 期末语文考了90分 (类型: life_event)\n- 我不是笨 (类型: cognition)\n- 以前只是心太乱 (类型: cognition)\n- 爸爸发火 (类型: life_event)\n- 想打人 (类型: behavior)\n- 数五个数 (类型: strategy)\n- 离开现场 (类型: strategy)\n- 看蚂蚁 (类型: strategy)\n- 拼乐高 (类型: strategy)\n- 找能帮你的人 (类型: strategy)\n- 立刻求助 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --experiences--> 当选班里体育委员\n- CP1033_小杰及陪同母亲 --does--> 不怎么打架了\n- CP1033_小杰及陪同母亲 --does--> 帮老师搬器材\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸说话声音没以前那么大\n- CP1033_小杰及陪同母亲 --experiences--> 期末数学考了85分\n- CP1033_小杰及陪同母亲 --experiences--> 期末语文考了90分\n- CP1033_小杰及陪同母亲 --believes--> 我不是笨\n- CP1033_小杰及陪同母亲 --believes--> 以前只是心太乱\n- assistant --supports--> 数五个数\n- assistant --supports--> 离开现场\n- assistant --supports--> 看蚂蚁\n- assistant --supports--> 拼乐高\n- assistant --supports--> 找能帮你的人\n- assistant --supports--> 立刻求助\n- 数五个数 --relieves--> 想打人\n- 离开现场 --relieves--> 想打人\n- 看蚂蚁 --relieves--> 想打人\n- 拼乐高 --relieves--> 想打人\n- 找能帮你的人 --relieves--> 想打人\n- 立刻求助 --relieves--> 想打人",
+          "score": 1.079412579536438,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 数五个数 (类型: strategy)\n- 同学拿橡皮不还 (类型: life_event)\n- 想推同学 (类型: behavior)\n- 叫同学还橡皮 (类型: behavior)\n- 父亲吼母亲 (类型: life_event)\n- 愤怒 (类型: emotion)\n- 砸枕头 (类型: behavior)\n- 跑出去 (类型: behavior)\n- 看蚂蚁搬家 (类型: strategy)\n- 心里发堵 (类型: emotion)\n- 拼乐高 (类型: interest)\n- 离开现场 (类型: strategy)\n- 自我安抚工具箱 (类型: strategy)\n- 父亲不当着孩子面和母亲吵 (类型: life_event)\n- 父亲特别惯着孩子 (类型: life_event)\n- 让孩子自己做事的机会 (类型: strategy)\n- 找回掌控感 (类型: goal)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --applies--> 数五个数\n- CP1033_小杰及陪同母亲 --experiences--> 同学拿橡皮不还\n- 同学拿橡皮不还 --causes--> 想推同学\n- 数五个数 --relieves--> 想推同学\n- CP1033_小杰及陪同母亲 --does--> 叫同学还橡皮\n- CP1033_小杰及陪同母亲 --experiences--> 父亲吼母亲\n- 父亲吼母亲 --causes--> 愤怒\n- CP1033_小杰及陪同母亲 --does--> 砸枕头\n- CP1033_小杰及陪同母亲 --does--> 跑出去\n- 跑出去 --supports--> 离开现场\n- CP1033_小杰及陪同母亲 --applies--> 看蚂蚁搬家\n- 看蚂蚁搬家 --relieves--> 心里发堵\n- CP1033_小杰及陪同母亲 --interested_in--> 拼乐高\n- 拼乐高 --relieves--> 心里发堵\n- assistant --supports--> 自我安抚工具箱\n- 自我安抚工具箱 --supports--> 数五个数\n- 自我安抚工具箱 --supports--> 离开现场\n- 自我安抚工具箱 --supports--> 看蚂蚁搬家\n- 自我安抚工具箱 --supports--> 拼乐高\n- CP1033_小杰及陪同母亲 --reports--> 父亲不当着孩子面和母亲吵\n- CP1033_小杰及陪同母亲 --reports--> 父亲特别惯着孩子\n- assistant --supports--> 让孩子自己做事的机会\n- 让孩子自己做事的机会 --supports--> 找回掌控感",
+          "score": 1.0778264999389648,
+          "session_id": "CP1033_小杰及陪同母亲_Session2"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 回学校 (类型: life_event)\n- 紧张 (类型: emotion)\n- 和曾闹过矛盾的同学聊天 (类型: behavior)\n- 与同学闹过矛盾 (类型: life_event)\n- 奥特曼 (类型: interest)\n- 打人的方式保护自己 (类型: behavior)\n- 舒服 (类型: emotion)\n- 拼乐高车 (类型: behavior)\n- 乐高车 (类型: interest)\n- 帮妈妈浇花 (类型: behavior)\n- 爸爸不在家 (类型: life_event)\n- 自己挤牙膏 (类型: behavior)\n- 收书包 (类型: behavior)\n- 被妈妈夸奖 (类型: life_event)\n- 上课专心 (类型: behavior)\n- 成就感 (类型: emotion)\n- 心情稳定 (类型: emotion)\n- 家里老打架 (类型: life_event)\n- 家里更安全 (类型: goal)\n- 和同学一起玩 (类型: goal)\n- 先避开，不和他爸硬顶 (类型: strategy)\n- 更稳的处理方式 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 回学校\n- CP1033_小杰及陪同母亲 --feels--> 紧张\n- CP1033_小杰及陪同母亲 --experiences--> 与同学闹过矛盾\n- CP1033_小杰及陪同母亲 --does--> 和曾闹过矛盾的同学聊天\n- CP1033_小杰及陪同母亲 --interested_in--> 奥特曼\n- CP1033_小杰及陪同母亲 --does--> 打人的方式保护自己\n- CP1033_小杰及陪同母亲 --feels--> 舒服\n- CP1033_小杰及陪同母亲 --does--> 拼乐高车\n- CP1033_小杰及陪同母亲 --interested_in--> 乐高车\n- CP1033_小杰及陪同母亲 --does--> 帮妈妈浇花\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸不在家\n- CP1033_小杰及陪同母亲 --does--> 自己挤牙膏\n- CP1033_小杰及陪同母亲 --does--> 收书包\n- CP1033_小杰及陪同母亲 --experiences--> 被妈妈夸奖\n- CP1033_小杰及陪同母亲 --does--> 上课专心\n- 自己挤牙膏 --causes--> 成就感\n- 收书包 --causes--> 成就感\n- 成就感 --causes--> 心情稳定\n- 心情稳定 --supports--> 上课专心\n- CP1033_小杰及陪同母亲 --wants--> 家里更安全\n- CP1033_小杰及陪同母亲 --wants--> 和同学一起玩\n- CP1033_小杰及陪同母亲 --experiences--> 家里老打架\n- CP1033_小杰及陪同母亲 --applies--> 先避开，不和他爸硬顶\n- 先避开，不和他爸硬顶 --supports--> 家里更安全\n- 先避开，不和他爸硬顶 --supports--> 更稳的处理方式",
+          "score": 1.0727990865707397,
+          "session_id": "CP1033_小杰及陪同母亲_Session3"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 学校暂时不让回去 (类型: life_event)\n- 与数学老师发生冲突 (类型: life_event)\n- 老师当着全班说没写作业 (类型: life_event)\n- 撞老师 (类型: behavior)\n- 父母经常吵架 (类型: life_event)\n- 父亲打母亲 (类型: life_event)\n- 烦躁 (类型: emotion)\n- 愤怒 (类型: emotion)\n- 无力 (类型: emotion)\n- 心疼妈妈 (类型: emotion)\n- 想帮妈妈 (类型: goal)\n- 打不过父亲 (类型: cognition)\n- 被同学碰一下就想打回去 (类型: behavior)\n- 后悔 (类型: emotion)\n- 让愤怒慢下来 (类型: goal)\n- 在不激化冲突的前提下保护孩子 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 学校暂时不让回去\n- CP1033_小杰及陪同母亲 --reports--> 与数学老师发生冲突\n- CP1033_小杰及陪同母亲 --experiences--> 老师当着全班说没写作业\n- CP1033_小杰及陪同母亲 --does--> 撞老师\n- CP1033_小杰及陪同母亲 --experiences--> 父母经常吵架\n- CP1033_小杰及陪同母亲 --experiences--> 父亲打母亲\n- CP1033_小杰及陪同母亲 --feels--> 烦躁\n- CP1033_小杰及陪同母亲 --feels--> 愤怒\n- CP1033_小杰及陪同母亲 --feels--> 无力\n- CP1033_小杰及陪同母亲 --feels--> 心疼妈妈\n- CP1033_小杰及陪同母亲 --wants--> 想帮妈妈\n- CP1033_小杰及陪同母亲 --believes--> 打不过父亲\n- CP1033_小杰及陪同母亲 --does--> 被同学碰一下就想打回去\n- CP1033_小杰及陪同母亲 --feels--> 后悔\n- 父母经常吵架 --causes--> 烦躁\n- 父亲打母亲 --causes--> 愤怒\n- 父亲打母亲 --causes--> 无力\n- 父亲打母亲 --causes--> 心疼妈妈\n- 愤怒 --causes--> 撞老师\n- assistant --supports--> 让愤怒慢下来\n- assistant --applies--> 在不激化冲突的前提下保护孩子",
+          "score": 1.0008022785186768,
+          "session_id": "CP1033_小杰及陪同母亲_Session1"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 参加踢毽子 (类型: behavior)\n- 特别好 (类型: emotion)\n- 不是所有人都讨厌我 (类型: cognition)\n- 父亲与母亲争吵 (类型: life_event)\n- 拨打110 (类型: behavior)\n- 害怕 (类型: emotion)\n- 父亲打母亲 (类型: life_event)\n- 母亲道歉 (类型: life_event)\n- 心里没以前那么堵了 (类型: symptom)\n- 有朋友了 (类型: life_event)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --does--> 参加踢毽子\n- CP1033_小杰及陪同母亲 --feels--> 特别好\n- CP1033_小杰及陪同母亲 --believes--> 不是所有人都讨厌我\n- CP1033_小杰及陪同母亲 --experiences--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --does--> 拨打110\n- CP1033_小杰及陪同母亲 --feels--> 害怕\n- 父亲打母亲 --causes--> 害怕\n- 拨打110 --relieves--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --experiences--> 母亲道歉\n- 母亲道歉 --supports--> CP1033_小杰及陪同母亲\n- CP1033_小杰及陪同母亲 --reports--> 心里没以前那么堵了\n- CP1033_小杰及陪同母亲 --reports--> 有朋友了\n- 参加踢毽子 --supports--> 有朋友了",
+          "score": 0.9717531204223633,
+          "session_id": "CP1033_小杰及陪同母亲_Session4"
+        }
+      ],
+      "graph_relations": []
+    },
+    "同伴关系修复": {
+      "context_text": "【相关历史会话摘要】\n- ['冲动攻击行为', '家庭暴力压力']: 主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。\n- 未知: 主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影\n- ['社交尝试与被接纳', '家庭冲突中的安全应对']: 主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。\n- 行为与情绪改善, 复发预防: 主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。\n- ['返校适应', '家庭与同伴关系改善']: 主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。\n【相关对话片段】\n[2026-04-13] The user said their school is currently not allowing them to return.\n[2026-04-13] The user now has friends.\n[2026-04-13] The user sometimes relaxes and clears their mind by building Lego.\n[2026-04-13] The user believes they are not unintelligent; past emotional turmoil interfered with their learning and attention.\n[2026-04-13] The user helps teachers move equipment.\n【相关图记忆】\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 数五个数 (类型: strategy)\n- 同学拿橡皮不还 (类型: life_event)\n- 想推同学 (类型: behavior)\n- 叫同学还橡皮 (类型: behavior)\n- 父亲吼母亲 (类型: life_event)\n- 愤怒 (类型: emotion)\n- 砸枕头 (类型: behavior)\n- 跑出去 (类型: behavior)\n- 看蚂蚁搬家 (类型: strategy)\n- 心里发堵 (类型: emotion)\n- 拼乐高 (类型: interest)\n- 离开现场 (类型: strategy)\n- 自我安抚工具箱 (类型: strategy)\n- 父亲不当着孩子面和母亲吵 (类型: life_event)\n- 父亲特别惯着孩子 (类型: life_event)\n- 让孩子自己做事的机会 (类型: strategy)\n- 找回掌控感 (类型: goal)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --applies--> 数五个数\n- CP1033_小杰及陪同母亲 --experiences--> 同学拿橡皮不还\n- 同学拿橡皮不还 --causes--> 想推同学\n- 数五个数 --relieves--> 想推同学\n- CP1033_小杰及陪同母亲 --does--> 叫同学还橡皮\n- CP1033_小杰及陪同母亲 --experiences--> 父亲吼母亲\n- 父亲吼母亲 --causes--> 愤怒\n- CP1033_小杰及陪同母亲 --does--> 砸枕头\n- CP1033_小杰及陪同母亲 --does--> 跑出去\n- 跑出去 --supports--> 离开现场\n- CP1033_小杰及陪同母亲 --applies--> 看蚂蚁搬家\n- 看蚂蚁搬家 --relieves--> 心里发堵\n- CP1033_小杰及陪同母亲 --interested_in--> 拼乐高\n- 拼乐高 --relieves--> 心里发堵\n- assistant --supports--> 自我安抚工具箱\n- 自我安抚工具箱 --supports--> 数五个数\n- 自我安抚工具箱 --supports--> 离开现场\n- 自我安抚工具箱 --supports--> 看蚂蚁搬家\n- 自我安抚工具箱 --supports--> 拼乐高\n- CP1033_小杰及陪同母亲 --reports--> 父亲不当着孩子面和母亲吵\n- CP1033_小杰及陪同母亲 --reports--> 父亲特别惯着孩子\n- assistant --supports--> 让孩子自己做事的机会\n- 让孩子自己做事的机会 --supports--> 找回掌控感\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 当选班里体育委员 (类型: life_event)\n- 不怎么打架了 (类型: behavior)\n- 帮老师搬器材 (类型: behavior)\n- 爸爸说话声音没以前那么大 (类型: life_event)\n- 期末数学考了85分 (类型: life_event)\n- 期末语文考了90分 (类型: life_event)\n- 我不是笨 (类型: cognition)\n- 以前只是心太乱 (类型: cognition)\n- 爸爸发火 (类型: life_event)\n- 想打人 (类型: behavior)\n- 数五个数 (类型: strategy)\n- 离开现场 (类型: strategy)\n- 看蚂蚁 (类型: strategy)\n- 拼乐高 (类型: strategy)\n- 找能帮你的人 (类型: strategy)\n- 立刻求助 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --experiences--> 当选班里体育委员\n- CP1033_小杰及陪同母亲 --does--> 不怎么打架了\n- CP1033_小杰及陪同母亲 --does--> 帮老师搬器材\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸说话声音没以前那么大\n- CP1033_小杰及陪同母亲 --experiences--> 期末数学考了85分\n- CP1033_小杰及陪同母亲 --experiences--> 期末语文考了90分\n- CP1033_小杰及陪同母亲 --believes--> 我不是笨\n- CP1033_小杰及陪同母亲 --believes--> 以前只是心太乱\n- assistant --supports--> 数五个数\n- assistant --supports--> 离开现场\n- assistant --supports--> 看蚂蚁\n- assistant --supports--> 拼乐高\n- assistant --supports--> 找能帮你的人\n- assistant --supports--> 立刻求助\n- 数五个数 --relieves--> 想打人\n- 离开现场 --relieves--> 想打人\n- 看蚂蚁 --relieves--> 想打人\n- 拼乐高 --relieves--> 想打人\n- 找能帮你的人 --relieves--> 想打人\n- 立刻求助 --relieves--> 想打人\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 参加踢毽子 (类型: behavior)\n- 特别好 (类型: emotion)\n- 不是所有人都讨厌我 (类型: cognition)\n- 父亲与母亲争吵 (类型: life_event)\n- 拨打110 (类型: behavior)\n- 害怕 (类型: emotion)\n- 父亲打母亲 (类型: life_event)\n- 母亲道歉 (类型: life_event)\n- 心里没以前那么堵了 (类型: symptom)\n- 有朋友了 (类型: life_event)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --does--> 参加踢毽子\n- CP1033_小杰及陪同母亲 --feels--> 特别好\n- CP1033_小杰及陪同母亲 --believes--> 不是所有人都讨厌我\n- CP1033_小杰及陪同母亲 --experiences--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --does--> 拨打110\n- CP1033_小杰及陪同母亲 --feels--> 害怕\n- 父亲打母亲 --causes--> 害怕\n- 拨打110 --relieves--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --experiences--> 母亲道歉\n- 母亲道歉 --supports--> CP1033_小杰及陪同母亲\n- CP1033_小杰及陪同母亲 --reports--> 心里没以前那么堵了\n- CP1033_小杰及陪同母亲 --reports--> 有朋友了\n- 参加踢毽子 --supports--> 有朋友了\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 学校暂时不让回去 (类型: life_event)\n- 与数学老师发生冲突 (类型: life_event)\n- 老师当着全班说没写作业 (类型: life_event)\n- 撞老师 (类型: behavior)\n- 父母经常吵架 (类型: life_event)\n- 父亲打母亲 (类型: life_event)\n- 烦躁 (类型: emotion)\n- 愤怒 (类型: emotion)\n- 无力 (类型: emotion)\n- 心疼妈妈 (类型: emotion)\n- 想帮妈妈 (类型: goal)\n- 打不过父亲 (类型: cognition)\n- 被同学碰一下就想打回去 (类型: behavior)\n- 后悔 (类型: emotion)\n- 让愤怒慢下来 (类型: goal)\n- 在不激化冲突的前提下保护孩子 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 学校暂时不让回去\n- CP1033_小杰及陪同母亲 --reports--> 与数学老师发生冲突\n- CP1033_小杰及陪同母亲 --experiences--> 老师当着全班说没写作业\n- CP1033_小杰及陪同母亲 --does--> 撞老师\n- CP1033_小杰及陪同母亲 --experiences--> 父母经常吵架\n- CP1033_小杰及陪同母亲 --experiences--> 父亲打母亲\n- CP1033_小杰及陪同母亲 --feels--> 烦躁\n- CP1033_小杰及陪同母亲 --feels--> 愤怒\n- CP1033_小杰及陪同母亲 --feels--> 无力\n- CP1033_小杰及陪同母亲 --feels--> 心疼妈妈\n- CP1033_小杰及陪同母亲 --wants--> 想帮妈妈\n- CP1033_小杰及陪同母亲 --believes--> 打不过父亲\n- CP1033_小杰及陪同母亲 --does--> 被同学碰一下就想打回去\n- CP1033_小杰及陪同母亲 --feels--> 后悔\n- 父母经常吵架 --causes--> 烦躁\n- 父亲打母亲 --causes--> 愤怒\n- 父亲打母亲 --causes--> 无力\n- 父亲打母亲 --causes--> 心疼妈妈\n- 愤怒 --causes--> 撞老师\n- assistant --supports--> 让愤怒慢下来\n- assistant --applies--> 在不激化冲突的前提下保护孩子\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 回学校 (类型: life_event)\n- 紧张 (类型: emotion)\n- 和曾闹过矛盾的同学聊天 (类型: behavior)\n- 与同学闹过矛盾 (类型: life_event)\n- 奥特曼 (类型: interest)\n- 打人的方式保护自己 (类型: behavior)\n- 舒服 (类型: emotion)\n- 拼乐高车 (类型: behavior)\n- 乐高车 (类型: interest)\n- 帮妈妈浇花 (类型: behavior)\n- 爸爸不在家 (类型: life_event)\n- 自己挤牙膏 (类型: behavior)\n- 收书包 (类型: behavior)\n- 被妈妈夸奖 (类型: life_event)\n- 上课专心 (类型: behavior)\n- 成就感 (类型: emotion)\n- 心情稳定 (类型: emotion)\n- 家里老打架 (类型: life_event)\n- 家里更安全 (类型: goal)\n- 和同学一起玩 (类型: goal)\n- 先避开，不和他爸硬顶 (类型: strategy)\n- 更稳的处理方式 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 回学校\n- CP1033_小杰及陪同母亲 --feels--> 紧张\n- CP1033_小杰及陪同母亲 --experiences--> 与同学闹过矛盾\n- CP1033_小杰及陪同母亲 --does--> 和曾闹过矛盾的同学聊天\n- CP1033_小杰及陪同母亲 --interested_in--> 奥特曼\n- CP1033_小杰及陪同母亲 --does--> 打人的方式保护自己\n- CP1033_小杰及陪同母亲 --feels--> 舒服\n- CP1033_小杰及陪同母亲 --does--> 拼乐高车\n- CP1033_小杰及陪同母亲 --interested_in--> 乐高车\n- CP1033_小杰及陪同母亲 --does--> 帮妈妈浇花\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸不在家\n- CP1033_小杰及陪同母亲 --does--> 自己挤牙膏\n- CP1033_小杰及陪同母亲 --does--> 收书包\n- CP1033_小杰及陪同母亲 --experiences--> 被妈妈夸奖\n- CP1033_小杰及陪同母亲 --does--> 上课专心\n- 自己挤牙膏 --causes--> 成就感\n- 收书包 --causes--> 成就感\n- 成就感 --causes--> 心情稳定\n- 心情稳定 --supports--> 上课专心\n- CP1033_小杰及陪同母亲 --wants--> 家里更安全\n- CP1033_小杰及陪同母亲 --wants--> 和同学一起玩\n- CP1033_小杰及陪同母亲 --experiences--> 家里老打架\n- CP1033_小杰及陪同母亲 --applies--> 先避开，不和他爸硬顶\n- 先避开，不和他爸硬顶 --supports--> 家里更安全\n- 先避开，不和他爸硬顶 --supports--> 更稳的处理方式\n【相关图关系】\n- 小杰 --有--> 朋友\n- cp1033_小杰及陪同母亲 --wants_to_play_with--> 同学\n- 同学 --had_conflict_with--> cp1033_小杰及陪同母亲\n- 小杰 --想推--> 同学\n- 小杰 --want_to_hit_back--> 同学",
+      "l3_fragments": [
+        {
+          "memory": "The user said their school is currently not allowing them to return.",
+          "score": 1.1508021354675293,
+          "session_id": "CP1033_小杰及陪同母亲_Session1",
+          "timestamp": "2026-04-13T16:55:27.366168",
+          "turn_index": 1
+        },
+        {
+          "memory": "The user now has friends.",
+          "score": 1.1363579034805298,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "timestamp": "2026-04-13T17:08:29.675114",
+          "turn_index": 5
+        },
+        {
+          "memory": "The user sometimes relaxes and clears their mind by building Lego.",
+          "score": 1.1311837434768677,
+          "session_id": "CP1033_小杰及陪同母亲_Session2",
+          "timestamp": "2026-04-13T17:00:04.691840",
+          "turn_index": 5
+        },
+        {
+          "memory": "The user believes they are not unintelligent; past emotional turmoil interfered with their learning and attention.",
+          "score": 1.1169729232788086,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+          "timestamp": "2026-04-13T17:11:42.650221",
+          "turn_index": 3
+        },
+        {
+          "memory": "The user helps teachers move equipment.",
+          "score": 1.0825345516204834,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+          "timestamp": "2026-04-13T17:11:12.892252",
+          "turn_index": 2
+        }
+      ],
+      "l2_summaries": [
+        {
+          "memory": "主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。",
+          "score": 0.9899823665618896,
+          "session_id": "CP1033_小杰及陪同母亲_Session1",
+          "topic": [
+            "冲动攻击行为",
+            "家庭暴力压力"
+          ],
+          "start_time": "2026-04-13T16:55:19.871801",
+          "summary": "主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。"
+        },
+        {
+          "memory": "主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影",
+          "score": 0.952085018157959,
+          "session_id": "CP1033_小杰及陪同母亲_Session2",
+          "topic": "未知",
+          "start_time": "2026-04-13T16:58:41.447639",
+          "summary": "主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影"
+        },
+        {
+          "memory": "主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。",
+          "score": 0.9012266993522644,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "topic": [
+            "社交尝试与被接纳",
+            "家庭冲突中的安全应对"
+          ],
+          "start_time": "2026-04-13T17:07:19.330020",
+          "summary": "主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。"
+        },
+        {
+          "memory": "主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。",
+          "score": 0.8021893501281738,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+          "topic": "行为与情绪改善, 复发预防",
+          "start_time": "2026-04-13T17:10:53.882651",
+          "summary": "主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。"
+        },
+        {
+          "memory": "主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。",
+          "score": 0.7905292510986328,
+          "session_id": "CP1033_小杰及陪同母亲_Session3",
+          "topic": [
+            "返校适应",
+            "家庭与同伴关系改善"
+          ],
+          "start_time": "2026-04-13T17:02:41.279762",
+          "summary": "主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。"
+        }
+      ],
+      "session_graphs": [
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 数五个数 (类型: strategy)\n- 同学拿橡皮不还 (类型: life_event)\n- 想推同学 (类型: behavior)\n- 叫同学还橡皮 (类型: behavior)\n- 父亲吼母亲 (类型: life_event)\n- 愤怒 (类型: emotion)\n- 砸枕头 (类型: behavior)\n- 跑出去 (类型: behavior)\n- 看蚂蚁搬家 (类型: strategy)\n- 心里发堵 (类型: emotion)\n- 拼乐高 (类型: interest)\n- 离开现场 (类型: strategy)\n- 自我安抚工具箱 (类型: strategy)\n- 父亲不当着孩子面和母亲吵 (类型: life_event)\n- 父亲特别惯着孩子 (类型: life_event)\n- 让孩子自己做事的机会 (类型: strategy)\n- 找回掌控感 (类型: goal)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --applies--> 数五个数\n- CP1033_小杰及陪同母亲 --experiences--> 同学拿橡皮不还\n- 同学拿橡皮不还 --causes--> 想推同学\n- 数五个数 --relieves--> 想推同学\n- CP1033_小杰及陪同母亲 --does--> 叫同学还橡皮\n- CP1033_小杰及陪同母亲 --experiences--> 父亲吼母亲\n- 父亲吼母亲 --causes--> 愤怒\n- CP1033_小杰及陪同母亲 --does--> 砸枕头\n- CP1033_小杰及陪同母亲 --does--> 跑出去\n- 跑出去 --supports--> 离开现场\n- CP1033_小杰及陪同母亲 --applies--> 看蚂蚁搬家\n- 看蚂蚁搬家 --relieves--> 心里发堵\n- CP1033_小杰及陪同母亲 --interested_in--> 拼乐高\n- 拼乐高 --relieves--> 心里发堵\n- assistant --supports--> 自我安抚工具箱\n- 自我安抚工具箱 --supports--> 数五个数\n- 自我安抚工具箱 --supports--> 离开现场\n- 自我安抚工具箱 --supports--> 看蚂蚁搬家\n- 自我安抚工具箱 --supports--> 拼乐高\n- CP1033_小杰及陪同母亲 --reports--> 父亲不当着孩子面和母亲吵\n- CP1033_小杰及陪同母亲 --reports--> 父亲特别惯着孩子\n- assistant --supports--> 让孩子自己做事的机会\n- 让孩子自己做事的机会 --supports--> 找回掌控感",
+          "score": 1.0580509901046753,
+          "session_id": "CP1033_小杰及陪同母亲_Session2"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 当选班里体育委员 (类型: life_event)\n- 不怎么打架了 (类型: behavior)\n- 帮老师搬器材 (类型: behavior)\n- 爸爸说话声音没以前那么大 (类型: life_event)\n- 期末数学考了85分 (类型: life_event)\n- 期末语文考了90分 (类型: life_event)\n- 我不是笨 (类型: cognition)\n- 以前只是心太乱 (类型: cognition)\n- 爸爸发火 (类型: life_event)\n- 想打人 (类型: behavior)\n- 数五个数 (类型: strategy)\n- 离开现场 (类型: strategy)\n- 看蚂蚁 (类型: strategy)\n- 拼乐高 (类型: strategy)\n- 找能帮你的人 (类型: strategy)\n- 立刻求助 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --experiences--> 当选班里体育委员\n- CP1033_小杰及陪同母亲 --does--> 不怎么打架了\n- CP1033_小杰及陪同母亲 --does--> 帮老师搬器材\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸说话声音没以前那么大\n- CP1033_小杰及陪同母亲 --experiences--> 期末数学考了85分\n- CP1033_小杰及陪同母亲 --experiences--> 期末语文考了90分\n- CP1033_小杰及陪同母亲 --believes--> 我不是笨\n- CP1033_小杰及陪同母亲 --believes--> 以前只是心太乱\n- assistant --supports--> 数五个数\n- assistant --supports--> 离开现场\n- assistant --supports--> 看蚂蚁\n- assistant --supports--> 拼乐高\n- assistant --supports--> 找能帮你的人\n- assistant --supports--> 立刻求助\n- 数五个数 --relieves--> 想打人\n- 离开现场 --relieves--> 想打人\n- 看蚂蚁 --relieves--> 想打人\n- 拼乐高 --relieves--> 想打人\n- 找能帮你的人 --relieves--> 想打人\n- 立刻求助 --relieves--> 想打人",
+          "score": 1.054614782333374,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 参加踢毽子 (类型: behavior)\n- 特别好 (类型: emotion)\n- 不是所有人都讨厌我 (类型: cognition)\n- 父亲与母亲争吵 (类型: life_event)\n- 拨打110 (类型: behavior)\n- 害怕 (类型: emotion)\n- 父亲打母亲 (类型: life_event)\n- 母亲道歉 (类型: life_event)\n- 心里没以前那么堵了 (类型: symptom)\n- 有朋友了 (类型: life_event)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --does--> 参加踢毽子\n- CP1033_小杰及陪同母亲 --feels--> 特别好\n- CP1033_小杰及陪同母亲 --believes--> 不是所有人都讨厌我\n- CP1033_小杰及陪同母亲 --experiences--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --does--> 拨打110\n- CP1033_小杰及陪同母亲 --feels--> 害怕\n- 父亲打母亲 --causes--> 害怕\n- 拨打110 --relieves--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --experiences--> 母亲道歉\n- 母亲道歉 --supports--> CP1033_小杰及陪同母亲\n- CP1033_小杰及陪同母亲 --reports--> 心里没以前那么堵了\n- CP1033_小杰及陪同母亲 --reports--> 有朋友了\n- 参加踢毽子 --supports--> 有朋友了",
+          "score": 1.0481728315353394,
+          "session_id": "CP1033_小杰及陪同母亲_Session4"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 学校暂时不让回去 (类型: life_event)\n- 与数学老师发生冲突 (类型: life_event)\n- 老师当着全班说没写作业 (类型: life_event)\n- 撞老师 (类型: behavior)\n- 父母经常吵架 (类型: life_event)\n- 父亲打母亲 (类型: life_event)\n- 烦躁 (类型: emotion)\n- 愤怒 (类型: emotion)\n- 无力 (类型: emotion)\n- 心疼妈妈 (类型: emotion)\n- 想帮妈妈 (类型: goal)\n- 打不过父亲 (类型: cognition)\n- 被同学碰一下就想打回去 (类型: behavior)\n- 后悔 (类型: emotion)\n- 让愤怒慢下来 (类型: goal)\n- 在不激化冲突的前提下保护孩子 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 学校暂时不让回去\n- CP1033_小杰及陪同母亲 --reports--> 与数学老师发生冲突\n- CP1033_小杰及陪同母亲 --experiences--> 老师当着全班说没写作业\n- CP1033_小杰及陪同母亲 --does--> 撞老师\n- CP1033_小杰及陪同母亲 --experiences--> 父母经常吵架\n- CP1033_小杰及陪同母亲 --experiences--> 父亲打母亲\n- CP1033_小杰及陪同母亲 --feels--> 烦躁\n- CP1033_小杰及陪同母亲 --feels--> 愤怒\n- CP1033_小杰及陪同母亲 --feels--> 无力\n- CP1033_小杰及陪同母亲 --feels--> 心疼妈妈\n- CP1033_小杰及陪同母亲 --wants--> 想帮妈妈\n- CP1033_小杰及陪同母亲 --believes--> 打不过父亲\n- CP1033_小杰及陪同母亲 --does--> 被同学碰一下就想打回去\n- CP1033_小杰及陪同母亲 --feels--> 后悔\n- 父母经常吵架 --causes--> 烦躁\n- 父亲打母亲 --causes--> 愤怒\n- 父亲打母亲 --causes--> 无力\n- 父亲打母亲 --causes--> 心疼妈妈\n- 愤怒 --causes--> 撞老师\n- assistant --supports--> 让愤怒慢下来\n- assistant --applies--> 在不激化冲突的前提下保护孩子",
+          "score": 1.0285121202468872,
+          "session_id": "CP1033_小杰及陪同母亲_Session1"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 回学校 (类型: life_event)\n- 紧张 (类型: emotion)\n- 和曾闹过矛盾的同学聊天 (类型: behavior)\n- 与同学闹过矛盾 (类型: life_event)\n- 奥特曼 (类型: interest)\n- 打人的方式保护自己 (类型: behavior)\n- 舒服 (类型: emotion)\n- 拼乐高车 (类型: behavior)\n- 乐高车 (类型: interest)\n- 帮妈妈浇花 (类型: behavior)\n- 爸爸不在家 (类型: life_event)\n- 自己挤牙膏 (类型: behavior)\n- 收书包 (类型: behavior)\n- 被妈妈夸奖 (类型: life_event)\n- 上课专心 (类型: behavior)\n- 成就感 (类型: emotion)\n- 心情稳定 (类型: emotion)\n- 家里老打架 (类型: life_event)\n- 家里更安全 (类型: goal)\n- 和同学一起玩 (类型: goal)\n- 先避开，不和他爸硬顶 (类型: strategy)\n- 更稳的处理方式 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 回学校\n- CP1033_小杰及陪同母亲 --feels--> 紧张\n- CP1033_小杰及陪同母亲 --experiences--> 与同学闹过矛盾\n- CP1033_小杰及陪同母亲 --does--> 和曾闹过矛盾的同学聊天\n- CP1033_小杰及陪同母亲 --interested_in--> 奥特曼\n- CP1033_小杰及陪同母亲 --does--> 打人的方式保护自己\n- CP1033_小杰及陪同母亲 --feels--> 舒服\n- CP1033_小杰及陪同母亲 --does--> 拼乐高车\n- CP1033_小杰及陪同母亲 --interested_in--> 乐高车\n- CP1033_小杰及陪同母亲 --does--> 帮妈妈浇花\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸不在家\n- CP1033_小杰及陪同母亲 --does--> 自己挤牙膏\n- CP1033_小杰及陪同母亲 --does--> 收书包\n- CP1033_小杰及陪同母亲 --experiences--> 被妈妈夸奖\n- CP1033_小杰及陪同母亲 --does--> 上课专心\n- 自己挤牙膏 --causes--> 成就感\n- 收书包 --causes--> 成就感\n- 成就感 --causes--> 心情稳定\n- 心情稳定 --supports--> 上课专心\n- CP1033_小杰及陪同母亲 --wants--> 家里更安全\n- CP1033_小杰及陪同母亲 --wants--> 和同学一起玩\n- CP1033_小杰及陪同母亲 --experiences--> 家里老打架\n- CP1033_小杰及陪同母亲 --applies--> 先避开，不和他爸硬顶\n- 先避开，不和他爸硬顶 --supports--> 家里更安全\n- 先避开，不和他爸硬顶 --supports--> 更稳的处理方式",
+          "score": 0.9940556883811951,
+          "session_id": "CP1033_小杰及陪同母亲_Session3"
+        }
+      ],
+      "graph_relations": [
+        {
+          "source": "小杰",
+          "relationship": "有",
+          "target": "朋友"
+        },
+        {
+          "source": "cp1033_小杰及陪同母亲",
+          "relationship": "wants_to_play_with",
+          "target": "同学"
+        },
+        {
+          "source": "同学",
+          "relationship": "had_conflict_with",
+          "target": "cp1033_小杰及陪同母亲"
+        },
+        {
+          "source": "小杰",
+          "relationship": "想推",
+          "target": "同学"
+        },
+        {
+          "source": "小杰",
+          "relationship": "want_to_hit_back",
+          "target": "同学"
+        }
+      ]
+    },
+    "自我调节工具": {
+      "context_text": "【相关历史会话摘要】\n- ['返校适应', '家庭与同伴关系改善']: 主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。\n- ['社交尝试与被接纳', '家庭冲突中的安全应对']: 主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。\n- 行为与情绪改善, 复发预防: 主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。\n- 未知: 主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影\n- ['冲动攻击行为', '家庭暴力压力']: 主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。\n【相关对话片段】\n[2026-04-13] The user now has friends.\n[2026-04-13] The user wants to be able to play with classmates.\n[2026-04-13] The user's mother once apologized for making the user, as an only child, carry worry about family problems.\n[2026-04-13] The user has had impulses to hit someone and worries it could happen again.\n[2026-04-13] The user believes the problems at home are affecting the child.\n【相关图记忆】\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 学校暂时不让回去 (类型: life_event)\n- 与数学老师发生冲突 (类型: life_event)\n- 老师当着全班说没写作业 (类型: life_event)\n- 撞老师 (类型: behavior)\n- 父母经常吵架 (类型: life_event)\n- 父亲打母亲 (类型: life_event)\n- 烦躁 (类型: emotion)\n- 愤怒 (类型: emotion)\n- 无力 (类型: emotion)\n- 心疼妈妈 (类型: emotion)\n- 想帮妈妈 (类型: goal)\n- 打不过父亲 (类型: cognition)\n- 被同学碰一下就想打回去 (类型: behavior)\n- 后悔 (类型: emotion)\n- 让愤怒慢下来 (类型: goal)\n- 在不激化冲突的前提下保护孩子 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 学校暂时不让回去\n- CP1033_小杰及陪同母亲 --reports--> 与数学老师发生冲突\n- CP1033_小杰及陪同母亲 --experiences--> 老师当着全班说没写作业\n- CP1033_小杰及陪同母亲 --does--> 撞老师\n- CP1033_小杰及陪同母亲 --experiences--> 父母经常吵架\n- CP1033_小杰及陪同母亲 --experiences--> 父亲打母亲\n- CP1033_小杰及陪同母亲 --feels--> 烦躁\n- CP1033_小杰及陪同母亲 --feels--> 愤怒\n- CP1033_小杰及陪同母亲 --feels--> 无力\n- CP1033_小杰及陪同母亲 --feels--> 心疼妈妈\n- CP1033_小杰及陪同母亲 --wants--> 想帮妈妈\n- CP1033_小杰及陪同母亲 --believes--> 打不过父亲\n- CP1033_小杰及陪同母亲 --does--> 被同学碰一下就想打回去\n- CP1033_小杰及陪同母亲 --feels--> 后悔\n- 父母经常吵架 --causes--> 烦躁\n- 父亲打母亲 --causes--> 愤怒\n- 父亲打母亲 --causes--> 无力\n- 父亲打母亲 --causes--> 心疼妈妈\n- 愤怒 --causes--> 撞老师\n- assistant --supports--> 让愤怒慢下来\n- assistant --applies--> 在不激化冲突的前提下保护孩子\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 参加踢毽子 (类型: behavior)\n- 特别好 (类型: emotion)\n- 不是所有人都讨厌我 (类型: cognition)\n- 父亲与母亲争吵 (类型: life_event)\n- 拨打110 (类型: behavior)\n- 害怕 (类型: emotion)\n- 父亲打母亲 (类型: life_event)\n- 母亲道歉 (类型: life_event)\n- 心里没以前那么堵了 (类型: symptom)\n- 有朋友了 (类型: life_event)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --does--> 参加踢毽子\n- CP1033_小杰及陪同母亲 --feels--> 特别好\n- CP1033_小杰及陪同母亲 --believes--> 不是所有人都讨厌我\n- CP1033_小杰及陪同母亲 --experiences--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --does--> 拨打110\n- CP1033_小杰及陪同母亲 --feels--> 害怕\n- 父亲打母亲 --causes--> 害怕\n- 拨打110 --relieves--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --experiences--> 母亲道歉\n- 母亲道歉 --supports--> CP1033_小杰及陪同母亲\n- CP1033_小杰及陪同母亲 --reports--> 心里没以前那么堵了\n- CP1033_小杰及陪同母亲 --reports--> 有朋友了\n- 参加踢毽子 --supports--> 有朋友了\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 回学校 (类型: life_event)\n- 紧张 (类型: emotion)\n- 和曾闹过矛盾的同学聊天 (类型: behavior)\n- 与同学闹过矛盾 (类型: life_event)\n- 奥特曼 (类型: interest)\n- 打人的方式保护自己 (类型: behavior)\n- 舒服 (类型: emotion)\n- 拼乐高车 (类型: behavior)\n- 乐高车 (类型: interest)\n- 帮妈妈浇花 (类型: behavior)\n- 爸爸不在家 (类型: life_event)\n- 自己挤牙膏 (类型: behavior)\n- 收书包 (类型: behavior)\n- 被妈妈夸奖 (类型: life_event)\n- 上课专心 (类型: behavior)\n- 成就感 (类型: emotion)\n- 心情稳定 (类型: emotion)\n- 家里老打架 (类型: life_event)\n- 家里更安全 (类型: goal)\n- 和同学一起玩 (类型: goal)\n- 先避开，不和他爸硬顶 (类型: strategy)\n- 更稳的处理方式 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 回学校\n- CP1033_小杰及陪同母亲 --feels--> 紧张\n- CP1033_小杰及陪同母亲 --experiences--> 与同学闹过矛盾\n- CP1033_小杰及陪同母亲 --does--> 和曾闹过矛盾的同学聊天\n- CP1033_小杰及陪同母亲 --interested_in--> 奥特曼\n- CP1033_小杰及陪同母亲 --does--> 打人的方式保护自己\n- CP1033_小杰及陪同母亲 --feels--> 舒服\n- CP1033_小杰及陪同母亲 --does--> 拼乐高车\n- CP1033_小杰及陪同母亲 --interested_in--> 乐高车\n- CP1033_小杰及陪同母亲 --does--> 帮妈妈浇花\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸不在家\n- CP1033_小杰及陪同母亲 --does--> 自己挤牙膏\n- CP1033_小杰及陪同母亲 --does--> 收书包\n- CP1033_小杰及陪同母亲 --experiences--> 被妈妈夸奖\n- CP1033_小杰及陪同母亲 --does--> 上课专心\n- 自己挤牙膏 --causes--> 成就感\n- 收书包 --causes--> 成就感\n- 成就感 --causes--> 心情稳定\n- 心情稳定 --supports--> 上课专心\n- CP1033_小杰及陪同母亲 --wants--> 家里更安全\n- CP1033_小杰及陪同母亲 --wants--> 和同学一起玩\n- CP1033_小杰及陪同母亲 --experiences--> 家里老打架\n- CP1033_小杰及陪同母亲 --applies--> 先避开，不和他爸硬顶\n- 先避开，不和他爸硬顶 --supports--> 家里更安全\n- 先避开，不和他爸硬顶 --supports--> 更稳的处理方式\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 当选班里体育委员 (类型: life_event)\n- 不怎么打架了 (类型: behavior)\n- 帮老师搬器材 (类型: behavior)\n- 爸爸说话声音没以前那么大 (类型: life_event)\n- 期末数学考了85分 (类型: life_event)\n- 期末语文考了90分 (类型: life_event)\n- 我不是笨 (类型: cognition)\n- 以前只是心太乱 (类型: cognition)\n- 爸爸发火 (类型: life_event)\n- 想打人 (类型: behavior)\n- 数五个数 (类型: strategy)\n- 离开现场 (类型: strategy)\n- 看蚂蚁 (类型: strategy)\n- 拼乐高 (类型: strategy)\n- 找能帮你的人 (类型: strategy)\n- 立刻求助 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --experiences--> 当选班里体育委员\n- CP1033_小杰及陪同母亲 --does--> 不怎么打架了\n- CP1033_小杰及陪同母亲 --does--> 帮老师搬器材\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸说话声音没以前那么大\n- CP1033_小杰及陪同母亲 --experiences--> 期末数学考了85分\n- CP1033_小杰及陪同母亲 --experiences--> 期末语文考了90分\n- CP1033_小杰及陪同母亲 --believes--> 我不是笨\n- CP1033_小杰及陪同母亲 --believes--> 以前只是心太乱\n- assistant --supports--> 数五个数\n- assistant --supports--> 离开现场\n- assistant --supports--> 看蚂蚁\n- assistant --supports--> 拼乐高\n- assistant --supports--> 找能帮你的人\n- assistant --supports--> 立刻求助\n- 数五个数 --relieves--> 想打人\n- 离开现场 --relieves--> 想打人\n- 看蚂蚁 --relieves--> 想打人\n- 拼乐高 --relieves--> 想打人\n- 找能帮你的人 --relieves--> 想打人\n- 立刻求助 --relieves--> 想打人\n本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 数五个数 (类型: strategy)\n- 同学拿橡皮不还 (类型: life_event)\n- 想推同学 (类型: behavior)\n- 叫同学还橡皮 (类型: behavior)\n- 父亲吼母亲 (类型: life_event)\n- 愤怒 (类型: emotion)\n- 砸枕头 (类型: behavior)\n- 跑出去 (类型: behavior)\n- 看蚂蚁搬家 (类型: strategy)\n- 心里发堵 (类型: emotion)\n- 拼乐高 (类型: interest)\n- 离开现场 (类型: strategy)\n- 自我安抚工具箱 (类型: strategy)\n- 父亲不当着孩子面和母亲吵 (类型: life_event)\n- 父亲特别惯着孩子 (类型: life_event)\n- 让孩子自己做事的机会 (类型: strategy)\n- 找回掌控感 (类型: goal)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --applies--> 数五个数\n- CP1033_小杰及陪同母亲 --experiences--> 同学拿橡皮不还\n- 同学拿橡皮不还 --causes--> 想推同学\n- 数五个数 --relieves--> 想推同学\n- CP1033_小杰及陪同母亲 --does--> 叫同学还橡皮\n- CP1033_小杰及陪同母亲 --experiences--> 父亲吼母亲\n- 父亲吼母亲 --causes--> 愤怒\n- CP1033_小杰及陪同母亲 --does--> 砸枕头\n- CP1033_小杰及陪同母亲 --does--> 跑出去\n- 跑出去 --supports--> 离开现场\n- CP1033_小杰及陪同母亲 --applies--> 看蚂蚁搬家\n- 看蚂蚁搬家 --relieves--> 心里发堵\n- CP1033_小杰及陪同母亲 --interested_in--> 拼乐高\n- 拼乐高 --relieves--> 心里发堵\n- assistant --supports--> 自我安抚工具箱\n- 自我安抚工具箱 --supports--> 数五个数\n- 自我安抚工具箱 --supports--> 离开现场\n- 自我安抚工具箱 --supports--> 看蚂蚁搬家\n- 自我安抚工具箱 --supports--> 拼乐高\n- CP1033_小杰及陪同母亲 --reports--> 父亲不当着孩子面和母亲吵\n- CP1033_小杰及陪同母亲 --reports--> 父亲特别惯着孩子\n- assistant --supports--> 让孩子自己做事的机会\n- 让孩子自己做事的机会 --supports--> 找回掌控感\n【相关图关系】\n- 乐高 --对象--> 乐高\n- 乐高 --对象--> 乐高\n- 工具箱 --包含--> 乐高\n- 小杰 --拼--> 乐高\n- 蚂蚁 --对象--> 蚂蚁",
+      "l3_fragments": [
+        {
+          "memory": "The user now has friends.",
+          "score": 1.24309504032135,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "timestamp": "2026-04-13T17:08:29.675114",
+          "turn_index": 5
+        },
+        {
+          "memory": "The user wants to be able to play with classmates.",
+          "score": 1.2314797639846802,
+          "session_id": "CP1033_小杰及陪同母亲_Session3",
+          "timestamp": "2026-04-13T17:03:41.589780",
+          "turn_index": 5
+        },
+        {
+          "memory": "The user's mother once apologized for making the user, as an only child, carry worry about family problems.",
+          "score": 1.2290061712265015,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "timestamp": "2026-04-13T17:08:11.985468",
+          "turn_index": 4
+        },
+        {
+          "memory": "The user has had impulses to hit someone and worries it could happen again.",
+          "score": 1.227936029434204,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+          "timestamp": "2026-04-13T17:11:57.681712",
+          "turn_index": 4
+        },
+        {
+          "memory": "The user believes the problems at home are affecting the child.",
+          "score": 1.2187535762786865,
+          "session_id": "CP1033_小杰及陪同母亲_Session1",
+          "timestamp": "2026-04-13T16:56:48.609070",
+          "turn_index": 6
+        }
+      ],
+      "l2_summaries": [
+        {
+          "memory": "主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。",
+          "score": 1.116778016090393,
+          "session_id": "CP1033_小杰及陪同母亲_Session3",
+          "topic": [
+            "返校适应",
+            "家庭与同伴关系改善"
+          ],
+          "start_time": "2026-04-13T17:02:41.279762",
+          "summary": "主题：['返校适应', '家庭与同伴关系改善']\n背景：来访者小杰本次反馈已回到学校，起初感到紧张，随后因与曾有矛盾的同学恢复互动而逐渐放松，情绪从警惕紧张转为相对稳定、轻松。其一周内体验到多个‘舒服的时候’，包括拼乐高车、帮母亲浇花、在父亲不在家时独立完成挤牙膏和收书包，并得到母亲表扬，显示其积极情绪、成就感和自我效能感有所提升。家庭情境中，小杰仍在意父母争执，希望家里不要总打架；学校情境中，希望能与同学一起玩。应对资源包括：兴趣活动（奥特曼、乐高）、与同学的主动交流、家务与自理行为带来的掌控感、母亲的肯定，以及母亲开始采取回避冲突升级的方式来降低家庭紧张。\n总结：本次会话围绕小杰返校后的适应情况、积极例外经验及家庭/同伴关系目标展开。咨询师首先通过积极关注强化其返校这一进步，并追问‘后来还行’的具体原因，帮助其识别与曾有矛盾同学恢复对话这一积极社会连接。随后咨询师指出，当小杰减少用攻击方式保护自己时，他人更容易靠近，以此强化非暴力互动的正向结果。针对小杰提到的多次‘舒服时刻’，咨询师运用例外扩大，帮助其看到生活中已不只有生气和害怕。对其独立完成自理任务并因此获得表扬、上课更专注的经历，咨询师进一步梳理出‘自己能做事—成就感—情绪稳定—上课专心’的积极链条，增强其对良性循环的理解。之后咨询师协助将愿望具体化为两个持续目标：提升家庭安全感、增进学校中的同伴靠近。母亲在会话中补充自己已尽量避免与父亲正面冲突，咨询师对此进行赋能，强调‘先避开’是在减少家庭升级、也为孩子示范更稳的应对方式。来访者整体反应积极，能够描述具体改善与期待，说明其对自身变化已有觉察并愿意朝目标继续努力。结论上，小杰在返校适应、情绪稳定、社会互动和自理能力方面均出现积极进展，家庭系统中母亲也开始形成更稳的冲突管理策略。可延续的作业方向包括：继续记录一周中的‘舒服时刻’、增加可带来成就感的自理或家务任务、练习与同学围绕共同兴趣展开互动、家长继续使用降级冲突策略。风险评估：本次未见自伤、他伤或急性危机直接表达；既往以打人方式自我保护的模式提示仍需持续关注冲动行为风险及家庭冲突对其情绪与安全感的影响，但当前整体风险表现较前稳定。"
+        },
+        {
+          "memory": "主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。",
+          "score": 1.1162354946136475,
+          "session_id": "CP1033_小杰及陪同母亲_Session4",
+          "topic": [
+            "社交尝试与被接纳",
+            "家庭冲突中的安全应对"
+          ],
+          "start_time": "2026-04-13T17:07:19.330020",
+          "summary": "主题：['社交尝试与被接纳', '家庭冲突中的安全应对']\n背景：来访者小杰近期呈现出明显的积极变化轨迹：从过去较强的被排斥感、容易被怒气推动，逐渐转向更有希望感与行动力。本次会话中，他分享自己主动参加踢毽子活动，虽然表现不佳，但体验到同伴没有嘲笑自己，由此修正了“所有人都讨厌我”的消极认知，情绪上感到开心、轻松、被接纳。家庭方面，小杰提到父母再次发生激烈争吵时，他没有像以往那样冲上去卷入冲突，而是在害怕中选择拨打110求助，成功阻止父亲继续施暴，体现出其在高压情境下的自我控制与安全求助能力。事后母亲向他表达歉意，使其感受到自己的辛苦被看见，亲子关系中出现了修复性体验。当前可见的重要应对资源包括：主动参与同伴活动、现实检验能力增强、遇险时能够寻求外部支持、与母亲之间开始出现情感回应，以及新建立的朋友关系。\n总结：本次会话围绕来访者在同伴关系与家庭危机应对中的双重进展展开。咨询师首先抓住其参加踢毽子的行为，强化“敢于加入”本身就是重要改变，并引导其觉察被接纳时的积极感受；随后通过认知修正，帮助来访者松动“别人都讨厌我”的固有信念，使其看到当自己改变与外界互动方式后，关系体验也会变化。在谈到家庭冲突时，咨询师对其在父母争吵中选择报警、而非以暴制暴的做法给予高度肯定，将其定义为更安全、更成熟的保护方式；同时借由母亲的道歉，帮助来访者理解自己正在从被动卷入家庭冲突的孩子，转变为能够保护自己、也能寻求支持的人。来访者的反应整体积极，能明确表达自己“心里没那么堵了”，并意识到自己开始有朋友、也不再被单一的愤怒和无助主导。会谈结论显示：来访者的社交信心、自我效能感与危机应对能力均在提升。隐含作业可继续为：保持参与同伴活动、遇到家庭暴力时优先使用求助与安全方案、继续觉察并记录自己被接纳和成功应对的时刻。风险评估方面：当前家庭暴力风险仍未完全消失，仍需关注父母冲突再发时的安全；但来访者本次未表现出自伤、他伤或失控升级迹象，且已具备一定求助意识与现实支持资源，整体风险较既往下降但仍需持续监测。"
+        },
+        {
+          "memory": "主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。",
+          "score": 1.1047264337539673,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固",
+          "topic": "行为与情绪改善, 复发预防",
+          "start_time": "2026-04-13T17:10:53.882651",
+          "summary": "主题：行为与情绪改善, 复发预防\n背景：来访者近期在学校和家庭中的状态明显改善：被同学投票选为体育委员，感受到被信任和被认可；在行为上较少打架，并开始主动帮助老师搬器材。家庭关系也出现缓和，父亲说话的音量较以往降低。学习方面，期末数学85分、语文90分，来访者由此修正了“自己很笨”的旧有认知，开始认识到过去更多是因为内心混乱、痛苦占据注意力。情绪轨迹表现为从过去的冲动、混乱和易激惹，逐渐转向稳定、自信和有掌控感。已有应对资源包括数数、离开现场、观察蚂蚁、拼乐高、寻求他人帮助，以及学校中的正向角色和外界支持。\n总结：本次会话围绕来访者近期的积极变化与未来可能的情绪/冲突复发预防展开。咨询师先对来访者被选为体育委员给予惊喜和强化，帮助其巩固“自己值得被信任”的正向体验；随后从系统视角指出，来访者的改变正在带动学校与家庭关系一并松动，强化其改变的意义。针对学业进步，咨询师帮助来访者整合新的自我认知，即并非能力不足，而是曾经被痛苦和混乱影响了专注与发挥。之后会话转向预防性干预：来访者主动提出担忧——如果父亲再次发火，或自己再次出现打人冲动该怎么办。咨询师提供了具体的“工具箱”策略，包括数五个数、离开现场、看蚂蚁、拼乐高、找能帮忙的人，并强调当自助不足时要立即求助。来访者表示“记住了”，对建议有良好接受度，并以感谢回应。会谈结论是：来访者已形成明显的正向改变，且开始具备自我保护和自我照顾意识。作业/后续任务可概括为继续熟记并使用“工具箱”，在触发情境出现时优先调节和求助。风险评估：当前未见自伤、他伤或急性危机的直接表达，既往冲动/攻击风险较前下降，但在父亲发火或自身情绪被触发时仍存在一定复发可能，需持续关注并巩固求助与情绪调节策略。"
+        },
+        {
+          "memory": "主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影",
+          "score": 0.9936230182647705,
+          "session_id": "CP1033_小杰及陪同母亲_Session2",
+          "topic": "未知",
+          "start_time": "2026-04-13T16:58:41.447639",
+          "summary": "主题：未知\n背景：包含6轮对话\n总结：{\n  \"topic\": \"愤怒控制与替代行为\",\n  \"background\": \"来访者小杰本周在冲动控制上出现积极进展：在学校被同学拿走橡皮不还时，原本想用推人的方式解决，后通过“数五个数”中断冲动，改为口头表达需求并成功拿回物品，情绪由激动转向可控，体现出一定自我效能。与此同时，家庭情境仍是显著诱发因素：回家听到父亲对母亲吼叫后，小杰再次出现强烈愤怒，曾用砸枕头和跑出家门的方式宣泄与脱离现场，但随后在楼下花园通过看蚂蚁搬家逐渐平静下来。其可用应对资源包括数数、离开冲突现场、观察自然、拼乐高。母亲反馈父亲本周未当着孩子面争吵，说明家庭环境有微小改善，但父亲仍存在溺爱/过度包办倾向，可能影"
+        },
+        {
+          "session_id": "CP1033_小杰及陪同母亲_Session1",
+          "summary": "主题：['冲动攻击行为', '家庭暴力压力']\n背景：来访者小杰，11岁，本次并非主动求助，是在母亲要求下来访。当前因在学校与数学老师发生肢体冲突、被学校暂时拒绝返校。事件表面诱因为老师当众批评其未完成作业，但进一步谈及其长期处于家庭高冲突环境中，父母经常争吵，父亲有时殴打母亲。小杰目睹后体验到强烈愤怒、痛恨父亲、心疼母亲，同时又因无力保护母亲而感到挫败与压抑。情绪轨迹表现为：起初抗拒来访、带有防御；在咨询师接纳和具体化提问下，逐渐从学校冲突转向表达家庭中的积压情绪；进一步能识别自己常在被碰触或被刺激时迅速被点燃，出现攻击冲动，事后又后悔。现有应对资源包括：小杰已能初步觉察“打完会后悔”，说明存在反思能力；母亲能够意识到家庭环境对孩子的影响，并愿意参与支持；咨询关系初步建立，小杰对情绪来源有了一定表达。\n总结：本次会话围绕小杰在学校的攻击行为及其背后的家庭压力展开。咨询师先以接纳态度降低其被强迫来访的抵触，再通过开放式提问和具体化技术，帮助其从“撞老师”这一事件进入对诱发因素的回顾。随后通过共情、情绪命名，将学校中的爆发与家庭中长期积累的愤怒、无力和对母亲的心疼连接起来，使来访者感受到被理解。针对其“容易一激就动手、事后后悔”的模式，咨询师未急于说教，而是提出初步工作目标：先学习在愤怒冲上来时放慢反应、提升情绪调节能力。会谈后段母亲加入，咨询师肯定其已认识到家庭环境的关键影响，并将后续方向扩展到在不激化家庭冲突的前提下保护孩子、增强家庭支持。来访者反应上，从最初不情愿逐步转为能够讲述家庭暴力目击经历及自己的愤怒和无力，说明会谈建立了初步安全感。结论上，本次学校攻击行为并非单一纪律问题，而与家庭暴力暴露、持续高压及情绪调节不足密切相关。后续作业/方向可包括：记录自己“快要爆发”前的身体和情绪信号，练习暂停和降温方法；母亲留意孩子在家庭冲突后的状态，并尽量减少其暴露于父母激烈冲突场景。风险评估：存在明显冲动攻击风险，已对老师实施过肢体行为，对同学触碰也有打回去冲动；同时存在持续家庭暴力暴露风险。当前对话中未报告自伤、自杀或明确伤人计划，但需继续评估家庭安全与校园冲动行为风险。",
+          "topic": [
+            "冲动攻击行为",
+            "家庭暴力压力"
+          ],
+          "score": null,
+          "start_time": "2026-04-13T16:55:19.871801"
+        }
+      ],
+      "session_graphs": [
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 学校暂时不让回去 (类型: life_event)\n- 与数学老师发生冲突 (类型: life_event)\n- 老师当着全班说没写作业 (类型: life_event)\n- 撞老师 (类型: behavior)\n- 父母经常吵架 (类型: life_event)\n- 父亲打母亲 (类型: life_event)\n- 烦躁 (类型: emotion)\n- 愤怒 (类型: emotion)\n- 无力 (类型: emotion)\n- 心疼妈妈 (类型: emotion)\n- 想帮妈妈 (类型: goal)\n- 打不过父亲 (类型: cognition)\n- 被同学碰一下就想打回去 (类型: behavior)\n- 后悔 (类型: emotion)\n- 让愤怒慢下来 (类型: goal)\n- 在不激化冲突的前提下保护孩子 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 学校暂时不让回去\n- CP1033_小杰及陪同母亲 --reports--> 与数学老师发生冲突\n- CP1033_小杰及陪同母亲 --experiences--> 老师当着全班说没写作业\n- CP1033_小杰及陪同母亲 --does--> 撞老师\n- CP1033_小杰及陪同母亲 --experiences--> 父母经常吵架\n- CP1033_小杰及陪同母亲 --experiences--> 父亲打母亲\n- CP1033_小杰及陪同母亲 --feels--> 烦躁\n- CP1033_小杰及陪同母亲 --feels--> 愤怒\n- CP1033_小杰及陪同母亲 --feels--> 无力\n- CP1033_小杰及陪同母亲 --feels--> 心疼妈妈\n- CP1033_小杰及陪同母亲 --wants--> 想帮妈妈\n- CP1033_小杰及陪同母亲 --believes--> 打不过父亲\n- CP1033_小杰及陪同母亲 --does--> 被同学碰一下就想打回去\n- CP1033_小杰及陪同母亲 --feels--> 后悔\n- 父母经常吵架 --causes--> 烦躁\n- 父亲打母亲 --causes--> 愤怒\n- 父亲打母亲 --causes--> 无力\n- 父亲打母亲 --causes--> 心疼妈妈\n- 愤怒 --causes--> 撞老师\n- assistant --supports--> 让愤怒慢下来\n- assistant --applies--> 在不激化冲突的前提下保护孩子",
+          "score": 1.1104788780212402,
+          "session_id": "CP1033_小杰及陪同母亲_Session1"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 参加踢毽子 (类型: behavior)\n- 特别好 (类型: emotion)\n- 不是所有人都讨厌我 (类型: cognition)\n- 父亲与母亲争吵 (类型: life_event)\n- 拨打110 (类型: behavior)\n- 害怕 (类型: emotion)\n- 父亲打母亲 (类型: life_event)\n- 母亲道歉 (类型: life_event)\n- 心里没以前那么堵了 (类型: symptom)\n- 有朋友了 (类型: life_event)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --does--> 参加踢毽子\n- CP1033_小杰及陪同母亲 --feels--> 特别好\n- CP1033_小杰及陪同母亲 --believes--> 不是所有人都讨厌我\n- CP1033_小杰及陪同母亲 --experiences--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --does--> 拨打110\n- CP1033_小杰及陪同母亲 --feels--> 害怕\n- 父亲打母亲 --causes--> 害怕\n- 拨打110 --relieves--> 父亲与母亲争吵\n- CP1033_小杰及陪同母亲 --experiences--> 母亲道歉\n- 母亲道歉 --supports--> CP1033_小杰及陪同母亲\n- CP1033_小杰及陪同母亲 --reports--> 心里没以前那么堵了\n- CP1033_小杰及陪同母亲 --reports--> 有朋友了\n- 参加踢毽子 --supports--> 有朋友了",
+          "score": 1.0682522058486938,
+          "session_id": "CP1033_小杰及陪同母亲_Session4"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 回学校 (类型: life_event)\n- 紧张 (类型: emotion)\n- 和曾闹过矛盾的同学聊天 (类型: behavior)\n- 与同学闹过矛盾 (类型: life_event)\n- 奥特曼 (类型: interest)\n- 打人的方式保护自己 (类型: behavior)\n- 舒服 (类型: emotion)\n- 拼乐高车 (类型: behavior)\n- 乐高车 (类型: interest)\n- 帮妈妈浇花 (类型: behavior)\n- 爸爸不在家 (类型: life_event)\n- 自己挤牙膏 (类型: behavior)\n- 收书包 (类型: behavior)\n- 被妈妈夸奖 (类型: life_event)\n- 上课专心 (类型: behavior)\n- 成就感 (类型: emotion)\n- 心情稳定 (类型: emotion)\n- 家里老打架 (类型: life_event)\n- 家里更安全 (类型: goal)\n- 和同学一起玩 (类型: goal)\n- 先避开，不和他爸硬顶 (类型: strategy)\n- 更稳的处理方式 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --reports--> 回学校\n- CP1033_小杰及陪同母亲 --feels--> 紧张\n- CP1033_小杰及陪同母亲 --experiences--> 与同学闹过矛盾\n- CP1033_小杰及陪同母亲 --does--> 和曾闹过矛盾的同学聊天\n- CP1033_小杰及陪同母亲 --interested_in--> 奥特曼\n- CP1033_小杰及陪同母亲 --does--> 打人的方式保护自己\n- CP1033_小杰及陪同母亲 --feels--> 舒服\n- CP1033_小杰及陪同母亲 --does--> 拼乐高车\n- CP1033_小杰及陪同母亲 --interested_in--> 乐高车\n- CP1033_小杰及陪同母亲 --does--> 帮妈妈浇花\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸不在家\n- CP1033_小杰及陪同母亲 --does--> 自己挤牙膏\n- CP1033_小杰及陪同母亲 --does--> 收书包\n- CP1033_小杰及陪同母亲 --experiences--> 被妈妈夸奖\n- CP1033_小杰及陪同母亲 --does--> 上课专心\n- 自己挤牙膏 --causes--> 成就感\n- 收书包 --causes--> 成就感\n- 成就感 --causes--> 心情稳定\n- 心情稳定 --supports--> 上课专心\n- CP1033_小杰及陪同母亲 --wants--> 家里更安全\n- CP1033_小杰及陪同母亲 --wants--> 和同学一起玩\n- CP1033_小杰及陪同母亲 --experiences--> 家里老打架\n- CP1033_小杰及陪同母亲 --applies--> 先避开，不和他爸硬顶\n- 先避开，不和他爸硬顶 --supports--> 家里更安全\n- 先避开，不和他爸硬顶 --supports--> 更稳的处理方式",
+          "score": 1.04727041721344,
+          "session_id": "CP1033_小杰及陪同母亲_Session3"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 当选班里体育委员 (类型: life_event)\n- 不怎么打架了 (类型: behavior)\n- 帮老师搬器材 (类型: behavior)\n- 爸爸说话声音没以前那么大 (类型: life_event)\n- 期末数学考了85分 (类型: life_event)\n- 期末语文考了90分 (类型: life_event)\n- 我不是笨 (类型: cognition)\n- 以前只是心太乱 (类型: cognition)\n- 爸爸发火 (类型: life_event)\n- 想打人 (类型: behavior)\n- 数五个数 (类型: strategy)\n- 离开现场 (类型: strategy)\n- 看蚂蚁 (类型: strategy)\n- 拼乐高 (类型: strategy)\n- 找能帮你的人 (类型: strategy)\n- 立刻求助 (类型: strategy)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --experiences--> 当选班里体育委员\n- CP1033_小杰及陪同母亲 --does--> 不怎么打架了\n- CP1033_小杰及陪同母亲 --does--> 帮老师搬器材\n- CP1033_小杰及陪同母亲 --experiences--> 爸爸说话声音没以前那么大\n- CP1033_小杰及陪同母亲 --experiences--> 期末数学考了85分\n- CP1033_小杰及陪同母亲 --experiences--> 期末语文考了90分\n- CP1033_小杰及陪同母亲 --believes--> 我不是笨\n- CP1033_小杰及陪同母亲 --believes--> 以前只是心太乱\n- assistant --supports--> 数五个数\n- assistant --supports--> 离开现场\n- assistant --supports--> 看蚂蚁\n- assistant --supports--> 拼乐高\n- assistant --supports--> 找能帮你的人\n- assistant --supports--> 立刻求助\n- 数五个数 --relieves--> 想打人\n- 离开现场 --relieves--> 想打人\n- 看蚂蚁 --relieves--> 想打人\n- 拼乐高 --relieves--> 想打人\n- 找能帮你的人 --relieves--> 想打人\n- 立刻求助 --relieves--> 想打人",
+          "score": 1.0345070362091064,
+          "session_id": "CP1033_小杰及陪同母亲_Session5_三个月后回访与巩固"
+        },
+        {
+          "memory": "本次会话提取的实体：\n- CP1033_小杰及陪同母亲 (类型: user)\n- assistant (类型: assistant)\n- 数五个数 (类型: strategy)\n- 同学拿橡皮不还 (类型: life_event)\n- 想推同学 (类型: behavior)\n- 叫同学还橡皮 (类型: behavior)\n- 父亲吼母亲 (类型: life_event)\n- 愤怒 (类型: emotion)\n- 砸枕头 (类型: behavior)\n- 跑出去 (类型: behavior)\n- 看蚂蚁搬家 (类型: strategy)\n- 心里发堵 (类型: emotion)\n- 拼乐高 (类型: interest)\n- 离开现场 (类型: strategy)\n- 自我安抚工具箱 (类型: strategy)\n- 父亲不当着孩子面和母亲吵 (类型: life_event)\n- 父亲特别惯着孩子 (类型: life_event)\n- 让孩子自己做事的机会 (类型: strategy)\n- 找回掌控感 (类型: goal)\n\n本次会话提取的关系：\n- CP1033_小杰及陪同母亲 --applies--> 数五个数\n- CP1033_小杰及陪同母亲 --experiences--> 同学拿橡皮不还\n- 同学拿橡皮不还 --causes--> 想推同学\n- 数五个数 --relieves--> 想推同学\n- CP1033_小杰及陪同母亲 --does--> 叫同学还橡皮\n- CP1033_小杰及陪同母亲 --experiences--> 父亲吼母亲\n- 父亲吼母亲 --causes--> 愤怒\n- CP1033_小杰及陪同母亲 --does--> 砸枕头\n- CP1033_小杰及陪同母亲 --does--> 跑出去\n- 跑出去 --supports--> 离开现场\n- CP1033_小杰及陪同母亲 --applies--> 看蚂蚁搬家\n- 看蚂蚁搬家 --relieves--> 心里发堵\n- CP1033_小杰及陪同母亲 --interested_in--> 拼乐高\n- 拼乐高 --relieves--> 心里发堵\n- assistant --supports--> 自我安抚工具箱\n- 自我安抚工具箱 --supports--> 数五个数\n- 自我安抚工具箱 --supports--> 离开现场\n- 自我安抚工具箱 --supports--> 看蚂蚁搬家\n- 自我安抚工具箱 --supports--> 拼乐高\n- CP1033_小杰及陪同母亲 --reports--> 父亲不当着孩子面和母亲吵\n- CP1033_小杰及陪同母亲 --reports--> 父亲特别惯着孩子\n- assistant --supports--> 让孩子自己做事的机会\n- 让孩子自己做事的机会 --supports--> 找回掌控感",
+          "score": 0.9196627736091614,
+          "session_id": "CP1033_小杰及陪同母亲_Session2"
+        }
+      ],
+      "graph_relations": [
+        {
+          "source": "乐高",
+          "relationship": "对象",
+          "target": "乐高"
+        },
+        {
+          "source": "乐高",
+          "relationship": "对象",
+          "target": "乐高"
+        },
+        {
+          "source": "工具箱",
+          "relationship": "包含",
+          "target": "乐高"
+        },
+        {
+          "source": "小杰",
+          "relationship": "拼",
+          "target": "乐高"
+        },
+        {
+          "source": "蚂蚁",
+          "relationship": "对象",
+          "target": "蚂蚁"
+        }
+      ]
+    }
+  }
+}
