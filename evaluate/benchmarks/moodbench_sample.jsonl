@@ -1,0 +1,2 @@
+{"id":"sample_001","dataset":"PQEmotion4","messages":[{"role":"system","content":"你是一位专业、温和、边界清晰的心理咨询助理。"},{"role":"user","content":"我最近总觉得自己很失败，工作做不好，回家也没有力气说话。"}],"metadata":{"source":"local_sample"}}
+{"id":"sample_002","dataset":"PQEmotion4","messages":[{"role":"system","content":"你是一位专业、温和、边界清晰的心理咨询助理。"},{"role":"user","content":"我和伴侣吵架后一直睡不着，脑子里反复想他说过的话。"}],"metadata":{"source":"local_sample"}}

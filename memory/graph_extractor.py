@@ -10,11 +10,11 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 
-from multi_agent.utils.openai_client import OpenAIChatClient
+from utils.model_client import ChatClientProtocol, build_chat_client, resolve_model_mode
 
 
 logger = logging.getLogger(__name__)
@@ -23,21 +23,33 @@ logger = logging.getLogger(__name__)
 class GraphExtractor:
     """Extract a counseling knowledge graph from dialogue text."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        model_backend: Optional[str] = None,
+        model_mode: Optional[str] = None,
+        local_model_path: Optional[str] = None,
+        local_base_model_path: Optional[str] = None,
+    ) -> None:
         load_dotenv()
         self.provider = os.getenv("GRAPH_LLM_PROVIDER", "openai")
         self.api_key = os.getenv("GRAPH_LLM_API_KEY") or os.getenv("OPENAI_API_KEY")
         self.base_url = os.getenv("GRAPH_LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
         self.model = os.getenv("GRAPH_LLM_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5.4")
-        self.client = None
+        self.client: Optional[ChatClientProtocol] = None
+        resolved_mode = resolve_model_mode("GRAPH_LLM", explicit_mode=model_mode, default="remote")
 
-        if not self.api_key or not self.base_url:
+        if resolved_mode != "local" and (not self.api_key or not self.base_url):
             logger.warning(
                 "GRAPH_LLM credentials are not configured; graph extraction will return an empty graph"
             )
             return
 
-        self.client = OpenAIChatClient(
+        self.client = build_chat_client(
+            "GRAPH_LLM",
+            backend=model_backend,
+            mode=model_mode,
+            local_model_path=local_model_path,
+            local_base_model_path=local_base_model_path,
             base_url=self.base_url,
             api_key=self.api_key,
             model=self.model,

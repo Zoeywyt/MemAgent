@@ -1,9 +1,9 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from multi_agent.memory.mem0_adapter import Mem0Adapter
-from multi_agent.prompts.supervisor_prompts import TREATMENT_PROGRESS_PROMPT
-from multi_agent.utils.openai_client import OpenAIChatClient
+from memory.mem0_adapter import Mem0Adapter
+from prompts.supervisor_prompts import TREATMENT_PROGRESS_PROMPT
+from utils.model_client import ChatClientProtocol, build_chat_client
 
 
 class SupervisorAgent:
@@ -11,11 +11,27 @@ class SupervisorAgent:
         self,
         user_id: str,
         mem0: Optional[Mem0Adapter] = None,
-        openai_client: Optional[OpenAIChatClient] = None,
+        openai_client: Optional[ChatClientProtocol] = None,
+        model_backend: Optional[str] = None,
+        model_mode: Optional[str] = None,
+        local_model_path: Optional[str] = None,
+        local_base_model_path: Optional[str] = None,
     ):
         self.user_id = user_id
-        self.mem0 = mem0 or Mem0Adapter()
-        self.openai_client = openai_client or OpenAIChatClient()
+        self._mem0 = mem0
+        self.openai_client = openai_client or build_chat_client(
+            "SUPERVISOR_AGENT",
+            backend=model_backend,
+            mode=model_mode,
+            local_model_path=local_model_path,
+            local_base_model_path=local_base_model_path,
+        )
+
+    @property
+    def mem0(self) -> Mem0Adapter:
+        if self._mem0 is None:
+            self._mem0 = Mem0Adapter()
+        return self._mem0
 
     def _call_model(self, prompt: str) -> str:
         messages = [

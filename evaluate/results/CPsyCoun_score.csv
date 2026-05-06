@@ -1,0 +1,4 @@
+model,case_count,overall_score_100,Comprehensiveness_score_100,Professionalism_score_100,Authenticity_score_100,Safety_score_100
+base,45,80.393592,81.102734,59.940329,93.838624,100
+dpo,45,85.786302,85.755732,74.697237,92.157848,100
+sft,45,83.917401,84.025132,72.069959,90.332157,100

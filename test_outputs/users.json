@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "user_id": "CP1033_小杰及陪同母亲",
+      "created_at": "2026-05-02T19:37:44.845347",
+      "source": "legacy_import",
+      "last_login_at": "2026-05-04T15:13:56.347563",
+      "display_name": "CP1033_小杰及陪同母亲"
+    },
+    {
+      "user_id": "CP224_刘某",
+      "created_at": "2026-05-02T19:37:44.845358",
+      "source": "legacy_import",
+      "last_login_at": "2026-05-04T16:16:53.980220",
+      "display_name": "CP224_刘某"
+    },
+    {
+      "user_id": "wyt",
+      "created_at": "2026-05-02T19:37:44.845362",
+      "source": "legacy_import",
+      "last_seen_at": "2026-05-02T19:52:55.280256",
+      "display_name": "wyt",
+      "last_login_at": "2026-05-04T22:20:41.370477"
+    }
+  ]
+}

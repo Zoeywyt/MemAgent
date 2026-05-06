@@ -45,3 +45,53 @@
 ```bash
 python -m multi_agent.main
 ```
+
+## Local model mode
+
+You can now choose a backend per component:
+
+- `gpt`: use the existing OpenAI-compatible API
+- `qwen3b`: use `models/Qwen2.5-3B-Instruct` + `models/Qwen2.5-3B-Instruct-Lora`
+
+Example mixed setup:
+
+```env
+MA_AGENT_MODEL_BACKEND=qwen3b
+MA_SUMMARY_MODEL_BACKEND=qwen3b
+MA_SUPERVISOR_MODEL_BACKEND=gpt
+MA_GRAPH_MODEL_BACKEND=gpt
+MEM0_L3_LLM_MODEL_BACKEND=gpt
+```
+
+If you want a custom local path instead of the built-in presets, you can still use:
+
+- `*_MODEL_MODE=local`
+- `*_LOCAL_MODEL_PATH`
+- `*_LOCAL_BASE_MODEL_PATH`
+
+## Gradio UI
+
+`main.py` now launches a Gradio web app by default.
+
+Features:
+
+- user login / session start
+- per-component model backend selection
+- live chat UI
+- memory + report dashboard rendered in the same style as `render_memory_demo.py`
+- report export as zip/html/json/txt
+- direct history import for replay/report generation using the `test_case.py` replay format
+
+Run:
+
+```bash
+python main.py
+```
+
+Optional:
+
+```env
+MA_UI_MODE=gradio
+GRADIO_SERVER_NAME=127.0.0.1
+GRADIO_SERVER_PORT=7860
+```

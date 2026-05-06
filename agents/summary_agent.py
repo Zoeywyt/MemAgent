@@ -1,14 +1,27 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from multi_agent.memory.user_summary_store import UserSummaryStore
-from multi_agent.prompts.summary_prompts import INTEGRATED_SUMMARY_INSTRUCTION, L2_SESSION_SUMMARY_PROMPT
-from multi_agent.utils.openai_client import OpenAIChatClient
+from memory.user_summary_store import UserSummaryStore
+from prompts.summary_prompts import INTEGRATED_SUMMARY_INSTRUCTION, L2_SESSION_SUMMARY_PROMPT
+from utils.model_client import ChatClientProtocol, build_chat_client
 
 
 class SummaryAgent:
-    def __init__(self, openai_client: Optional[OpenAIChatClient] = None):
-        self.openai_client = openai_client or OpenAIChatClient()
+    def __init__(
+        self,
+        openai_client: Optional[ChatClientProtocol] = None,
+        model_backend: Optional[str] = None,
+        model_mode: Optional[str] = None,
+        local_model_path: Optional[str] = None,
+        local_base_model_path: Optional[str] = None,
+    ):
+        self.openai_client = openai_client or build_chat_client(
+            "SUMMARY_AGENT",
+            backend=model_backend,
+            mode=model_mode,
+            local_model_path=local_model_path,
+            local_base_model_path=local_base_model_path,
+        )
         self.summary_store = UserSummaryStore()
 
     def _call_model(self, prompt: str) -> str:

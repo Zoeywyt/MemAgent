@@ -11,9 +11,11 @@ from __future__ import annotations
 import json
 import logging
 import os
+import time
 from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime
+from pathlib import Path
 from threading import RLock
 from typing import Any, Dict, Iterator, List, Optional
 
@@ -25,8 +27,8 @@ try:
 except ImportError:  # pragma: no cover
     Memory = None  # type: ignore[assignment]
 
-from multi_agent.memory.mem0_stream_patch import patch_mem0_openai_streaming
-from multi_agent.utils.openai_client import OpenAIChatClient
+from memory.mem0_stream_patch import patch_mem0_openai_streaming
+from utils.model_client import ChatClientProtocol, build_chat_client, resolve_model_mode
 
 
 logger = logging.getLogger(__name__)
@@ -76,6 +78,36 @@ Each item must be:
 """
 
 
+class _FallbackGraph:
+    def add(self, *args: Any, **kwargs: Any) -> None:
+        return None
+
+
+class _FallbackMemoryClient:
+    def __init__(self, reason: str = ""):
+        self.reason = reason
+        self.enable_graph = False
+        self.graph = _FallbackGraph()
+
+    def add(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        return {}
+
+    def delete(self, *args: Any, **kwargs: Any) -> None:
+        return None
+
+    def delete_all(self, *args: Any, **kwargs: Any) -> None:
+        return None
+
+    def search(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        return {"results": [], "relations": []}
+
+    def get(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        return {}
+
+    def get_all(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        return {"results": []}
+
+
 class Mem0Adapter:
     _instance: Optional["Mem0Adapter"] = None
     _memory_client: Optional["Memory"] = None
@@ -98,12 +130,19 @@ class Mem0Adapter:
         self._l3_llm_api_key = os.getenv("MEM0_L3_LLM_API_KEY") or os.getenv("OPENAI_API_KEY")
         self._l3_llm_base_url = os.getenv("MEM0_L3_LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
         self._l3_llm_model = os.getenv("MEM0_L3_LLM_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5.4")
-        self._l3_llm_client = None
-        if self._l3_llm_api_key and self._l3_llm_base_url:
-            self._l3_llm_client = OpenAIChatClient(
+        self._l3_llm_client: Optional[ChatClientProtocol] = None
+        self._l3_llm_mode = resolve_model_mode("MEM0_L3_LLM", default="remote")
+        l3_backend = os.getenv("MEM0_L3_LLM_MODEL_BACKEND") or os.getenv("MULTI_AGENT_MODEL_BACKEND")
+        if l3_backend or self._l3_llm_mode == "local" or (self._l3_llm_api_key and self._l3_llm_base_url):
+            self._l3_llm_client = build_chat_client(
+                "MEM0_L3_LLM",
+                backend=l3_backend,
+                mode=self._l3_llm_mode,
                 base_url=self._l3_llm_base_url,
                 api_key=self._l3_llm_api_key,
                 model=self._l3_llm_model,
+                local_base_model_path=os.getenv("MEM0_L3_LLM_LOCAL_BASE_MODEL_PATH")
+                or os.getenv("LOCAL_BASE_MODEL_PATH"),
             )
         else:
             logger.warning("L3 memory judge LLM is not configured; L3 memory extraction will be skipped")
@@ -114,6 +153,8 @@ class Mem0Adapter:
         self._graph_db_path = os.getenv("KUZU_DB_PATH", "./mem0_kuzu_db")
         self._graph_threshold = float(os.getenv("MEM0_GRAPH_THRESHOLD", "0.7"))
         self._graph_toggle_lock = RLock()
+        self._io_lock = RLock()
+        embedding_model, embedding_kwargs = self._resolve_embedding_config()
 
         config: Dict[str, Any] = {
             "version": "v1.1",
@@ -147,10 +188,8 @@ class Mem0Adapter:
             "embedder": {
                 "provider": "huggingface",
                 "config": {
-                    "model": os.getenv("EMBEDDING_MODEL_NAME", "BAAI/bge-small-zh-v1.5"),
-                    "model_kwargs": {
-                        "device": "cuda" if torch.cuda.is_available() else "cpu",
-                    },
+                    "model": embedding_model,
+                    "model_kwargs": embedding_kwargs,
                 },
             },
             "vector_store": {
@@ -163,14 +202,61 @@ class Mem0Adapter:
             "history_db_path": os.getenv("MEM0_HISTORY_DB", "./mem0_history.db"),
         }
 
-        self._memory_client = Memory.from_config(config)
+        self._memory_client = self._initialize_memory_client(config)
         logger.info("Mem0 adapter initialized with Chroma vector store and Kuzu graph store")
+
+    def _initialize_memory_client(self, config: Dict[str, Any]) -> "Memory":
+        last_error: Optional[Exception] = None
+        for attempt in range(3):
+            try:
+                return Memory.from_config(config)
+            except Exception as exc:
+                last_error = exc
+                message = str(exc).lower()
+                if "disk i/o error" in message or "readonly database" in message or "journal" in message:
+                    time.sleep(0.8 * (attempt + 1))
+                    continue
+                break
+        logger.warning("Mem0 init fallback engaged: %s", last_error)
+        return _FallbackMemoryClient(reason=str(last_error))  # type: ignore[return-value]
+
+    def _resolve_embedding_config(self) -> tuple[str, Dict[str, Any]]:
+        local_path = os.getenv("EMBEDDING_MODEL_PATH", "").strip()
+        model_name = os.getenv("EMBEDDING_MODEL_NAME", "").strip()
+        project_default = Path(__file__).resolve().parents[1] / "models" / "bge-small-zh-v1.5"
+
+        candidate = None
+        if local_path:
+            candidate = Path(local_path).expanduser()
+        elif model_name:
+            named_path = Path(model_name).expanduser()
+            if named_path.exists():
+                candidate = named_path
+        elif project_default.exists():
+            candidate = project_default
+
+        model_ref = "BAAI/bge-small-zh-v1.5"
+        model_kwargs: Dict[str, Any] = {
+            "device": "cuda" if torch.cuda.is_available() else "cpu",
+        }
+        if candidate and candidate.exists():
+            model_ref = str(candidate.resolve())
+            model_kwargs["local_files_only"] = True
+        elif model_name:
+            model_ref = model_name
+
+        return model_ref, model_kwargs
 
     @property
     def client(self) -> "Memory":
         if self._memory_client is None:
             raise RuntimeError("Mem0 client is not initialized")
         return self._memory_client
+
+    @contextmanager
+    def _io_serialized(self) -> Iterator[None]:
+        with self._io_lock:
+            yield
 
     @contextmanager
     def _graph_temporarily_disabled(self) -> Iterator[None]:
@@ -190,28 +276,39 @@ class Mem0Adapter:
         run_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
-        with self._graph_temporarily_disabled():
-            self.client.add(text, user_id=user_id, run_id=run_id, metadata=metadata, infer=False)
+        try:
+            with self._io_serialized(), self._graph_temporarily_disabled():
+                self.client.add(text, user_id=user_id, run_id=run_id, metadata=metadata, infer=False)
+        except Exception as exc:
+            logger.error("Vector add failed for user %s run %s: %s", user_id, run_id, exc)
 
     def _vector_only_delete(self, memory_id: str) -> None:
-        with self._graph_temporarily_disabled():
-            self.client.delete(memory_id)
+        try:
+            with self._io_serialized(), self._graph_temporarily_disabled():
+                self.client.delete(memory_id)
+        except Exception as exc:
+            logger.error("Vector delete failed for memory %s: %s", memory_id, exc)
 
     def _vector_only_search(self, query: str, *, user_id: str, limit: int) -> Dict[str, Any]:
-        with self._graph_temporarily_disabled():
-            return self.client.search(query, user_id=user_id, limit=limit)
+        try:
+            with self._io_serialized(), self._graph_temporarily_disabled():
+                return self.client.search(query, user_id=user_id, limit=limit)
+        except Exception as exc:
+            logger.error("Vector search failed for user %s: %s", user_id, exc)
+            return {"results": [], "relations": []}
 
     def _ingest_session_graph(self, graph_text: str, user_id: str, session_id: str) -> None:
         if not getattr(self.client, "enable_graph", False):
             return
         try:
-            self.client.graph.add(
-                graph_text,
-                {
-                    "user_id": user_id,
-                    "run_id": session_id,
-                },
-            )
+            with self._io_serialized():
+                self.client.graph.add(
+                    graph_text,
+                    {
+                        "user_id": user_id,
+                        "run_id": session_id,
+                    },
+                )
         except Exception as exc:
             logger.error("Failed to ingest session graph into Kuzu for session %s: %s", session_id, exc)
 
@@ -360,7 +457,8 @@ class Mem0Adapter:
 
     def _get_memory_by_id(self, memory_id: str) -> Optional[Dict[str, Any]]:
         try:
-            return self.client.get(memory_id)
+            with self._io_serialized():
+                return self.client.get(memory_id)
         except Exception as exc:
             logger.error("Failed to load memory %s: %s", memory_id, exc)
             return None
@@ -512,7 +610,8 @@ class Mem0Adapter:
 
     def get_l2_summaries(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
         try:
-            all_memories = self.client.get_all(user_id=user_id, limit=100)
+            with self._io_serialized():
+                all_memories = self.client.get_all(user_id=user_id, limit=100)
         except Exception as exc:
             logger.error("Failed to get L2 summaries: %s", exc)
             return []
@@ -542,7 +641,8 @@ class Mem0Adapter:
         graph_relations: List[Dict[str, Any]] = []
 
         try:
-            results = self.client.search(query, user_id=user_id, limit=search_limit)
+            with self._io_serialized():
+                results = self.client.search(query, user_id=user_id, limit=search_limit)
             for item in results.get("results", []):
                 metadata = item.get("metadata", {})
                 memory_type = metadata.get("memory_type")
@@ -586,7 +686,8 @@ class Mem0Adapter:
         )
         if session_ids:
             try:
-                all_memories = self.client.get_all(user_id=user_id, limit=100)
+                with self._io_serialized():
+                    all_memories = self.client.get_all(user_id=user_id, limit=100)
                 for memory in all_memories.get("results", []):
                     metadata = memory.get("metadata", {})
                     if metadata.get("memory_type") != "l2_summary":
@@ -664,7 +765,8 @@ class Mem0Adapter:
 
     def get_latest_treatment_report(self, user_id: str) -> Optional[Dict[str, Any]]:
         try:
-            all_memories = self.client.get_all(user_id=user_id, limit=50)
+            with self._io_serialized():
+                all_memories = self.client.get_all(user_id=user_id, limit=50)
             latest_memory: Optional[Dict[str, Any]] = None
             latest_timestamp: Optional[str] = None
             for memory in all_memories.get("results", []):
