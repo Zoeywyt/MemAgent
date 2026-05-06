@@ -14,6 +14,9 @@ class SummaryAgent:
         model_mode: Optional[str] = None,
         local_model_path: Optional[str] = None,
         local_base_model_path: Optional[str] = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model: Optional[str] = None,
     ):
         self.openai_client = openai_client or build_chat_client(
             "SUMMARY_AGENT",
@@ -21,6 +24,9 @@ class SummaryAgent:
             mode=model_mode,
             local_model_path=local_model_path,
             local_base_model_path=local_base_model_path,
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
         )
         self.summary_store = UserSummaryStore()
 

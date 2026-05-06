@@ -15,7 +15,9 @@ SESSIONS_DIR = OUTPUT_ROOT / "sessions"
 SESSION_SUMMARIES_DIR = OUTPUT_ROOT / "sessions_summaries"
 TRENDS_DIR = OUTPUT_ROOT / "trends"
 WHOLE_SUMMARIES_DIR = OUTPUT_ROOT / "whole_summaries"
-USER_REGISTRY_PATH = OUTPUT_ROOT / "users.json"
+USER_REGISTRY_DB_PATH = OUTPUT_ROOT / "users.db"
+USER_REGISTRY_JSON_PATH = OUTPUT_ROOT / "users.json"
+USER_REGISTRY_PATH = USER_REGISTRY_DB_PATH
 
 
 def ensure_output_dirs() -> None:

@@ -163,6 +163,7 @@ class _SharedLocalModel:
         self.model_path = str(Path(model_path).expanduser().resolve())
         self.base_model_path = _normalize_model_reference(base_model_path)
         self._load_lock = threading.Lock()
+        self._generate_lock = threading.Lock()
         self._initialized = True
         self._loaded = False
         self.model = None
@@ -209,7 +210,7 @@ class _SharedLocalModel:
 
                         self.model = AutoPeftModelForCausalLM.from_pretrained(
                             self.model_path,
-                            torch_dtype=dtype,
+                            dtype=dtype,
                             trust_remote_code=True,
                             low_cpu_mem_usage=True,
                         )
@@ -258,14 +259,14 @@ class _SharedLocalModel:
 
         base_model = AutoModelForCausalLM.from_pretrained(
             base_model_path,
-            torch_dtype=dtype,
+            dtype=dtype,
             trust_remote_code=True,
             low_cpu_mem_usage=True,
         )
         return PeftModel.from_pretrained(
             base_model,
             self.model_path,
-            torch_dtype=dtype,
+            dtype=dtype,
             trust_remote_code=True,
         )
 
@@ -274,7 +275,7 @@ class _SharedLocalModel:
 
         return AutoModelForCausalLM.from_pretrained(
             model_path,
-            torch_dtype=dtype,
+            dtype=dtype,
             trust_remote_code=True,
             low_cpu_mem_usage=True,
         )
@@ -310,8 +311,9 @@ class _SharedLocalModel:
             generation_kwargs["temperature"] = temperature
             generation_kwargs["top_p"] = top_p
 
-        with torch.no_grad():
-            output_ids = self.model.generate(**inputs, **generation_kwargs)
+        with self._generate_lock:
+            with torch.no_grad():
+                output_ids = self.model.generate(**inputs, **generation_kwargs)
 
         input_length = int(inputs["input_ids"].shape[-1])
         generated_ids = output_ids[0][input_length:]

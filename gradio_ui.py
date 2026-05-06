@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import json
 import html
+import hmac
 import os
 import re
+import sqlite3
 import socket
 import sys
 import time
+import hashlib
+import secrets
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -22,6 +26,8 @@ from agents.empathy_agent import EmpathyAgent
 from memory.user_summary_store import UserSummaryStore
 from output_store import (
     CONSULTING_REPORTS_DIR,
+    USER_REGISTRY_DB_PATH,
+    USER_REGISTRY_JSON_PATH,
     USER_REGISTRY_PATH,
     consulting_report_html_path,
     consulting_report_json_path,
@@ -55,18 +61,194 @@ SUMMARY_BACKEND_CHOICES = [
     ("Qwen2.5-3B + 3B LoRA", "qwen3b"),
 ]
 
+DEFAULT_API_MODEL_NAME = "gpt-5.4"
 
-def load_user_registry() -> Dict[str, Any]:
-    if not USER_REGISTRY_PATH.exists():
+DEFAULT_EXISTING_USER_PASSWORDS = {
+    "CP224_刘某": "123",
+    "刘某": "123",
+    "Zoey": "456",
+    "CP1033_小杰及陪同母亲": "789",
+    "小杰": "789",
+    "wyt": "888",
+}
+
+
+USER_REGISTRY_COLUMNS = (
+    "user_id",
+    "display_name",
+    "created_at",
+    "last_login_at",
+    "source",
+    "password_hash",
+    "password_salt",
+    "password_set_at",
+    "password_updated_at",
+)
+
+
+def _connect_user_registry_db() -> sqlite3.Connection:
+    ensure_output_dirs()
+    conn = sqlite3.connect(str(USER_REGISTRY_DB_PATH), timeout=30)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA busy_timeout=30000")
+    # Some Windows folders fail when SQLite creates sidecar WAL/rollback journal
+    # files. The account registry is tiny, so an in-memory journal is sufficient
+    # and keeps login independent from the memory/output JSON files.
+    conn.execute("PRAGMA journal_mode=MEMORY")
+    conn.execute("PRAGMA synchronous=OFF")
+    return conn
+
+
+def _ensure_user_registry_db(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            user_id TEXT PRIMARY KEY,
+            display_name TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT '',
+            last_login_at TEXT NOT NULL DEFAULT '',
+            source TEXT NOT NULL DEFAULT 'legacy_import',
+            password_hash TEXT NOT NULL DEFAULT '',
+            password_salt TEXT NOT NULL DEFAULT '',
+            password_set_at TEXT NOT NULL DEFAULT '',
+            password_updated_at TEXT NOT NULL DEFAULT ''
+        )
+        """
+    )
+
+
+def _profile_from_row(row: sqlite3.Row) -> Dict[str, Any]:
+    return {column: row[column] for column in USER_REGISTRY_COLUMNS}
+
+
+def _upsert_user_profile(conn: sqlite3.Connection, profile: Dict[str, Any]) -> None:
+    normalized = _normalize_user_entry(dict(profile))
+    normalized.setdefault("password_updated_at", "")
+    values = [str(normalized.get(column, "") or "") for column in USER_REGISTRY_COLUMNS]
+    conn.execute(
+        """
+        INSERT INTO users (
+            user_id, display_name, created_at, last_login_at, source,
+            password_hash, password_salt, password_set_at, password_updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            display_name=excluded.display_name,
+            created_at=excluded.created_at,
+            last_login_at=excluded.last_login_at,
+            source=excluded.source,
+            password_hash=excluded.password_hash,
+            password_salt=excluded.password_salt,
+            password_set_at=excluded.password_set_at,
+            password_updated_at=excluded.password_updated_at
+        """,
+        values,
+    )
+
+
+def _load_legacy_user_registry_json() -> Dict[str, Any]:
+    if not USER_REGISTRY_JSON_PATH.exists():
         return {"users": []}
     try:
-        return json.loads(USER_REGISTRY_PATH.read_text(encoding="utf-8"))
+        registry = json.loads(USER_REGISTRY_JSON_PATH.read_text(encoding="utf-8"))
     except Exception:
         return {"users": []}
+    if not isinstance(registry, dict):
+        return {"users": []}
+    users = registry.get("users", [])
+    return {"users": users if isinstance(users, list) else []}
+
+
+def _migrate_legacy_user_registry_if_needed(conn: sqlite3.Connection) -> None:
+    count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+    if count or not USER_REGISTRY_JSON_PATH.exists():
+        return
+    legacy_registry = _load_legacy_user_registry_json()
+    for item in legacy_registry.get("users", []):
+        if isinstance(item, dict) and item.get("user_id"):
+            _upsert_user_profile(conn, item)
+
+
+def load_user_registry() -> Dict[str, Any]:
+    with _connect_user_registry_db() as conn:
+        _ensure_user_registry_db(conn)
+        _migrate_legacy_user_registry_if_needed(conn)
+        rows = conn.execute(
+            "SELECT user_id, display_name, created_at, last_login_at, source, "
+            "password_hash, password_salt, password_set_at, password_updated_at "
+            "FROM users ORDER BY user_id"
+        ).fetchall()
+    return {"users": [_profile_from_row(row) for row in rows]}
 
 
 def save_user_registry(registry: Dict[str, Any]) -> None:
-    USER_REGISTRY_PATH.write_text(json.dumps(registry, ensure_ascii=False, indent=2), encoding="utf-8")
+    users = registry.get("users", []) if isinstance(registry, dict) else []
+    with _connect_user_registry_db() as conn:
+        _ensure_user_registry_db(conn)
+        for item in users:
+            if isinstance(item, dict) and item.get("user_id"):
+                _upsert_user_profile(conn, item)
+
+
+def _normalize_user_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
+    entry.setdefault("display_name", entry.get("user_id", ""))
+    entry.setdefault("created_at", "")
+    entry.setdefault("last_login_at", "")
+    entry.setdefault("source", "legacy_import")
+    entry.setdefault("password_hash", "")
+    entry.setdefault("password_salt", "")
+    entry.setdefault("password_set_at", "")
+    return entry
+
+
+def _password_digest(password: str, salt: Optional[str] = None) -> Tuple[str, str]:
+    salt = salt or secrets.token_hex(16)
+    digest = hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
+    return digest, salt
+
+
+def _verify_password(profile: Dict[str, Any], password: str) -> bool:
+    stored_hash = str(profile.get("password_hash") or "")
+    stored_salt = str(profile.get("password_salt") or "")
+    if not stored_hash or not stored_salt:
+        return False
+    digest, _ = _password_digest(password, stored_salt)
+    return hmac.compare_digest(digest, stored_hash)
+
+
+def _set_password(profile: Dict[str, Any], password: str) -> None:
+    digest, salt = _password_digest(password)
+    profile["password_hash"] = digest
+    profile["password_salt"] = salt
+    profile["password_set_at"] = datetime.now().isoformat()
+
+
+def _default_password_for_profile(profile: Dict[str, Any]) -> str:
+    user_id = str(profile.get("user_id") or "")
+    display_name = str(profile.get("display_name") or "")
+    for marker, password in DEFAULT_EXISTING_USER_PASSWORDS.items():
+        if marker and (marker == user_id or marker == display_name or marker in user_id or marker in display_name):
+            return password
+    return ""
+
+
+def _form_message(text: str = "", kind: str = "error") -> str:
+    if not text:
+        return ""
+    kind_class = "form-ok" if kind == "ok" else "form-error"
+    return f'<div class="{kind_class}">{_html_escape(text)}</div>'
+
+
+def _safe_sanitize_user_id(raw_value: str) -> Tuple[str, str]:
+    text = (raw_value or "").strip()
+    if not text:
+        return "", "请输入用户名或用户 ID。"
+    text = re.sub(r"\s+", "_", text)
+    text = re.sub(r"[^\w\u4e00-\u9fff\-]", "_", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+    if not text:
+        return "", "用户 ID 不合法，请换一个名称。"
+    return text, ""
 
 
 def sanitize_user_id(raw_value: str) -> str:
@@ -77,7 +259,7 @@ def sanitize_user_id(raw_value: str) -> str:
     text = re.sub(r"[^\w\u4e00-\u9fff\-]", "_", text)
     text = re.sub(r"_+", "_", text).strip("_")
     if not text:
-        raise gr.Error("用户 ID 非法，请换一个名称。")
+        raise gr.Error("用户 ID 不合法，请换一个名称。")
     return text
 
 
@@ -100,6 +282,33 @@ def collect_known_user_ids() -> List[str]:
     return sorted(user_ids)
 
 
+def default_login_user_id(choices: List[str]) -> Optional[str]:
+    if "CP224_刘某" in choices:
+        return "CP224_刘某"
+    for user_id in choices:
+        if "刘某" in user_id:
+            return user_id
+    return choices[0] if choices else None
+
+
+def resolve_existing_user_id(raw_value: str) -> str:
+    text = (raw_value or "").strip()
+    if not text:
+        return ""
+    profile = find_user_profile(text)
+    if profile:
+        return str(profile.get("user_id") or text)
+    registry = load_user_registry()
+    for item in registry.get("users", []):
+        if not isinstance(item, dict):
+            continue
+        user_id = str(item.get("user_id") or "")
+        display_name = str(item.get("display_name") or "")
+        if text == display_name or text in user_id or text in display_name:
+            return user_id
+    return sanitize_user_id(text)
+
+
 def ensure_seed_users() -> None:
     registry = load_user_registry()
     known = {item.get("user_id", "") for item in registry.get("users", []) if isinstance(item, dict)}
@@ -107,15 +316,26 @@ def ensure_seed_users() -> None:
     for user_id in collect_known_user_ids():
         if user_id and user_id not in known:
             registry.setdefault("users", []).append(
-                {
-                    "user_id": user_id,
-                    "display_name": user_id,
-                    "created_at": datetime.now().isoformat(),
-                    "last_login_at": "",
-                    "source": "seeded",
-                }
+                _normalize_user_entry(
+                    {
+                        "user_id": user_id,
+                        "display_name": user_id,
+                        "created_at": datetime.now().isoformat(),
+                        "last_login_at": "",
+                        "source": "seeded",
+                    }
+                )
             )
             changed = True
+    for item in registry.get("users", []):
+        if isinstance(item, dict):
+            before = dict(item)
+            _normalize_user_entry(item)
+            default_password = _default_password_for_profile(item)
+            if default_password and not _verify_password(item, default_password):
+                _set_password(item, default_password)
+            if item != before:
+                changed = True
     if changed or not USER_REGISTRY_PATH.exists():
         save_user_registry(registry)
 
@@ -128,13 +348,15 @@ def find_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def register_user(display_name: str) -> str:
-    user_id = sanitize_user_id(display_name)
+def register_user(user_id: str, display_name: str, password: str) -> str:
+    user_id = sanitize_user_id(user_id)
+    if not password.strip():
+        raise gr.Error("请为新账户设置密码。")
     if find_user_profile(user_id):
         raise gr.Error(f"用户 `{user_id}` 已存在，请直接登录。")
 
     registry = load_user_registry()
-    registry.setdefault("users", []).append(
+    profile = _normalize_user_entry(
         {
             "user_id": user_id,
             "display_name": display_name.strip() or user_id,
@@ -143,6 +365,8 @@ def register_user(display_name: str) -> str:
             "source": "manual_register",
         }
     )
+    _set_password(profile, password)
+    registry.setdefault("users", []).append(profile)
     save_user_registry(registry)
 
     summary_store = UserSummaryStore()
@@ -154,12 +378,24 @@ def register_user(display_name: str) -> str:
     return user_id
 
 
-def build_agent(agent_backend: str, summary_backend: str, supervisor_backend: str, graph_backend: str) -> EmpathyAgent:
+def build_agent(
+    agent_backend: str,
+    summary_backend: str,
+    supervisor_backend: str,
+    graph_backend: str,
+    *,
+    api_key: str = "",
+    base_url: str = "",
+    model: str = "",
+) -> EmpathyAgent:
     return EmpathyAgent(
         model_backend=agent_backend,
         summary_model_backend=summary_backend,
         supervisor_model_backend=supervisor_backend,
         graph_model_backend=graph_backend,
+        api_key=api_key or None,
+        base_url=base_url or None,
+        model=model or None,
     )
 
 
@@ -180,32 +416,95 @@ def empty_state() -> Dict[str, Any]:
     }
 
 
+def _state_api_config(state: Dict[str, Any]) -> Dict[str, str]:
+    config = state.get("config", {}) if isinstance(state.get("config", {}), dict) else {}
+    return {
+        "api_key": str(config.get("api_key", "") or ""),
+        "model": str(config.get("model", "") or DEFAULT_API_MODEL_NAME),
+    }
+
+
+def _needs_remote_api(*backends: str) -> bool:
+    return any((backend or "gpt").strip().lower() == "gpt" for backend in backends)
+
+
+def _require_api_key_if_needed(state: Dict[str, Any], *backends: str) -> Optional[str]:
+    if not _needs_remote_api(*backends):
+        return None
+    config = state.get("config", {}) if isinstance(state.get("config", {}), dict) else {}
+    api_key = str(config.get("api_key", "") or "").strip()
+    if api_key:
+        return None
+    return "选择 GPT/API 模型时，请先在“我的配置”里填写自己的 API Key。"
+
+
 def login_user(
     selected_user_id: str,
     typed_user_id: str,
+    password: str,
     agent_backend: str,
     summary_backend: str,
     supervisor_backend: str,
     graph_backend: str,
-) -> Tuple[Dict[str, Any], str, dict, dict, str, str, dict, str, dict]:
+) -> Tuple[Dict[str, Any], str, dict, dict, dict, str, str, dict, str, dict, str, dict, dict]:
     selected_user_id = (selected_user_id or "").strip()
     typed_user_id = (typed_user_id or "").strip()
-    user_id = sanitize_user_id(typed_user_id) if typed_user_id else selected_user_id
+    password = (password or "").strip()
+    user_id = resolve_existing_user_id(typed_user_id) if typed_user_id else selected_user_id
+
+    def fail(message: str) -> Tuple[Dict[str, Any], str, dict, dict, dict, str, str, dict, str, dict, str, dict, dict]:
+        return (
+            empty_state(),
+            "登录失败。",
+            gr.update(visible=True),
+            gr.update(visible=False),
+            gr.update(visible=False),
+            "",
+            "",
+            dropdown_update([], "", False),
+            "",
+            gr.update(visible=False),
+            _form_message(message),
+            gr.update(value=""),
+            gr.update(value="我的咨询"),
+        )
+
     if not user_id:
-        raise gr.Error("请选择已有用户或输入用户名称。")
+        return fail("请选择已有用户，或输入用户名后再登录。")
+    if not password:
+        return fail("请输入密码。")
 
     profile = find_user_profile(user_id)
     if not profile:
-        user_id = register_user(user_id)
-        profile = find_user_profile(user_id)
+        return fail("未找到该账号，请先注册账户。")
 
-    now = datetime.now().isoformat()
     registry = load_user_registry()
+    updated = False
     for item in registry.get("users", []):
         if isinstance(item, dict) and item.get("user_id") == user_id:
-            item["last_login_at"] = now
-            item.setdefault("display_name", user_id)
-    save_user_registry(registry)
+            _normalize_user_entry(item)
+            profile = item
+            updated = True
+            break
+    if not profile:
+        return fail("账号信息读取失败，请重新打开页面。")
+
+    stored_hash = str(profile.get("password_hash") or "")
+    stored_salt = str(profile.get("password_salt") or "")
+    if stored_hash and stored_salt:
+        if not _verify_password(profile, password):
+            return fail("密码错误，请检查后重试。")
+    else:
+        _set_password(profile, password)
+        updated = True
+
+    now = datetime.now().isoformat()
+    profile["last_login_at"] = now
+    profile.setdefault("display_name", user_id)
+    profile.setdefault("source", "legacy_import")
+    updated = True
+    if updated:
+        save_user_registry(registry)
 
     state = empty_state()
     state["authenticated"] = True
@@ -216,6 +515,8 @@ def login_user(
         "summary_backend": summary_backend,
         "supervisor_backend": supervisor_backend,
         "graph_backend": graph_backend,
+        "api_key": "",
+        "model": DEFAULT_API_MODEL_NAME,
     }
     memory_html = build_session_memory_panel(user_id, state["display_name"])
     choices = session_choices(user_id)
@@ -226,21 +527,136 @@ def login_user(
         state,
         f"登录成功：{state['display_name']} ({user_id})",
         gr.update(visible=False),
+        gr.update(visible=False),
         gr.update(visible=True),
         state["display_name"],
         memory_html,
-        gr.update(choices=choices, value=selected_session, visible=False),
+        dropdown_update(choices, selected_session, False),
         hub_html,
         gr.update(visible=False),
+        "",
+        gr.update(value=""),
+        gr.update(value=f"我的咨询 · {state['display_name']}"),
     )
 
 
-def register_and_refresh(display_name: str) -> Tuple[str, dict]:
-    user_id = register_user(display_name)
-    return f"注册成功：{user_id}", gr.update(choices=collect_known_user_ids(), value=user_id)
+def register_and_refresh(user_id: str, display_name: str, password: str, confirm_password: str) -> Tuple[str, dict, dict, dict, str, str, str, str]:
+    user_id, error = _safe_sanitize_user_id(user_id)
+    if error:
+        return _form_message(error), gr.update(), gr.update(visible=False), gr.update(visible=True), "", display_name or "", "", ""
+    if not password.strip():
+        return _form_message("请为新账户设置密码。"), gr.update(), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
+    if password != (confirm_password or ""):
+        return _form_message("两次输入的密码不一致。"), gr.update(), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
+    if find_user_profile(user_id):
+        return _form_message(f"用户 `{user_id}` 已存在，请直接登录。"), gr.update(), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
+    try:
+        user_id = register_user(user_id, display_name, password)
+    except Exception as exc:
+        return _form_message(f"注册失败：{exc}"), gr.update(), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
+    return (
+        _form_message(f"注册成功：{user_id}，请返回登录。", "ok"),
+        gr.update(choices=collect_known_user_ids(), value=user_id),
+        gr.update(visible=True),
+        gr.update(visible=False),
+        "",
+        "",
+        "",
+        "",
+    )
 
 
-def logout_user() -> Tuple[Dict[str, Any], str, str, str, dict, dict, dict, str, str, str, str, str, dict, str]:
+def open_register_page() -> Tuple[dict, dict, str]:
+    return gr.update(visible=False), gr.update(visible=True), "请先注册账户，再返回登录。"
+
+
+def open_login_page() -> Tuple[dict, dict, str]:
+    return gr.update(visible=True), gr.update(visible=False), "已返回登录界面。"
+
+
+def clear_login_password() -> Tuple[dict, str]:
+    return gr.update(value=""), ""
+
+
+def fill_login_user_from_dropdown(user_id: str) -> Tuple[dict, dict, str]:
+    return gr.update(value=user_id or ""), gr.update(value=""), ""
+
+
+def dropdown_value(value: str, choices: List[str]) -> Optional[str]:
+    return value if value and value in choices else None
+
+
+def dropdown_update(choices: List[str], value: str = "", visible: bool = False) -> dict:
+    if not choices:
+        return gr.update(choices=[""], value="", visible=False)
+    return gr.update(choices=choices, value=dropdown_value(value, choices), visible=visible)
+
+
+def change_password(
+    state: Dict[str, Any],
+    old_password: str,
+    new_password: str,
+    confirm_password: str,
+) -> Tuple[str, str, str, str]:
+    if not state.get("authenticated") or not state.get("user_id"):
+        return _form_message("请先登录后再修改密码。"), "", "", ""
+    old_password = (old_password or "").strip()
+    new_password = (new_password or "").strip()
+    confirm_password = (confirm_password or "").strip()
+    if not old_password:
+        return _form_message("请输入原密码。"), "", "", ""
+    if not new_password:
+        return _form_message("请输入新密码。"), "", "", ""
+    if len(new_password) < 3:
+        return _form_message("新密码至少需要 3 个字符。"), "", "", ""
+    if new_password != confirm_password:
+        return _form_message("两次输入的新密码不一致。"), "", "", ""
+
+    registry = load_user_registry()
+    for item in registry.get("users", []):
+        if isinstance(item, dict) and item.get("user_id") == state["user_id"]:
+            _normalize_user_entry(item)
+            if not _verify_password(item, old_password):
+                return _form_message("原密码错误，请重新输入。"), "", "", ""
+            _set_password(item, new_password)
+            item["password_updated_at"] = datetime.now().isoformat()
+            save_user_registry(registry)
+            return _form_message("密码修改成功。", "ok"), "", "", ""
+    return _form_message("账号信息不存在，请重新登录。"), "", "", ""
+
+
+def save_model_config(
+    state: Dict[str, Any],
+    agent_backend: str,
+    summary_backend: str,
+    supervisor_backend: str,
+    graph_backend: str,
+    api_key: str,
+    model: str,
+) -> Tuple[Dict[str, Any], str]:
+    if not state.get("authenticated") or not state.get("user_id"):
+        return state, _form_message("请先登录后再保存配置。")
+    api_key = (api_key or "").strip()
+    model = DEFAULT_API_MODEL_NAME
+    if _needs_remote_api(agent_backend, summary_backend, supervisor_backend, graph_backend) and not api_key:
+        return state, _form_message("当前选择了 GPT/API 模型，请先填写自己的 API Key。")
+    state["config"] = {
+        "agent_backend": agent_backend or "gpt",
+        "summary_backend": summary_backend or "gpt",
+        "supervisor_backend": supervisor_backend or "gpt",
+        "graph_backend": graph_backend or "gpt",
+        "api_key": api_key,
+        "model": model,
+    }
+    if not state.get("chatbot"):
+        state["agent"] = None
+        state["agent_ready"] = False
+        state["current_session_id"] = ""
+        state["preloaded_session_context"] = {}
+    return state, _form_message("配置已保存。未开始的新会话会使用当前配置。", "ok")
+
+
+def logout_user() -> Tuple[Dict[str, Any], str, str, str, dict, dict, dict, str, str, str, str, str, dict, str, str, str, str, dict]:
     return (
         empty_state(),
         "已退出登录。",
@@ -254,8 +670,13 @@ def logout_user() -> Tuple[Dict[str, Any], str, str, str, dict, dict, dict, str,
         "",
         "",
         "",
-        gr.update(choices=[], value="", visible=False),
+        dropdown_update([], "", False),
         "",
+        "",
+        "",
+        "",
+        "",
+        gr.update(value="我的咨询"),
     )
 
 
@@ -271,12 +692,25 @@ def ensure_agent_ready(state: Dict[str, Any]) -> Dict[str, Any]:
         timings.append((label, time.perf_counter() - started_at))
 
     config = state.get("config", {})
+    if not isinstance(config, dict):
+        config = {}
+    api_error = _require_api_key_if_needed(
+        state,
+        config.get("agent_backend", "gpt"),
+        config.get("summary_backend", "gpt"),
+        config.get("supervisor_backend", "gpt"),
+        config.get("graph_backend", "gpt"),
+    )
+    if api_error:
+        raise gr.Error(api_error)
     started = time.perf_counter()
     agent = build_agent(
         config.get("agent_backend", "gpt"),
         config.get("summary_backend", "gpt"),
         config.get("supervisor_backend", "gpt"),
         config.get("graph_backend", "gpt"),
+        api_key=str(config.get("api_key", "") or ""),
+        model=str(config.get("model", "") or DEFAULT_API_MODEL_NAME),
     )
     mark("build_agent", started)
     started = time.perf_counter()
@@ -379,7 +813,7 @@ def build_session_memory_panel(user_id: str, display_name: str) -> str:
     return (
         '<div class="fold-grid">'
         f'{render_fold_panel("我的画像", profile, subtitle=display_name)}'
-        f'{render_fold_panel("目前督导师报告", localize_report_payload(report_payload), subtitle=display_name)}'
+        f'{render_fold_panel("当前督导师报告", localize_report_payload(report_payload), subtitle=display_name)}'
         '</div>'
     )
 
@@ -418,7 +852,7 @@ def render_history_session_detail(user_id: str, session_id: str) -> str:
 def render_consultation_hub(user_id: str, section: str = "overview", session_id: str = "") -> Tuple[str, str, Dict[str, Any]]:
     profile_html = render_document_card("我的画像", read_json_payload(whole_summary_path(user_id), {}))
     report_payload, _ = latest_treatment_report_payload(user_id)
-    _ = render_document_card("目前督导师报告", localize_report_payload(report_payload))
+    _ = render_document_card("当前督导师报告", localize_report_payload(report_payload))
     summary_doc = load_user_session_summaries(user_id)
     full_report_payload = {
         "final_l1_summary": read_json_payload(whole_summary_path(user_id), {}),
@@ -713,8 +1147,8 @@ def show_supervisor_report(state: Dict[str, Any]) -> Tuple[str, str, dict, dict,
     if not state.get("authenticated") or not state.get("user_id"):
         raise gr.Error("请先登录。")
     payload, _ = latest_treatment_report_payload(state["user_id"])
-    html_text = render_document_card("目前督导师报告", localize_report_payload(payload), subtitle=state["display_name"])
-    return html_text, "已加载目前督导师报告。", *resource_button_updates("supervisor")
+    html_text = render_document_card("当前督导师报告", localize_report_payload(payload), subtitle=state["display_name"])
+    return html_text, "已加载当前督导师报告。", *resource_button_updates("supervisor")
 
 
 def show_full_report(state: Dict[str, Any]) -> Tuple[str, str, dict, dict, dict, dict]:
@@ -779,14 +1213,14 @@ def open_consultation_hub(state: Dict[str, Any]) -> Tuple[dict, dict, str, dict,
     if not state.get("authenticated") or not state.get("user_id"):
         raise gr.Error("请先登录。")
     choices = session_choices(state["user_id"])
-    selected = state.get("history_session_id") or (choices[-1] if choices else "")
+    selected = dropdown_value(state.get("history_session_id", ""), choices) or (choices[-1] if choices else "")
     html_text, status, meta = render_consultation_hub(state["user_id"], "overview", selected)
-    state["history_session_id"] = meta.get("history_session_id", selected)
+    state["history_session_id"] = dropdown_value(meta.get("history_session_id", selected), choices) or ""
     return (
         gr.update(visible=False),
         gr.update(visible=True),
         html_text,
-        gr.update(choices=choices, value=state["history_session_id"], visible=False),
+        dropdown_update(choices, state["history_session_id"], False),
         status,
     )
 
@@ -809,15 +1243,15 @@ def show_hub_history(state: Dict[str, Any]) -> Tuple[Dict[str, Any], str, dict, 
     if not state.get("authenticated") or not state.get("user_id"):
         raise gr.Error("请先登录。")
     choices = session_choices(state["user_id"])
-    selected = state.get("history_session_id") or (choices[-1] if choices else "")
-    state["history_session_id"] = selected
+    selected = dropdown_value(state.get("history_session_id", ""), choices) or (choices[-1] if choices else "")
+    state["history_session_id"] = dropdown_value(selected, choices) or ""
     html_text, status, _ = render_consultation_hub(state["user_id"], "history", selected)
-    return state, html_text, gr.update(choices=choices, value=selected, visible=True), status
+    return state, html_text, dropdown_update(choices, selected, bool(choices)), status
 
 
 def select_history_session(session_id: str, state: Dict[str, Any]) -> Tuple[Dict[str, Any], str, str]:
     if not state.get("authenticated") or not state.get("user_id"):
-        raise gr.Error("请先登录。")
+        return state, "", ""
     state["history_session_id"] = session_id or ""
     return state, render_history_session_detail(state["user_id"], state["history_session_id"]), "已切换历史会话。"
 
@@ -1104,6 +1538,10 @@ APP_CSS = """
   margin-top: 0 !important;
 }
 
+.login-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
 .auth-grid .wrap,
 .auth-grid .container,
 .auth-grid .form,
@@ -1217,6 +1655,61 @@ APP_CSS = """
 .auth-user-dropdown .form,
 .auth-user-dropdown .block {
   margin: 0 !important;
+}
+
+.auth-shell [data-testid="textbox"] input[type="password"] {
+  letter-spacing: 0.02em;
+}
+
+.field-message {
+  min-height: 0;
+}
+
+.form-error,
+.form-ok {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.form-error {
+  color: #b42318;
+  background: #fff3f1;
+  border: 1px solid #ffd1cc;
+}
+
+.form-ok {
+  color: #116329;
+  background: #eefbf3;
+  border: 1px solid #bdeccb;
+}
+
+.register-link-button {
+  margin-top: -6px;
+}
+
+.register-link-button button {
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 2px 4px !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #1677ff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.register-link-button button:hover {
+  color: #0b5ed7 !important;
+  text-decoration: underline;
+}
+
+.change-password-panel {
+  margin-top: -4px;
+  margin-bottom: 14px;
 }
 
 .report-panel {
@@ -1537,6 +2030,8 @@ APP_CSS = """
 def build_app() -> gr.Blocks:
     migrate_legacy_session_tree()
     ensure_seed_users()
+    login_user_choices = collect_known_user_ids()
+    default_login_user = default_login_user_id(login_user_choices)
     with gr.Blocks(title="MemAgent Chat") as demo:
         state = gr.State(empty_state())
 
@@ -1559,31 +2054,46 @@ def build_app() -> gr.Blocks:
 
         with gr.Column(visible=True, elem_classes=["auth-shell"]) as auth_page:
             with gr.Group(elem_classes=["auth-section", "user-section"]):
-                gr.HTML('<div class="auth-section-title">选择用户</div>')
-                with gr.Row(elem_classes=["auth-grid"]):
+                gr.HTML('<div class="auth-section-title">登录</div>')
+                with gr.Row(elem_classes=["auth-grid", "login-grid"]):
                     existing_user = gr.Dropdown(
-                        choices=collect_known_user_ids(),
+                        choices=login_user_choices,
+                        value=default_login_user,
                         label="已有用户",
                         allow_custom_value=False,
                         filterable=False,
                         elem_classes=["auth-user-dropdown"],
                     )
-                    typed_user = gr.Textbox(label="输入名称 / 用户 ID", interactive=True)
-            with gr.Group(elem_classes=["auth-section", "config-section"]):
-                gr.HTML('<div class="auth-section-title">配置模型</div>')
-                with gr.Row(elem_classes=["auth-grid"]):
-                    login_agent_backend = gr.Dropdown(AGENT_BACKEND_CHOICES, value="gpt", label="Empathy Agent")
-                    login_summary_backend = gr.Dropdown(SUMMARY_BACKEND_CHOICES, value="gpt", label="Summary Agent")
-                login_supervisor_backend = gr.State("gpt")
-                login_graph_backend = gr.State("gpt")
-            with gr.Row(elem_classes=["action-row"]):
-                login_btn = gr.Button("登录", variant="primary")
+                    typed_user = gr.Textbox(label="用户名称 / 用户 ID", value=default_login_user or "", interactive=True)
+                with gr.Row(elem_classes=["auth-grid", "login-grid"]):
+                    login_password = gr.Textbox(label="密码", type="password", interactive=True)
+                login_form_message = gr.HTML(elem_classes=["field-message"])
+                with gr.Row(elem_classes=["action-row", "login-action-row"]):
+                    login_btn = gr.Button("登录", variant="primary")
+                goto_register_btn = gr.Button("没有账号？注册账户", elem_classes=["register-link-button"])
+            login_agent_backend = gr.State("gpt")
+            login_summary_backend = gr.State("gpt")
+            login_supervisor_backend = gr.State("gpt")
+            login_graph_backend = gr.State("gpt")
             auth_status = gr.Textbox(label="认证状态", interactive=False, lines=3, elem_classes=["status-box"])
+
+        with gr.Column(visible=False, elem_classes=["auth-shell"]) as register_page:
+            with gr.Group(elem_classes=["auth-section", "user-section"]):
+                gr.HTML('<div class="auth-section-title">注册账户</div>')
+                with gr.Row(elem_classes=["auth-grid", "login-grid"]):
+                    register_user_id = gr.Textbox(label="用户名 / 用户 ID", interactive=True)
+                    register_display_name = gr.Textbox(label="显示名称", interactive=True)
+                with gr.Row(elem_classes=["auth-grid", "login-grid"]):
+                    register_password = gr.Textbox(label="密码", type="password", interactive=True)
+                    register_confirm_password = gr.Textbox(label="确认密码", type="password", interactive=True)
+                with gr.Row(elem_classes=["action-row"]):
+                    register_btn = gr.Button("注册账户", variant="primary")
+                    back_to_login_btn = gr.Button("返回登录")
+            register_status = gr.HTML(elem_classes=["field-message"])
 
         with gr.Column(visible=False, elem_classes=["chat-shell"]) as chat_page:
             with gr.Row(elem_classes=["user-row"]):
                 current_user = gr.Textbox(label="当前用户", interactive=False)
-                logout_btn = gr.Button("退出登录")
             resource_panel = gr.HTML(label="资料展示", elem_classes=["resource-panel", "inline-memory-panel"])
             chatbot = gr.Chatbot(
                 label="咨询对话",
@@ -1612,7 +2122,8 @@ def build_app() -> gr.Blocks:
                 hub_history_btn = gr.Button("历史会话")
                 chat_nav_btn = gr.Button("返回会话")
             history_session = gr.Dropdown(
-                choices=[],
+                choices=[""],
+                value="",
                 label="会话编号",
                 allow_custom_value=False,
                 filterable=False,
@@ -1621,21 +2132,107 @@ def build_app() -> gr.Blocks:
             )
             consult_panel = gr.HTML(label="我的咨询", elem_classes=["resource-panel", "consult-panel"])
             consult_status = gr.Textbox(label="咨询资料状态", interactive=False, lines=2, elem_classes=["status-box"])
+            with gr.Group(elem_classes=["auth-section", "config-section", "account-section"]):
+                gr.HTML('<div class="auth-section-title">我的配置</div>')
+                with gr.Accordion("模型配置", open=False, elem_classes=["change-password-panel"]):
+                    with gr.Row(elem_classes=["auth-grid", "login-grid"]):
+                        config_agent_backend = gr.Dropdown(AGENT_BACKEND_CHOICES, value="gpt", label="Empathy Agent")
+                        config_summary_backend = gr.Dropdown(SUMMARY_BACKEND_CHOICES, value="gpt", label="Summary Agent")
+                    with gr.Row(elem_classes=["auth-grid", "login-grid"]):
+                        config_api_key = gr.Textbox(label="API Key", type="password", interactive=True)
+                    with gr.Row(elem_classes=["auth-grid", "login-grid"]):
+                        config_model_name = gr.Textbox(
+                            label="API 模型名",
+                            value=DEFAULT_API_MODEL_NAME,
+                            interactive=False,
+                        )
+                    config_status = gr.HTML(elem_classes=["field-message"])
+                    with gr.Row(elem_classes=["action-row"]):
+                        save_config_btn = gr.Button("保存配置", variant="primary")
+            with gr.Group(elem_classes=["auth-section", "account-section"]):
+                gr.HTML('<div class="auth-section-title">账号管理</div>')
+                with gr.Accordion("修改密码", open=False, elem_classes=["change-password-panel"]):
+                    with gr.Row(elem_classes=["auth-grid", "login-grid"]):
+                        old_password = gr.Textbox(label="原密码", type="password", interactive=True)
+                        new_password = gr.Textbox(label="新密码", type="password", interactive=True)
+                        confirm_new_password = gr.Textbox(label="确认新密码", type="password", interactive=True)
+                    change_password_message = gr.HTML(elem_classes=["field-message"])
+                    with gr.Row(elem_classes=["action-row"]):
+                        submit_change_password_btn = gr.Button("保存新密码", variant="primary")
+                with gr.Row(elem_classes=["action-row"]):
+                    logout_btn = gr.Button("退出登录")
 
         login_btn.click(
             fn=login_user,
-            inputs=[existing_user, typed_user, login_agent_backend, login_summary_backend, login_supervisor_backend, login_graph_backend],
+            inputs=[existing_user, typed_user, login_password, login_agent_backend, login_summary_backend, login_supervisor_backend, login_graph_backend],
             outputs=[
                 state,
                 auth_status,
                 auth_page,
+                register_page,
                 chat_page,
                 current_user,
                 resource_panel,
                 history_session,
                 consult_panel,
                 consult_page,
+                login_form_message,
+                login_password,
+                consult_nav_btn,
             ],
+            queue=False,
+        )
+        existing_user.change(
+            fn=fill_login_user_from_dropdown,
+            inputs=[existing_user],
+            outputs=[typed_user, login_password, login_form_message],
+            queue=False,
+        )
+        goto_register_btn.click(
+            fn=open_register_page,
+            inputs=[],
+            outputs=[auth_page, register_page, register_status],
+            queue=False,
+        )
+        back_to_login_btn.click(
+            fn=open_login_page,
+            inputs=[],
+            outputs=[auth_page, register_page, auth_status],
+            queue=False,
+        )
+        register_btn.click(
+            fn=register_and_refresh,
+            inputs=[register_user_id, register_display_name, register_password, register_confirm_password],
+            outputs=[
+                register_status,
+                existing_user,
+                auth_page,
+                register_page,
+                register_user_id,
+                register_display_name,
+                register_password,
+                register_confirm_password,
+            ],
+            queue=False,
+        )
+        submit_change_password_btn.click(
+            fn=change_password,
+            inputs=[state, old_password, new_password, confirm_new_password],
+            outputs=[change_password_message, old_password, new_password, confirm_new_password],
+            queue=False,
+        )
+        save_config_btn.click(
+            fn=save_model_config,
+            inputs=[
+                state,
+                config_agent_backend,
+                config_summary_backend,
+                login_supervisor_backend,
+                login_graph_backend,
+                config_api_key,
+                config_model_name,
+            ],
+            outputs=[state, config_status],
             queue=False,
         )
         logout_btn.click(
@@ -1656,6 +2253,11 @@ def build_app() -> gr.Blocks:
                 consult_panel,
                 history_session,
                 consult_status,
+                change_password_message,
+                old_password,
+                new_password,
+                confirm_new_password,
+                consult_nav_btn,
             ],
             queue=False,
         )
@@ -1664,16 +2266,19 @@ def build_app() -> gr.Blocks:
             fn=send_message,
             inputs=[user_message, state],
             outputs=[user_message, state, chatbot, chat_status],
+            concurrency_limit=None,
         )
         user_message.submit(
             fn=send_message,
             inputs=[user_message, state],
             outputs=[user_message, state, chatbot, chat_status],
+            concurrency_limit=None,
         )
         end_btn.click(
             fn=end_session,
             inputs=[state],
             outputs=[state, chatbot, chat_status, session_summary_panel, session_report_panel, resource_panel],
+            concurrency_limit=None,
         )
         chat_nav_btn.click(
             fn=open_chat_page,
@@ -1710,19 +2315,33 @@ def build_app() -> gr.Blocks:
 def find_available_port(host: str, preferred_port: int, attempts: int = 20) -> int:
     for port in range(preferred_port, preferred_port + attempts):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(0.2)
-            if sock.connect_ex((host, port)) != 0:
+            try:
+                sock.bind((host, port))
                 return port
+            except OSError:
+                continue
     raise OSError(f"Cannot find empty port in range: {preferred_port}-{preferred_port + attempts - 1}.")
 
 
 def launch_app() -> None:
     demo = build_app()
-    server_name = os.getenv("GRADIO_SERVER_NAME", "127.0.0.1")
+    public_mode = os.getenv("MEMAGENT_PUBLIC", "0").strip().lower() in {"1", "true", "yes"}
+    server_name = os.getenv("GRADIO_SERVER_NAME", "0.0.0.0" if public_mode else "127.0.0.1")
     preferred_port = int(os.getenv("GRADIO_SERVER_PORT", "7860"))
+    share = os.getenv("GRADIO_SHARE", "0").strip().lower() in {"1", "true", "yes"}
+    root_path = os.getenv("GRADIO_ROOT_PATH") or None
+    ssl_keyfile = os.getenv("GRADIO_SSL_KEYFILE") or None
+    ssl_certfile = os.getenv("GRADIO_SSL_CERTFILE") or None
     demo.launch(
         server_name=server_name,
         server_port=find_available_port(server_name, preferred_port),
         inbrowser=False,
+        share=share,
+        root_path=root_path,
+        ssl_keyfile=ssl_keyfile,
+        ssl_certfile=ssl_certfile,
+        ssl_verify=False if ssl_certfile else True,
+        show_error=True,
         css=APP_CSS,
     )
+

@@ -29,12 +29,15 @@ class GraphExtractor:
         model_mode: Optional[str] = None,
         local_model_path: Optional[str] = None,
         local_base_model_path: Optional[str] = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model: Optional[str] = None,
     ) -> None:
         load_dotenv()
         self.provider = os.getenv("GRAPH_LLM_PROVIDER", "openai")
-        self.api_key = os.getenv("GRAPH_LLM_API_KEY") or os.getenv("OPENAI_API_KEY")
-        self.base_url = os.getenv("GRAPH_LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
-        self.model = os.getenv("GRAPH_LLM_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5.4")
+        self.api_key = api_key or os.getenv("GRAPH_LLM_API_KEY") or os.getenv("OPENAI_API_KEY")
+        self.base_url = base_url or os.getenv("GRAPH_LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
+        self.model = model or os.getenv("GRAPH_LLM_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5.4")
         self.client: Optional[ChatClientProtocol] = None
         resolved_mode = resolve_model_mode("GRAPH_LLM", explicit_mode=model_mode, default="remote")
 

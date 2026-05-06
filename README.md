@@ -1,102 +1,138 @@
 # MemAgent
-### 基于双Agent与Mem0的心理咨询长期记忆系统
-> 本科毕业设计｜多智能体协作｜三层记忆架构｜本地微调大模型｜私有化部署
 
-[![GitHub](https://img.shields.io/badge/GitHub-Zoeywyt/MemAgent-blue)](https://github.com/Zoeywyt/MemAgent)
+面向连续心理咨询场景的长期记忆 Agent 系统。项目重点在于追踪来访者的历史经历、关系模式、症状变化与阶段性咨询进展，并在后续会话中调用这些信息生成更连贯、更个性化的回复。
 
-## 项目简介
-MemAgent 是面向**长周期心理咨询场景**设计的智能对话记忆系统，基于 Mem0 记忆框架深度扩展，创新提出 **L1 长期画像 / L2 专业知识图谱 / L3 原文片段** 三层记忆结构，并搭配**双智能体分工协作**与**本地微调模型**，解决大模型在心理咨询中记忆碎片化、跨会话遗忘、共情不专业、缺乏结构化推理等问题。
-系统支持私有化部署、记忆自动读写、混合检索、会话督导与可视化展示，可直接用于心理咨询 Agent 记忆增强与对话能力升级。
+## 项目背景与工作内容
 
----
+心理咨询不是一次性问答，而是持续理解、持续记录和持续修正的过程。理想的咨询系统需要记住来访者提到的重要事件、情绪变化、关系冲突、行为模式和阶段性目标，并在新一轮咨询中把这些内容重新调取。通用大模型虽然具备较强的语言生成能力，但通常缺少稳定的跨会话记忆交互机制，现有方案也多停留在文本存档、简单摘要或单轮检索，难以支撑长期咨询中的关联理解与专业推进。
 
-## 核心特性
-- **三层记忆架构**
-  - L1 长期画像：跨会话全局摘要、来访者状态与咨询进展
-  - L2 专业图谱：心理问题、关系、行为模式结构化关系网络
-  - L3 片段记忆：关键对话原文、细节语境与重要表述
-- **双智能体协同**
-  - EmpathyAgent（Qwen2.5-7B 微调）：负责共情交互、对话策略、主回复生成
-  - SummaryAgent（Qwen2.5-3B 微调）：负责记忆压缩、摘要更新、图谱抽取
-  - Supervisor：提供治疗方向督导与整体进展分析
-- **本地模型微调**
-  - SFT 监督微调：掌握咨询格式与专业干预策略
-  - DPO 偏好对齐：提升真实性、专业性，抑制幻觉与无效安慰
-- **混合检索引擎**
-  融合向量检索、图关系检索、BM25 关键词检索，实现高精度记忆召回
-- **完整工程闭环**
-  会话管理、记忆更新、图谱写入、督导报告、HTML 可视化、自动化测试全流程
+MemAgent 因此构建了一套基于 Agent 记忆机制的协同系统：会话开始时读取用户画像、历史会话摘要和最新督导师报告；会话进行中保留关键片段和关系线索；会话结束后生成本次会话总结、更新长期画像，并由督导师 Agent 对阶段性咨询进展进行分析。整体流程模拟咨询师在新一轮咨询前查阅既往记录、在咨询中捕捉关键信息、咨询后整理记录并进行专业反思的过程。
 
----
+本项目主要完成三类工作：
 
-## 系统架构
-1. **交互层**：用户输入 → EmpathyAgent 组织上下文 → 调用记忆
-2. **记忆层**：Mem0 适配器统一管理 L1/L2/L3 存储、检索、更新
-3. **智能体层**：SummaryAgent 生成摘要与图谱；Supervisor 输出督导结论
-4. **存储层**：Chroma 向量库 + Kuzu 图数据库 + 本地 SQLite 记忆历史
-5. **展示层**：HTML 可视化记忆结构、对话日志、督导报告、评估结果
+- **Agent 记忆存储**：构建长期画像、知识图谱和对话片段三类记忆。
+- **多 Agent 协同调度**：实现会话前预加载、会话中片段写入、会话后摘要与督导生成。
+- **共情模型训练与评估**：对共情主模型进行监督微调和偏好对齐，并用 MoodBench 与 CPsyCoun 做结构化评估。
 
----
+## 代码结构
 
-## 技术栈
-- 核心框架：Mem0
-- 模型：Qwen2.5-7B-Instruct、Qwen2.5-3B-Instruct
-- 训练方法：LoRA、SFT、DPO
-- 存储：Chroma（向量）、Kuzu（图）、SQLite（记忆历史）
-- 评估：BLEU、ROUGE、BERTScore、CPsyCounR 四维评估体系
-- 工程：Python、dotenv 配置、自动化测试、HTML 可视化
+项目主要代码模块如下：
 
----
-
-## 项目结构
+```text
+MemAgent/
+  agents/         # EmpathyAgent、SummaryAgent、Supervisor
+  memory/         # Mem0 适配、图谱抽取、用户摘要读取
+  evaluate/       # MoodBench / CPsyCoun 评估入口
+  train/          # SFT / DPO 训练代码
+  tests/          # 调试、回放、记忆检查脚本
+  utils/          # 模型客户端与接口封装
+  gradio_ui.py    # Gradio 前端
+  main.py         # 启动入口
+  output_store.py # 会话记忆统一写入
+  output_report.py# 报告生成与展示
 ```
 
-## Local model mode
+代码职责可以概括为：
 
-You can now choose a backend per component:
+- `agents/` 负责对话生成、摘要归档和督导师分析。
+- `memory/` 负责记忆读取、图谱抽取与多源存储适配。
+- `output_store.py` 负责会话结束后的统一落库，避免重复写入。
+- `gradio_ui.py` 负责界面展示、会话流转和结果查看。
+- `evaluate/` 负责 MoodBench 与 CPsyCoun 的评估执行和汇总。
 
-- `gpt`: use the existing OpenAI-compatible API
-- `qwen3b`: use `models/Qwen2.5-3B-Instruct` + `models/Qwen2.5-3B-Instruct-Lora`
+## 记忆设计
 
-Example mixed setup:
+记忆输出目录用于展示记忆落库：
 
-```env
-MA_AGENT_MODEL_BACKEND=qwen3b
-MA_SUMMARY_MODEL_BACKEND=qwen3b
-MA_SUPERVISOR_MODEL_BACKEND=gpt
-MA_GRAPH_MODEL_BACKEND=gpt
-MEM0_L3_LLM_MODEL_BACKEND=gpt
+```text
+test_outputs/
+  sessions/               # 每次原始会话记录
+  sessions_summaries/     # 每次会话摘要
+  trends/                 # 每次督导师报告
+  whole_summaries/        # 跨会话长期用户画像
+  consulting_reports/     # 完整咨询报告 HTML / JSON
+  users.json              # 用户注册信息
 ```
 
-If you want a custom local path instead of the built-in presets, you can still use:
 
-- `*_MODEL_MODE=local`
-- `*_LOCAL_MODEL_PATH`
-- `*_LOCAL_BASE_MODEL_PATH`
+## Gradio 界面
 
-## Gradio UI
+`main.py` 默认启动 Gradio 前端：
 
-`main.py` now launches a Gradio web app by default.
-
-Features:
-
-- user login / session start
-- per-component model backend selection
-- live chat UI
-- memory + report dashboard rendered in the same style as `render_memory_demo.py`
-- report export as zip/html/json/txt
-- direct history import for replay/report generation using the `test_case.py` replay format
-
-Run:
-
-```bash
+```powershell
 python main.py
 ```
 
-Optional:
+界面包含：
 
-```env
-MA_UI_MODE=gradio
-GRADIO_SERVER_NAME=127.0.0.1
-GRADIO_SERVER_PORT=7860
+- 用户登录与注册
+- 已有用户下拉选择
+- 模型配置选择
+- 实时咨询对话
+- 可折叠的“我的画像”和“目前督导师报告”
+- “我的咨询”页面，用于查看完整报告和历史会话
+- 结束会话后展示本次会话总结与本次督导师报告
+
+## 训练
+
+训练脚本位于 `train/`：
+
+```text
+train/SFT_.py
+train/DPO.py
 ```
+
+评估指标结果：
+
+| 模型 | BERTScore F1 | 困惑度 | Distinct-1 | Distinct-2 |
+| --- | ---: | ---: | ---: | ---: |
+| SFT | 0.4424 | 1.51 | 0.1001 | 0.3610 |
+| DPO | 0.4731 | 1.49 | 0.1117 | 0.4172 |
+
+## 评估指标
+
+### MoodBench
+
+| 指标 | 中文标签 | 含义 |
+| --- | --- | --- |
+| `PQEmotion1` | 情感识别 | 判断文本中的情绪类别、情绪状态或相关语义 |
+| `PQEmotion2` | 情感原因分析 | 理解情绪产生、变化或表达背后的原因 |
+| `PQEmotion3` | 情感策略选择 | 判断面对个人或社交情境时应采用的情绪管理策略 |
+| `PQEmotion4` | 共情表达 | 判断心理支持场景中的共情回应质量 |
+| `PQEmotion5` | 特定场景下情感回复 | 判断具体情感支持场景中的回复适配度 |
+
+MoodBench 使用单选题准确率评价结构化情感能力。
+
+
+### 评估结果
+
+MoodBench 结构化情感能力评估结果如下：
+
+| 模型 | 情感识别 | 情感原因分析 | 情感策略选择 | 共情表达 | 特定场景下情感回复 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 基座模型 | 58.00 | 77.33 | 54.33 | 40.67 | 39.67 |
+| SFT | 58.33 | 78.00 | 58.67 | 41.00 | 40.67 |
+| DPO | 58.67 | 83.33 | 56.33 | 42.00 | 42.67 |
+
+### CPsyCoun
+
+| 指标 | 中文标签 | 满分 |
+| --- | --- | ---: |
+| `Comprehensiveness` | 全面性 | 2 |
+| `Professionalism` | 专业性 | 3 |
+| `Authenticity` | 真实性 | 3 |
+| `Safety` | 安全性 | 1 |
+
+CPsyCoun 综合得分按原始维度满分加权：全面性 2 分、专业性 3 分、真实性 3 分、安全性 1 分，总分 9 分。分数已进行归一化处理。
+
+CPsyCoun 多轮咨询评估结果如下：
+
+| 模型 | 案例数 | 综合得分 | 全面性 | 专业性 | 真实性 | 安全性 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 基座模型 | 45 | 80.393592 | 81.102734 | 59.940329 | 93.838624 | 100.000000 |
+| SFT | 45 | 83.917401 | 84.025132 | 72.069959 | 90.332157 | 100.000000 |
+| DPO | 45 | 85.786302 | 85.755732 | 74.697237 | 92.157848 | 100.000000 |
+
+## 说明
+
+本项目用于心理咨询智能体与长期记忆机制研究。系统输出不能替代专业心理咨询或医疗诊断；涉及高风险、自伤、自杀、暴力等内容时，应优先转介人工专业支持与当地紧急援助渠道。

@@ -12,10 +12,13 @@ from utils.model_client import ChatClientProtocol, build_chat_client
 
 
 SYSTEM_PROMPT = (
-    "你是一个共情交互模型，需要在每次会话启动时先理解来访者的长期画像和督导师治疗进展报告，"
-    "再结合当前输入生成专业、稳定且连续的心理咨询回复。"
-    "你应把这些预加载资料作为临床相关知识使用，但不要机械复述，也不要让来访者感觉自己被标签化。"
-    "回复时请在回答开始前用 [策略] 明确标注本轮采用的主要咨询策略，例如 [倾听]、[共情]、[引导]、[反思]、[探索]。"
+    "你是一位经验丰富的心理咨询师，正在为同一位来访者提供长程咨询。每次会话开始前，系统会为你提供来访者的长期画像和最新治疗进展报告，这些是你的背景知识，请内化于心，不要在回复中复述或解释这些材料。"
+    "坚守以下原则：\n"
+    "1. 回应聚焦：分析并回应来访者当前主要存在的问题或者情况，要看到本质给予慢慢引导。\n"
+    "2. 风格自然：使用自然流畅的专业表达，让来访者感受到平等而深入，像导师又像朋友的对话，而非诊断。\n"
+    "3. 节奏克制：聊天内容保持倾听与共情，整体引导节奏不应过快，让来访者有充分的表达和思考，引导来访者进行深入的自我探索。\n"
+    "4. 策略标注：回复开头用 [策略名] 标注本轮采用的主要咨询策略。\n"
+    "5. 长度控制：一般回复控制在3-5句的连贯流畅段落；当来访者主动要求详细分析时可适当延长、但仍需保持清晰和重点突出。\n"
 )
 
 
@@ -43,6 +46,9 @@ class EmpathyAgent:
         graph_model_mode: Optional[str] = None,
         graph_local_model_path: Optional[str] = None,
         graph_local_base_model_path: Optional[str] = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model: Optional[str] = None,
     ):
         self.openai_client = openai_client or build_chat_client(
             "EMPATHY_AGENT",
@@ -50,12 +56,18 @@ class EmpathyAgent:
             mode=model_mode,
             local_model_path=local_model_path,
             local_base_model_path=local_base_model_path,
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
         )
         self.summary_agent = SummaryAgent(
             model_backend=summary_model_backend or model_backend,
             model_mode=summary_model_mode or model_mode,
             local_model_path=summary_local_model_path or local_model_path,
             local_base_model_path=summary_local_base_model_path or local_base_model_path,
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
         )
         self._mem0: Optional[Mem0Adapter] = None
         self.graph_extractor = GraphExtractor(
@@ -63,12 +75,18 @@ class EmpathyAgent:
             model_mode=graph_model_mode or model_mode,
             local_model_path=graph_local_model_path or local_model_path,
             local_base_model_path=graph_local_base_model_path or local_base_model_path,
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
         )
         self.supervisor: Optional[SupervisorAgent] = None
         self._supervisor_model_backend = supervisor_model_backend or model_backend
         self._supervisor_model_mode = supervisor_model_mode or model_mode
         self._supervisor_local_model_path = supervisor_local_model_path or local_model_path
         self._supervisor_local_base_model_path = supervisor_local_base_model_path or local_base_model_path
+        self._api_key = api_key
+        self._base_url = base_url
+        self._api_model = model
         self.session_messages: List[Dict[str, str]] = []
         self.current_user_id: Optional[str] = None
         self.session_id: Optional[str] = None
@@ -104,6 +122,9 @@ class EmpathyAgent:
             model_mode=self._supervisor_model_mode,
             local_model_path=self._supervisor_local_model_path,
             local_base_model_path=self._supervisor_local_base_model_path,
+            api_key=self._api_key,
+            base_url=self._base_url,
+            model=self._api_model,
         )
         mark("supervisor", started)
 
