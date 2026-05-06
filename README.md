@@ -1,49 +1,54 @@
-# multi_agent
+# MemAgent
+### 基于双Agent与Mem0的心理咨询长期记忆系统
+> 本科毕业设计｜多智能体协作｜三层记忆架构｜本地微调大模型｜私有化部署
 
-这是一个参考 `code/src` 目录组织的多 agent 心理咨询示例项目。
+[![GitHub](https://img.shields.io/badge/GitHub-Zoeywyt/MemAgent-blue)](https://github.com/Zoeywyt/MemAgent)
 
-## 目录结构
+## 项目简介
+MemAgent 是面向**长周期心理咨询场景**设计的智能对话记忆系统，基于 Mem0 记忆框架深度扩展，创新提出 **L1 长期画像 / L2 专业知识图谱 / L3 原文片段** 三层记忆结构，并搭配**双智能体分工协作**与**本地微调模型**，解决大模型在心理咨询中记忆碎片化、跨会话遗忘、共情不专业、缺乏结构化推理等问题。
+系统支持私有化部署、记忆自动读写、混合检索、会话督导与可视化展示，可直接用于心理咨询 Agent 记忆增强与对话能力升级。
 
-- `agents/`：共情、总结、督导师三个主要 agent
-- `memory/`：Mem0 记忆适配器与图谱提取
-- `prompts/`：本地 prompt 模板
-- `utils/`：OpenAI 兼容 SSE 调用客户端
+---
 
-## 当前实现
+## 核心特性
+- **三层记忆架构**
+  - L1 长期画像：跨会话全局摘要、来访者状态与咨询进展
+  - L2 专业图谱：心理问题、关系、行为模式结构化关系网络
+  - L3 片段记忆：关键对话原文、细节语境与重要表述
+- **双智能体协同**
+  - EmpathyAgent（Qwen2.5-7B 微调）：负责共情交互、对话策略、主回复生成
+  - SummaryAgent（Qwen2.5-3B 微调）：负责记忆压缩、摘要更新、图谱抽取
+  - Supervisor：提供治疗方向督导与整体进展分析
+- **本地模型微调**
+  - SFT 监督微调：掌握咨询格式与专业干预策略
+  - DPO 偏好对齐：提升真实性、专业性，抑制幻觉与无效安慰
+- **混合检索引擎**
+  融合向量检索、图关系检索、BM25 关键词检索，实现高精度记忆召回
+- **完整工程闭环**
+  会话管理、记忆更新、图谱写入、督导报告、HTML 可视化、自动化测试全流程
 
-- `empathy_agent.py`：使用 OpenAI 兼容接口生成回复，并在回复开头标注 `[策略]`
-- `summary_agent.py`、`supervisor.py`：使用本地微调模型 `code/src/models/Qwen2.5-3B-Instruct-Lora`
-- `memory/mem0_adapter.py`：已对齐 `code/src`，使用真实 Mem0 + Chroma 向量库 + Kuzu 图库存储
-- `memory/graph_extractor.py`：已接入外部 OpenAI 兼容 LLM，用于提取 Mem0 可写入的实体与关系
-- `end_session()`：结束会话时会写入图谱记忆、保存 L2 摘要、更新 L1 摘要，并生成治疗进展报告
+---
 
-## 运行前配置
+## 系统架构
+1. **交互层**：用户输入 → EmpathyAgent 组织上下文 → 调用记忆
+2. **记忆层**：Mem0 适配器统一管理 L1/L2/L3 存储、检索、更新
+3. **智能体层**：SummaryAgent 生成摘要与图谱；Supervisor 输出督导结论
+4. **存储层**：Chroma 向量库 + Kuzu 图数据库 + 本地 SQLite 记忆历史
+5. **展示层**：HTML 可视化记忆结构、对话日志、督导报告、评估结果
 
-需要在 `.env` 中至少提供这些变量：
+---
 
-- `OPENAI_BASE_URL`
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
+## 技术栈
+- 核心框架：Mem0
+- 模型：Qwen2.5-7B-Instruct、Qwen2.5-3B-Instruct
+- 训练方法：LoRA、SFT、DPO
+- 存储：Chroma（向量）、Kuzu（图）、SQLite（记忆历史）
+- 评估：BLEU、ROUGE、BERTScore、CPsyCounR 四维评估体系
+- 工程：Python、dotenv 配置、自动化测试、HTML 可视化
 
-如果需要图谱提取，还需要：
+---
 
-- `GRAPH_LLM_BASE_URL`
-- `GRAPH_LLM_API_KEY`
-- `GRAPH_LLM_MODEL`
-
-可选的 Mem0 / 向量库配置：
-
-- `MEM0_ENABLE_GRAPH`
-- `KUZU_DB_PATH`
-- `CHROMA_DB_PATH`
-- `MEM0_HISTORY_DB`
-- `EMBEDDING_MODEL_NAME`
-- `MEM0_COLLECTION_NAME`
-
-## 运行
-
-```bash
-python -m multi_agent.main
+## 项目结构
 ```
 
 ## Local model mode
