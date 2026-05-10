@@ -4,7 +4,7 @@ import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple
 
 from dotenv import load_dotenv
 
@@ -29,6 +29,14 @@ def iter_sse_data_lines(resp: object) -> Iterable[str]:
         yield line[6:]
 
 
+def open_url(req: urllib.request.Request, timeout: int):
+    """Open requests without inheriting broken shell proxy settings by default."""
+    if os.getenv("OPENAI_USE_ENV_PROXY", "").strip() == "1":
+        return urllib.request.urlopen(req, timeout=timeout)
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    return opener.open(req, timeout=timeout)
+
+
 def stream_chat_completion(
     base_url: str,
     api_key: str,
@@ -36,8 +44,40 @@ def stream_chat_completion(
     messages: List[Dict[str, str]],
     timeout: int,
     user_agent: str,
+    max_tokens: Optional[int] = None,
     print_stream: bool = False,
 ) -> Tuple[str, Optional[Dict[str, object]]]:
+    pieces: List[str] = []
+    for content in iter_stream_chat_completion(
+        base_url=base_url,
+        api_key=api_key,
+        model=model,
+        messages=messages,
+        timeout=timeout,
+        user_agent=user_agent,
+        max_tokens=max_tokens,
+    ):
+        pieces.append(content)
+        if print_stream:
+            sys.stdout.write(content)
+            sys.stdout.flush()
+
+    if print_stream:
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
+    return "".join(pieces).strip(), None
+
+
+def iter_stream_chat_completion(
+    base_url: str,
+    api_key: str,
+    model: str,
+    messages: List[Dict[str, str]],
+    timeout: int,
+    user_agent: str,
+    max_tokens: Optional[int] = None,
+) -> Iterator[str]:
     endpoint = f"{normalize_base_url(base_url)}/chat/completions"
     payload = {
         "model": model,
@@ -45,6 +85,8 @@ def stream_chat_completion(
         "temperature": 0.7,
         "messages": messages,
     }
+    if max_tokens is not None:
+        payload["max_tokens"] = max_tokens
     req = urllib.request.Request(
         endpoint,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -57,19 +99,14 @@ def stream_chat_completion(
         method="POST",
     )
 
-    pieces: List[str] = []
-    usage: Optional[Dict[str, object]] = None
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with open_url(req, timeout=timeout) as resp:
             for data_line in iter_sse_data_lines(resp):
                 if data_line == "[DONE]":
                     break
                 chunk = json.loads(data_line)
                 if not isinstance(chunk, dict):
                     continue
-                usage_obj = chunk.get("usage")
-                if isinstance(usage_obj, dict):
-                    usage = usage_obj
                 choices = chunk.get("choices")
                 if not isinstance(choices, list) or not choices:
                     continue
@@ -81,19 +118,10 @@ def stream_chat_completion(
                     continue
                 content = delta.get("content")
                 if isinstance(content, str) and content:
-                    pieces.append(content)
-                    if print_stream:
-                        sys.stdout.write(content)
-                        sys.stdout.flush()
+                    yield content
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"HTTP {exc.code}: {detail}") from exc
-
-    if print_stream:
-        sys.stdout.write("\n")
-        sys.stdout.flush()
-
-    return "".join(pieces).strip(), usage
 
 
 @dataclass
@@ -103,6 +131,7 @@ class OpenAIChatClient:
     model: str = os.getenv("OPENAI_MODEL", "gpt-5.4")
     user_agent: str = os.getenv("OPENAI_USER_AGENT", "MultiAgent/1.0")
     timeout: int = 120
+    max_tokens: int = 1024
 
     def __post_init__(self):
         auto_load_dotenv()
@@ -110,6 +139,7 @@ class OpenAIChatClient:
         self.api_key = self.api_key or os.getenv("OPENAI_API_KEY", "")
         self.model = self.model or os.getenv("OPENAI_MODEL", "gpt-5.4")
         self.user_agent = self.user_agent or os.getenv("OPENAI_USER_AGENT", "MultiAgent/1.0")
+        self.max_tokens = int(os.getenv("OPENAI_MAX_TOKENS", str(self.max_tokens)))
 
         if not self.base_url or not self.api_key:
             raise ValueError("OPENAI_BASE_URL and OPENAI_API_KEY must be set in environment or .env")
@@ -122,5 +152,17 @@ class OpenAIChatClient:
             messages=messages,
             timeout=self.timeout,
             user_agent=self.user_agent,
+            max_tokens=self.max_tokens,
             print_stream=print_stream,
+        )
+
+    def stream_chat(self, messages: List[Dict[str, str]]) -> Iterator[str]:
+        yield from iter_stream_chat_completion(
+            base_url=self.base_url,
+            api_key=self.api_key,
+            model=self.model,
+            messages=messages,
+            timeout=self.timeout,
+            user_agent=self.user_agent,
+            max_tokens=self.max_tokens,
         )

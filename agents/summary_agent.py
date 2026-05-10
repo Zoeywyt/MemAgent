@@ -27,6 +27,7 @@ class SummaryAgent:
             api_key=api_key,
             base_url=base_url,
             model=model,
+            max_new_tokens=512,
         )
         self.summary_store = UserSummaryStore()
 

@@ -31,6 +31,7 @@ class SupervisorAgent:
             api_key=api_key,
             base_url=base_url,
             model=model,
+            max_new_tokens=512,
         )
 
     @property
@@ -54,10 +55,6 @@ class SupervisorAgent:
         if not context_text:
             sections: List[str] = []
 
-            if retrieval.get("l2_summaries"):
-                sections.append("【相关历史会话摘要】")
-                sections.extend(f"- {l2.get('summary', '')}" for l2 in retrieval["l2_summaries"])
-
             if retrieval.get("l3_fragments"):
                 sections.append("【相关对话片段】")
                 for l3 in retrieval["l3_fragments"]:
@@ -70,6 +67,13 @@ class SupervisorAgent:
             if retrieval.get("session_graphs"):
                 sections.append("【相关图记忆】")
                 sections.extend(item.get("memory", "") for item in retrieval["session_graphs"])
+
+            if retrieval.get("graph_relations"):
+                sections.append("【相关图关系】")
+                sections.extend(
+                    f"- {item.get('source', '')} --{item.get('relationship', '')}--> {item.get('target', '')}"
+                    for item in retrieval["graph_relations"]
+                )
 
             context_text = "\n".join(sections).strip()
 

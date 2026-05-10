@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import tempfile
 import time
 from contextlib import contextmanager
 from copy import deepcopy
@@ -22,6 +23,9 @@ from typing import Any, Dict, Iterator, List, Optional
 import torch
 from dotenv import load_dotenv
 
+os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
+os.environ.setdefault("POSTHOG_DISABLED", "true")
+
 try:
     from mem0 import Memory
 except ImportError:  # pragma: no cover
@@ -32,6 +36,30 @@ from utils.model_client import ChatClientProtocol, build_chat_client, resolve_mo
 
 
 logger = logging.getLogger(__name__)
+
+
+def _is_safe_local_path(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return False
+    try:
+        path = Path(text).expanduser()
+    except Exception:
+        return False
+    if not path.is_absolute():
+        return False
+    return all(ord(ch) < 128 for ch in str(path))
+
+
+def _runtime_store_path(env_value: str, *, name: str, suffix: str = "") -> str:
+    candidate = str(env_value or "").strip()
+    if _is_safe_local_path(candidate):
+        return str(Path(candidate).expanduser())
+    root = Path(tempfile.gettempdir()) / "MemAgent"
+    root.mkdir(parents=True, exist_ok=True)
+    target = root / f"{name}{suffix}"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    return str(target)
 
 
 L3_FACT_EXTRACTION_PROMPT = """You are a memory extraction assistant for long-term conversation memory.
@@ -150,7 +178,9 @@ class Mem0Adapter:
         self._mem0_llm_api_key = os.getenv("MEM0_LLM_API_KEY") or os.getenv("OPENAI_API_KEY")
         self._mem0_llm_base_url = os.getenv("MEM0_LLM_BASE_URL") or os.getenv("OPENAI_BASE_URL")
         self._mem0_llm_model = os.getenv("MEM0_LLM_MODEL") or os.getenv("OPENAI_MODEL", "gpt-5.4")
-        self._graph_db_path = os.getenv("KUZU_DB_PATH", "./mem0_kuzu_db")
+        self._graph_db_path = _runtime_store_path(os.getenv("KUZU_DB_PATH", ""), name="mem0_kuzu_db")
+        self._chroma_db_path = _runtime_store_path(os.getenv("CHROMA_DB_PATH", ""), name="chroma_db")
+        self._history_db_path = _runtime_store_path(os.getenv("MEM0_HISTORY_DB", ""), name="mem0_history", suffix=".db")
         self._graph_threshold = float(os.getenv("MEM0_GRAPH_THRESHOLD", "0.7"))
         self._graph_toggle_lock = RLock()
         self._io_lock = RLock()
@@ -196,10 +226,10 @@ class Mem0Adapter:
                 "provider": "chroma",
                 "config": {
                     "collection_name": os.getenv("MEM0_COLLECTION_NAME", "mem0_empathy_collection"),
-                    "path": os.getenv("CHROMA_DB_PATH", "./chroma_db"),
+                    "path": self._chroma_db_path,
                 },
             },
-            "history_db_path": os.getenv("MEM0_HISTORY_DB", "./mem0_history.db"),
+            "history_db_path": self._history_db_path,
         }
 
         self._memory_client = self._initialize_memory_client(config)
@@ -310,7 +340,11 @@ class Mem0Adapter:
                     },
                 )
         except Exception as exc:
-            logger.error("Failed to ingest session graph into Kuzu for session %s: %s", session_id, exc)
+            logger.info(
+                "Kuzu graph ingest is unavailable for session %s; vector graph memories remain available: %s",
+                session_id,
+                exc,
+            )
 
     def add_graph_data(
         self,
@@ -342,6 +376,25 @@ class Mem0Adapter:
             run_id=session_id,
             metadata={"memory_type": "session_graph"},
         )
+        for relation in graph_data.get("relations", []) or []:
+            if not isinstance(relation, dict):
+                continue
+            relation_text = (
+                f"图关系: {relation.get('source', '')} --{relation.get('relation', '')}--> "
+                f"{relation.get('destination', '')}"
+            ).strip()
+            if relation_text:
+                self._vector_only_add(
+                    relation_text,
+                    user_id=user_id,
+                    run_id=session_id,
+                    metadata={
+                        "memory_type": "graph_relation",
+                        "source": relation.get("source", ""),
+                        "relation": relation.get("relation", ""),
+                        "destination": relation.get("destination", ""),
+                    },
+                )
         self._ingest_session_graph(source_text or graph_description, user_id=user_id, session_id=session_id)
         logger.info(
             "Stored graph for session %s: %s entities, %s relations",
@@ -633,10 +686,61 @@ class Mem0Adapter:
         summaries.sort(key=lambda item: item.get("start_time", ""), reverse=True)
         return summaries[:limit]
 
+    def _print_retrieval_debug(
+        self,
+        *,
+        user_id: str,
+        query: str,
+        l3_fragments: List[Dict[str, Any]],
+        session_graphs: List[Dict[str, Any]],
+        graph_relations: List[Dict[str, Any]],
+        limit: int,
+    ) -> None:
+        enabled = os.getenv("MEMAGENT_DEBUG_RETRIEVAL", "1").strip().lower()
+        if enabled in {"0", "false", "no", "off"}:
+            return
+
+        print("\n" + "=" * 72, flush=True)
+        print(f"[MemAgent Retrieval] user={user_id} limit={limit}", flush=True)
+        print(f"[Query] {query}", flush=True)
+
+        def _score_text(item: Dict[str, Any]) -> str:
+            score = item.get("score")
+            return "score=N/A" if score is None else f"score={score}"
+
+        print(f"\n[L3 片段记忆] count={len(l3_fragments[:limit])}", flush=True)
+        for index, item in enumerate(l3_fragments[:limit], start=1):
+            timestamp = (item.get("timestamp") or "")[:19]
+            session_id = item.get("session_id") or ""
+            print(
+                f"{index}. {_score_text(item)} session={session_id} time={timestamp}\n"
+                f"   {item.get('memory', '')}",
+                flush=True,
+            )
+
+        print(f"\n[session_graph 图记忆] count={len(session_graphs[:limit])}", flush=True)
+        for index, item in enumerate(session_graphs[:limit], start=1):
+            session_id = item.get("session_id") or ""
+            print(
+                f"{index}. {_score_text(item)} session={session_id}\n"
+                f"   {item.get('memory', '')}",
+                flush=True,
+            )
+
+        print(f"\n[graph_relations 图关系] count={len(graph_relations[:limit])}", flush=True)
+        for index, item in enumerate(graph_relations[:limit], start=1):
+            if item.get("source") or item.get("target"):
+                print(
+                    f"{index}. {item.get('source', '')} --{item.get('relationship', '')}--> {item.get('target', '')}",
+                    flush=True,
+                )
+            else:
+                print(f"{index}. {item.get('memory', '')}", flush=True)
+        print("=" * 72 + "\n", flush=True)
+
     def search_relevant_context(self, user_id: str, query: str, limit: int = 3) -> Dict[str, Any]:
         search_limit = max(limit * 4, 12)
         vector_results: List[Dict[str, Any]] = []
-        l2_summaries: List[Dict[str, Any]] = []
         session_graphs: List[Dict[str, Any]] = []
         graph_relations: List[Dict[str, Any]] = []
 
@@ -656,13 +760,13 @@ class Mem0Adapter:
                     payload["timestamp"] = metadata.get("timestamp")
                     payload["turn_index"] = metadata.get("turn_index")
                     vector_results.append(payload)
-                elif memory_type == "l2_summary":
-                    payload["topic"] = metadata.get("topic", "")
-                    payload["start_time"] = metadata.get("start_time")
-                    payload["summary"] = item.get("memory", "")
-                    l2_summaries.append(payload)
                 elif memory_type == "session_graph":
                     session_graphs.append(payload)
+                elif memory_type == "graph_relation":
+                    payload["source"] = metadata.get("source", "")
+                    payload["relationship"] = metadata.get("relation", "")
+                    payload["target"] = metadata.get("destination", "")
+                    graph_relations.append(payload)
 
             for relation in results.get("relations", []) or []:
                 if not isinstance(relation, dict):
@@ -675,56 +779,45 @@ class Mem0Adapter:
                     }
                 )
         except Exception as exc:
-            logger.error("Vector/graph search error: %s", exc)
-
-        session_ids = list(
-            {
-                item["session_id"]
-                for item in [*vector_results, *l2_summaries, *session_graphs]
-                if item.get("session_id")
-            }
-        )
-        if session_ids:
+            logger.info("Full vector/graph search failed; falling back to vector-only search: %s", exc)
             try:
-                with self._io_serialized():
-                    all_memories = self.client.get_all(user_id=user_id, limit=100)
-                for memory in all_memories.get("results", []):
-                    metadata = memory.get("metadata", {})
-                    if metadata.get("memory_type") != "l2_summary":
-                        continue
-                    if memory.get("run_id") not in session_ids:
-                        continue
-                    if any(item.get("session_id") == memory.get("run_id") for item in l2_summaries):
-                        continue
-                    l2_summaries.append(
-                        {
-                            "session_id": memory.get("run_id"),
-                            "summary": memory.get("memory", ""),
-                            "topic": metadata.get("topic", ""),
-                            "score": None,
-                            "start_time": metadata.get("start_time"),
-                        }
-                    )
-            except Exception as exc:
-                logger.error("Failed to fetch linked L2 summaries: %s", exc)
+                with self._io_serialized(), self._graph_temporarily_disabled():
+                    fallback_results = self.client.search(query, user_id=user_id, limit=search_limit)
+                for item in fallback_results.get("results", []):
+                    metadata = item.get("metadata", {})
+                    memory_type = metadata.get("memory_type")
+                    payload = {
+                        "memory": item.get("memory", ""),
+                        "score": item.get("score"),
+                        "session_id": metadata.get("session_id") or item.get("run_id"),
+                    }
+                    if memory_type == "l3_fragment":
+                        payload["timestamp"] = metadata.get("timestamp")
+                        payload["turn_index"] = metadata.get("turn_index")
+                        vector_results.append(payload)
+                    elif memory_type == "session_graph":
+                        session_graphs.append(payload)
+                    elif memory_type == "graph_relation":
+                        payload["source"] = metadata.get("source", "")
+                        payload["relationship"] = metadata.get("relation", "")
+                        payload["target"] = metadata.get("destination", "")
+                        graph_relations.append(payload)
+            except Exception as fallback_exc:
+                logger.error("Fallback vector-only search failed: %s", fallback_exc)
 
-        l2_summaries.sort(
-            key=lambda item: (
-                item.get("score") is None,
-                -(item.get("score") or 0),
-                item.get("start_time") or "",
-            )
-        )
         vector_results.sort(key=lambda item: -(item.get("score") or 0))
         session_graphs.sort(key=lambda item: -(item.get("score") or 0))
+        graph_relations.sort(key=lambda item: -(item.get("score") or 0))
+        self._print_retrieval_debug(
+            user_id=user_id,
+            query=query,
+            l3_fragments=vector_results,
+            session_graphs=session_graphs,
+            graph_relations=graph_relations,
+            limit=limit,
+        )
 
         sections: List[str] = []
-        if l2_summaries:
-            sections.append("【相关历史会话摘要】")
-            sections.extend(
-                f"- {item.get('topic', '')}: {item.get('memory') or item.get('summary', '')}"
-                for item in l2_summaries[:limit]
-            )
         if vector_results:
             sections.append("【相关对话片段】")
             sections.extend(
@@ -741,14 +834,17 @@ class Mem0Adapter:
         if graph_relations:
             sections.append("【相关图关系】")
             sections.extend(
-                f"- {item.get('source', '')} --{item.get('relationship', '')}--> {item.get('target', '')}"
+                (
+                    f"- {item.get('source', '')} --{item.get('relationship', '')}--> {item.get('target', '')}"
+                    if item.get("source") or item.get("target")
+                    else f"- {item.get('memory', '')}"
+                )
                 for item in graph_relations[:limit]
             )
 
         return {
             "context_text": "\n".join(sections).strip(),
             "l3_fragments": vector_results[:limit],
-            "l2_summaries": l2_summaries[:limit],
             "session_graphs": session_graphs[:limit],
             "graph_relations": graph_relations[:limit],
         }

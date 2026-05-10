@@ -6,7 +6,7 @@ import threading
 import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Protocol, Tuple
+from typing import Dict, Iterator, List, Optional, Protocol, Tuple
 
 import torch
 from dotenv import load_dotenv
@@ -23,6 +23,9 @@ class ChatClientProtocol(Protocol):
         messages: ChatMessages,
         print_stream: bool = False,
     ) -> Tuple[str, Optional[Dict[str, object]]]:
+        ...
+
+    def stream_chat(self, messages: ChatMessages) -> Iterator[str]:
         ...
 
 
@@ -325,6 +328,69 @@ class _SharedLocalModel:
         }
         return text, usage
 
+    def stream_generate(
+        self,
+        messages: ChatMessages,
+        *,
+        max_new_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> Iterator[str]:
+        self.load()
+        assert self.model is not None
+        assert self.tokenizer is not None
+
+        try:
+            from transformers import TextIteratorStreamer
+        except ImportError as exc:
+            raise ImportError(
+                "transformers is required for local model streaming inference. Please install it first."
+            ) from exc
+
+        prompt = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+        inputs = self.tokenizer(prompt, return_tensors="pt")
+        inputs = {key: value.to(self.device) for key, value in inputs.items()}
+
+        do_sample = temperature > 0
+        generation_kwargs = {
+            "max_new_tokens": max_new_tokens,
+            "pad_token_id": self.tokenizer.pad_token_id,
+            "eos_token_id": self.tokenizer.eos_token_id,
+            "do_sample": do_sample,
+            "streamer": TextIteratorStreamer(
+                self.tokenizer,
+                skip_prompt=True,
+                skip_special_tokens=True,
+            ),
+        }
+        if do_sample:
+            generation_kwargs["temperature"] = temperature
+            generation_kwargs["top_p"] = top_p
+
+        streamer = generation_kwargs["streamer"]
+        error_holder: List[BaseException] = []
+
+        def _run_generation() -> None:
+            try:
+                with self._generate_lock:
+                    with torch.no_grad():
+                        self.model.generate(**inputs, **generation_kwargs)
+            except BaseException as exc:
+                error_holder.append(exc)
+
+        thread = threading.Thread(target=_run_generation, daemon=True)
+        thread.start()
+        for piece in streamer:
+            if piece:
+                yield piece
+        thread.join()
+        if error_holder:
+            raise error_holder[0]
+
 
 @dataclass
 class LocalChatClient:
@@ -353,6 +419,27 @@ class LocalChatClient:
             print(text)
         return text, usage
 
+    def stream_chat(self, messages: ChatMessages) -> Iterator[str]:
+        yield from self.runtime.stream_generate(
+            messages,
+            max_new_tokens=self.max_new_tokens,
+            temperature=self.temperature,
+            top_p=self.top_p,
+        )
+
+    def warmup(self) -> None:
+        list(
+            self.runtime.stream_generate(
+                [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": "ping"},
+                ],
+                max_new_tokens=1,
+                temperature=0.0,
+                top_p=1.0,
+            )
+        )
+
 
 def build_chat_client(
     component_name: str,
@@ -365,6 +452,7 @@ def build_chat_client(
     base_url: Optional[str] = None,
     api_key: Optional[str] = None,
     model: Optional[str] = None,
+    max_new_tokens: Optional[int] = None,
 ) -> ChatClientProtocol:
     resolved_backend = resolve_model_backend(component_name, explicit_backend=backend, default="gpt")
     if resolved_backend in LOCAL_MODEL_PRESETS:
@@ -372,6 +460,7 @@ def build_chat_client(
         return LocalChatClient(
             model_path=local_model_path or preset["model_path"] or default_local_model_path(),
             base_model_path=local_base_model_path or preset["base_model_path"],
+            max_new_tokens=max_new_tokens or 1024,
         )
 
     resolved_mode = resolve_model_mode(component_name, explicit_mode=mode, default=default_mode)
@@ -379,10 +468,12 @@ def build_chat_client(
         return LocalChatClient(
             model_path=resolve_local_model_path(component_name, explicit_path=local_model_path),
             base_model_path=resolve_local_base_model_path(component_name, explicit_path=local_base_model_path),
+            max_new_tokens=max_new_tokens or 1024,
         )
 
     return OpenAIChatClient(
         base_url=base_url or os.getenv(f"{component_name}_BASE_URL", "") or os.getenv("OPENAI_BASE_URL", ""),
         api_key=api_key or os.getenv(f"{component_name}_API_KEY", "") or os.getenv("OPENAI_API_KEY", ""),
         model=model or os.getenv(f"{component_name}_MODEL", "") or os.getenv("OPENAI_MODEL", "gpt-5.4"),
+        max_tokens=max_new_tokens or 1024,
     )

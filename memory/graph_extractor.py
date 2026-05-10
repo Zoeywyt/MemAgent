@@ -56,6 +56,7 @@ class GraphExtractor:
             base_url=self.base_url,
             api_key=self.api_key,
             model=self.model,
+            max_new_tokens=512,
         )
 
     def extract_graph(self, conversation_text: str, user_id: str = "user") -> Dict[str, Any]:
@@ -110,7 +111,7 @@ class GraphExtractor:
         return data
 
     def _build_instruction(self, user_id: str) -> str:
-        return f"""你是一个心理咨询知识图谱抽取助手。请从来访与咨询师的对话中，抽取可用于记忆检索的实体和关系。
+        return f"""你是一个心理咨询知识图谱抽取助手。请从来访者与咨询师的对话中，抽取可用于记忆检索的实体与关系。
 
 实体类型只允许使用以下类别：
 - user: 来访者，固定使用 {user_id}
@@ -140,9 +141,9 @@ class GraphExtractor:
 
 输出要求：
 - 严格输出 JSON
-- 只能包含两个顶层字段：entities, relations
-- entities 形如 {{"entity": "名称", "entity_type": "类型"}}
-- relations 形如 {{"source": "实体", "relation": "关系", "destination": "实体"}}
+- 只包含两个顶层字段：entities, relations
+- entities 形式如 {{"entity": "名称", "entity_type": "类型"}}
+- relations 形式如 {{"source": "实体", "relation": "关系类型", "destination": "实体"}}
 - 只抽取对话中明确出现或高度可支持的信息
 - 不要输出解释、注释、Markdown
 
