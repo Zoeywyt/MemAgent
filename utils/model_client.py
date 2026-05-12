@@ -6,9 +6,8 @@ import threading
 import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Protocol, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple
 
-import torch
 from dotenv import load_dotenv
 
 from utils.openai_client import OpenAIChatClient
@@ -52,6 +51,30 @@ LOCAL_MODEL_PRESETS: Dict[str, Dict[str, str]] = {
     },
 }
 
+REMOTE_API_PRESETS: Dict[str, Dict[str, str]] = {
+    "deepseek": {
+        "base_url_env": "DEEPSEEK_BASE_URL",
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "model_env": "DEEPSEEK_MODEL",
+        "base_url": "https://api.deepseek.com",
+        "model": "deepseek-chat",
+    },
+    "qwen": {
+        "base_url_env": "QWEN_BASE_URL",
+        "api_key_env": "QWEN_API_KEY",
+        "model_env": "QWEN_MODEL",
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "model": "qwen-plus",
+    },
+    "kimi": {
+        "base_url_env": "KIMI_BASE_URL",
+        "api_key_env": "KIMI_API_KEY",
+        "model_env": "KIMI_MODEL",
+        "base_url": "https://api.moonshot.cn/v1",
+        "model": "moonshot-v1-8k",
+    },
+}
+
 
 def _normalize_mode(mode: Optional[str], default: str = "remote") -> str:
     value = (mode or default).strip().lower()
@@ -87,6 +110,13 @@ def _normalize_backend(backend: Optional[str], default: str = "gpt") -> str:
         "qwen25o7b": "qwen7b",
         "qwen25-7b": "qwen7b",
         "qwen25-7binstruct": "qwen7b",
+        "deepseek": "deepseek",
+        "moonshot": "kimi",
+        "kimi": "kimi",
+        "qwen": "qwen",
+        "qwenapi": "qwen",
+        "qwenplus": "qwen",
+        "dashscope": "qwen",
     }
     return aliases.get(value, default)
 
@@ -171,7 +201,17 @@ class _SharedLocalModel:
         self._loaded = False
         self.model = None
         self.tokenizer = None
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._torch: Any = None
+        self.device = None
+
+    def _ensure_torch(self) -> Any:
+        if self._torch is None:
+            import torch
+
+            self._torch = torch
+        if self.device is None:
+            self.device = self._torch.device("cuda" if self._torch.cuda.is_available() else "cpu")
+        return self._torch
 
     def load(self) -> None:
         if self._loaded:
@@ -185,6 +225,7 @@ class _SharedLocalModel:
             if not model_dir.exists():
                 raise FileNotFoundError(f"Local model path does not exist: {self.model_path}")
 
+            torch = self._ensure_torch()
             try:
                 from transformers import AutoModelForCausalLM, AutoTokenizer
             except ImportError as exc:
@@ -315,6 +356,7 @@ class _SharedLocalModel:
             generation_kwargs["top_p"] = top_p
 
         with self._generate_lock:
+            torch = self._ensure_torch()
             with torch.no_grad():
                 output_ids = self.model.generate(**inputs, **generation_kwargs)
 
@@ -377,6 +419,7 @@ class _SharedLocalModel:
         def _run_generation() -> None:
             try:
                 with self._generate_lock:
+                    torch = self._ensure_torch()
                     with torch.no_grad():
                         self.model.generate(**inputs, **generation_kwargs)
             except BaseException as exc:
@@ -461,6 +504,15 @@ def build_chat_client(
             model_path=local_model_path or preset["model_path"] or default_local_model_path(),
             base_model_path=local_base_model_path or preset["base_model_path"],
             max_new_tokens=max_new_tokens or 1024,
+        )
+
+    if resolved_backend in REMOTE_API_PRESETS:
+        preset = REMOTE_API_PRESETS[resolved_backend]
+        return OpenAIChatClient(
+            base_url=base_url or os.getenv(f"{component_name}_BASE_URL", "") or os.getenv(str(preset.get("base_url_env", "")), "") or os.getenv("OPENAI_BASE_URL", "") or preset["base_url"],
+            api_key=api_key or os.getenv(f"{component_name}_API_KEY", "") or os.getenv(str(preset.get("api_key_env", "")), "") or os.getenv("OPENAI_API_KEY", ""),
+            model=model or os.getenv(f"{component_name}_MODEL", "") or os.getenv(str(preset.get("model_env", "")), "") or os.getenv("OPENAI_MODEL", preset["model"]) or preset["model"],
+            max_tokens=max_new_tokens or 1024,
         )
 
     resolved_mode = resolve_model_mode(component_name, explicit_mode=mode, default=default_mode)

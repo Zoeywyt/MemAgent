@@ -1,16 +1,18 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from memory.mem0_adapter import Mem0Adapter
 from prompts.supervisor_prompts import TREATMENT_PROGRESS_PROMPT
 from utils.model_client import ChatClientProtocol, build_chat_client
+
+if TYPE_CHECKING:
+    from memory.mem0_adapter import Mem0Adapter
 
 
 class SupervisorAgent:
     def __init__(
         self,
         user_id: str,
-        mem0: Optional[Mem0Adapter] = None,
+        mem0: Optional["Mem0Adapter"] = None,
         openai_client: Optional[ChatClientProtocol] = None,
         model_backend: Optional[str] = None,
         model_mode: Optional[str] = None,
@@ -35,8 +37,10 @@ class SupervisorAgent:
         )
 
     @property
-    def mem0(self) -> Mem0Adapter:
+    def mem0(self) -> "Mem0Adapter":
         if self._mem0 is None:
+            from memory.mem0_adapter import Mem0Adapter
+
             self._mem0 = Mem0Adapter()
         return self._mem0
 
@@ -49,7 +53,7 @@ class SupervisorAgent:
         return response_text
 
     def retrieve_context_for_response(self, user_input: str) -> Dict[str, Any]:
-        retrieval = self.mem0.search_relevant_context(self.user_id, user_input, limit=3)
+        retrieval = self.mem0.search_relevant_context(self.user_id, user_input, limit=6)
         context_text = retrieval.get("context_text", "")
 
         if not context_text:
@@ -63,10 +67,6 @@ class SupervisorAgent:
                         sections.append(f"[{timestamp}] {l3.get('memory', '')}")
                     else:
                         sections.append(f"{l3.get('memory', '')}")
-
-            if retrieval.get("session_graphs"):
-                sections.append("【相关图记忆】")
-                sections.extend(item.get("memory", "") for item in retrieval["session_graphs"])
 
             if retrieval.get("graph_relations"):
                 sections.append("【相关图关系】")

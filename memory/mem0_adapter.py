@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
+import re
 import tempfile
 import time
 from contextlib import contextmanager
@@ -26,10 +28,13 @@ from dotenv import load_dotenv
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
 os.environ.setdefault("POSTHOG_DISABLED", "true")
 
+_MEM0_IMPORT_ERROR: Optional[BaseException] = None
+
 try:
     from mem0 import Memory
-except ImportError:  # pragma: no cover
+except BaseException as exc:  # pragma: no cover
     Memory = None  # type: ignore[assignment]
+    _MEM0_IMPORT_ERROR = exc
 
 from memory.mem0_stream_patch import patch_mem0_openai_streaming
 from utils.model_client import ChatClientProtocol, build_chat_client, resolve_model_mode
@@ -149,8 +154,13 @@ class Mem0Adapter:
     def _initialize(self) -> None:
         load_dotenv()
         if Memory is None:
+            detail = ""
+            if _MEM0_IMPORT_ERROR is not None:
+                detail = f" Original import error: {type(_MEM0_IMPORT_ERROR).__name__}: {_MEM0_IMPORT_ERROR}"
             raise ImportError(
-                "mem0ai is not installed. Please install multi_agent requirements before using Mem0Adapter."
+                "mem0ai is not installed or could not be imported. "
+                "Please install/package MemAgent memory dependencies before using Mem0Adapter."
+                + detail
             )
 
         patch_mem0_openai_streaming()
@@ -182,6 +192,20 @@ class Mem0Adapter:
         self._chroma_db_path = _runtime_store_path(os.getenv("CHROMA_DB_PATH", ""), name="chroma_db")
         self._history_db_path = _runtime_store_path(os.getenv("MEM0_HISTORY_DB", ""), name="mem0_history", suffix=".db")
         self._graph_threshold = float(os.getenv("MEM0_GRAPH_THRESHOLD", "0.7"))
+        self._retrieval_rrf_k = int(os.getenv("MEM0_RRF_K", "60"))
+        self._retrieval_candidate_top_k = int(os.getenv("MEM0_RETRIEVAL_CANDIDATE_TOP_K", "20"))
+        self._bm25_pool_limit = int(os.getenv("MEM0_BM25_POOL_LIMIT", "500"))
+        self._bm25_enabled = os.getenv("MEM0_BM25_ENABLED", "1").strip().lower() not in {"0", "false", "no"}
+        self._rrf_enabled = os.getenv("MEM0_RRF_ENABLED", "1").strip().lower() not in {"0", "false", "no"}
+        self._reranker_setting = os.getenv("MEM0_RERANKER_ENABLED", "auto").strip().lower()
+        self._reranker_model_ref = (
+            os.getenv("MEM0_RERANKER_MODEL_PATH", "").strip()
+            or os.getenv("MEM0_RERANKER_MODEL", "").strip()
+        )
+        self._reranker_tokenizer: Any = None
+        self._reranker_model: Any = None
+        self._reranker_device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._reranker_load_error: Optional[str] = None
         self._graph_toggle_lock = RLock()
         self._io_lock = RLock()
         embedding_model, embedding_kwargs = self._resolve_embedding_config()
@@ -326,6 +350,218 @@ class Mem0Adapter:
         except Exception as exc:
             logger.error("Vector search failed for user %s: %s", user_id, exc)
             return {"results": [], "relations": []}
+
+    def _payload_from_memory_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
+        metadata = item.get("metadata", {}) if isinstance(item.get("metadata", {}), dict) else {}
+        memory_type = metadata.get("memory_type", "")
+        payload: Dict[str, Any] = {
+            "id": item.get("id") or item.get("memory_id"),
+            "memory": item.get("memory", ""),
+            "score": item.get("score"),
+            "memory_type": memory_type,
+            "session_id": metadata.get("session_id") or item.get("run_id"),
+        }
+        if memory_type == "l3_fragment":
+            payload["timestamp"] = metadata.get("timestamp")
+            payload["turn_index"] = metadata.get("turn_index")
+        elif memory_type == "graph_relation":
+            payload["source"] = metadata.get("source", "")
+            payload["relationship"] = metadata.get("relation", "")
+            payload["target"] = metadata.get("destination", "")
+        return payload
+
+    @staticmethod
+    def _retrieval_key(item: Dict[str, Any]) -> str:
+        explicit_id = str(item.get("id") or "").strip()
+        if explicit_id:
+            return explicit_id
+        return "|".join(
+            [
+                str(item.get("memory_type", "")),
+                str(item.get("session_id", "")),
+                str(item.get("memory", "")),
+                str(item.get("source", "")),
+                str(item.get("relationship", "")),
+                str(item.get("target", "")),
+            ]
+        )
+
+    @staticmethod
+    def _tokenize_for_bm25(text: str) -> List[str]:
+        text = str(text or "").lower()
+        return re.findall(r"[\u4e00-\u9fff]|[a-z0-9_]+", text)
+
+    def _bm25_rank(self, query: str, candidates: List[Dict[str, Any]], limit: int) -> List[Dict[str, Any]]:
+        query_tokens = self._tokenize_for_bm25(query)
+        if not query_tokens or not candidates:
+            return []
+
+        docs = [self._tokenize_for_bm25(str(item.get("memory", ""))) for item in candidates]
+        total_docs = len(docs)
+        avg_len = sum(len(doc) for doc in docs) / max(total_docs, 1)
+        if avg_len <= 0:
+            return []
+
+        doc_freq: Dict[str, int] = {}
+        for doc in docs:
+            for token in set(doc):
+                doc_freq[token] = doc_freq.get(token, 0) + 1
+
+        k1 = 1.5
+        b = 0.75
+        scored: List[Dict[str, Any]] = []
+        for item, doc in zip(candidates, docs):
+            if not doc:
+                continue
+            freqs: Dict[str, int] = {}
+            for token in doc:
+                freqs[token] = freqs.get(token, 0) + 1
+            score = 0.0
+            doc_len = len(doc)
+            for token in query_tokens:
+                tf = freqs.get(token, 0)
+                if not tf:
+                    continue
+                df = doc_freq.get(token, 0)
+                idf = math.log(1 + (total_docs - df + 0.5) / (df + 0.5))
+                denom = tf + k1 * (1 - b + b * doc_len / avg_len)
+                score += idf * (tf * (k1 + 1) / denom)
+            if score > 0:
+                payload = dict(item)
+                payload["bm25_score"] = score
+                scored.append(payload)
+        scored.sort(key=lambda item: -float(item.get("bm25_score", 0) or 0))
+        return scored[:limit]
+
+    def _bm25_search(self, user_id: str, query: str, *, memory_type: str, limit: int) -> List[Dict[str, Any]]:
+        if not self._bm25_enabled:
+            return []
+        try:
+            with self._io_serialized(), self._graph_temporarily_disabled():
+                all_memories = self.client.get_all(user_id=user_id, limit=self._bm25_pool_limit)
+        except Exception as exc:
+            logger.info("BM25 candidate load failed for user %s: %s", user_id, exc)
+            return []
+
+        candidates: List[Dict[str, Any]] = []
+        for item in all_memories.get("results", []) or []:
+            if not isinstance(item, dict):
+                continue
+            payload = self._payload_from_memory_item(item)
+            if payload.get("memory_type") == memory_type and str(payload.get("memory", "")).strip():
+                candidates.append(payload)
+        return self._bm25_rank(query, candidates, limit=limit)
+
+    def _rrf_fuse(self, ranked_lists: List[List[Dict[str, Any]]], *, top_k: int) -> List[Dict[str, Any]]:
+        if not self._rrf_enabled:
+            merged: Dict[str, Dict[str, Any]] = {}
+            for ranked in ranked_lists:
+                for item in ranked:
+                    key = self._retrieval_key(item)
+                    current = merged.get(key)
+                    if current is None or float(item.get("score") or item.get("bm25_score") or 0) > float(
+                        current.get("score") or current.get("bm25_score") or 0
+                    ):
+                        merged[key] = dict(item)
+            return sorted(merged.values(), key=lambda item: -float(item.get("score") or item.get("bm25_score") or 0))[:top_k]
+
+        fused: Dict[str, Dict[str, Any]] = {}
+        for source_index, ranked in enumerate(ranked_lists):
+            source_name = "vector" if source_index == 0 else "bm25"
+            for rank, item in enumerate(ranked, start=1):
+                key = self._retrieval_key(item)
+                record = fused.setdefault(key, dict(item))
+                record["rrf_score"] = float(record.get("rrf_score", 0) or 0) + 1.0 / (self._retrieval_rrf_k + rank)
+                sources = set(record.get("retrieval_sources", []))
+                sources.add(source_name)
+                record["retrieval_sources"] = sorted(sources)
+                if item.get("score") is not None:
+                    record["vector_score"] = item.get("score")
+                if item.get("bm25_score") is not None:
+                    record["bm25_score"] = item.get("bm25_score")
+        return sorted(fused.values(), key=lambda item: -float(item.get("rrf_score", 0) or 0))[:top_k]
+
+    def _resolve_reranker_model_ref(self) -> str:
+        if self._reranker_model_ref:
+            configured = Path(self._reranker_model_ref).expanduser()
+            if configured.is_absolute():
+                return str(configured)
+            project_candidate = Path(__file__).resolve().parents[1] / configured
+            if project_candidate.exists():
+                return str(project_candidate.resolve())
+            return self._reranker_model_ref
+        project_default = Path(__file__).resolve().parents[1] / "models" / "bge-reranker-base"
+        if project_default.exists():
+            return str(project_default.resolve())
+        return ""
+
+    def _ensure_reranker(self) -> bool:
+        if self._reranker_model is not None and self._reranker_tokenizer is not None:
+            return True
+        if self._reranker_load_error:
+            return False
+        model_ref = self._resolve_reranker_model_ref()
+        if self._reranker_setting in {"0", "false", "no", "off"}:
+            self._reranker_load_error = "disabled"
+            return False
+        if not model_ref and self._reranker_setting == "auto":
+            self._reranker_load_error = "no local reranker configured"
+            return False
+        if not model_ref:
+            model_ref = "BAAI/bge-reranker-base"
+        try:
+            from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+            model_path = Path(model_ref).expanduser()
+            local_files_only = model_path.exists()
+            self._reranker_tokenizer = AutoTokenizer.from_pretrained(model_ref, local_files_only=local_files_only)
+            self._reranker_model = AutoModelForSequenceClassification.from_pretrained(
+                model_ref,
+                local_files_only=local_files_only,
+            ).to(self._reranker_device)
+            self._reranker_model.eval()
+            logger.info("Cross-Encoder reranker loaded: %s", model_ref)
+            return True
+        except Exception as exc:
+            self._reranker_load_error = str(exc)
+            logger.warning("Cross-Encoder reranker unavailable; using RRF order only: %s", exc)
+            return False
+
+    def _cross_encoder_rerank(self, query: str, candidates: List[Dict[str, Any]], *, top_k: int) -> List[Dict[str, Any]]:
+        if not candidates or not self._ensure_reranker():
+            return candidates[:top_k]
+        try:
+            pairs = [(query, str(item.get("memory", ""))) for item in candidates]
+            scores: List[float] = []
+            batch_size = int(os.getenv("MEM0_RERANKER_BATCH_SIZE", "8"))
+            with torch.no_grad():
+                for start in range(0, len(pairs), batch_size):
+                    batch = pairs[start : start + batch_size]
+                    inputs = self._reranker_tokenizer(
+                        [pair[0] for pair in batch],
+                        [pair[1] for pair in batch],
+                        padding=True,
+                        truncation=True,
+                        max_length=int(os.getenv("MEM0_RERANKER_MAX_LENGTH", "512")),
+                        return_tensors="pt",
+                    )
+                    inputs = {key: value.to(self._reranker_device) for key, value in inputs.items()}
+                    logits = self._reranker_model(**inputs).logits
+                    if logits.ndim == 2 and logits.shape[-1] > 1:
+                        batch_scores = logits[:, -1]
+                    else:
+                        batch_scores = logits.reshape(-1)
+                    scores.extend(float(score) for score in batch_scores.detach().cpu().tolist())
+            reranked = []
+            for item, score in zip(candidates, scores):
+                payload = dict(item)
+                payload["rerank_score"] = score
+                reranked.append(payload)
+            reranked.sort(key=lambda item: -float(item.get("rerank_score", 0) or 0))
+            return reranked[:top_k]
+        except Exception as exc:
+            logger.warning("Cross-Encoder rerank failed; using RRF order only: %s", exc)
+            return candidates[:top_k]
 
     def _ingest_session_graph(self, graph_text: str, user_id: str, session_id: str) -> None:
         if not getattr(self.client, "enable_graph", False):
@@ -705,8 +941,18 @@ class Mem0Adapter:
         print(f"[Query] {query}", flush=True)
 
         def _score_text(item: Dict[str, Any]) -> str:
-            score = item.get("score")
-            return "score=N/A" if score is None else f"score={score}"
+            parts = []
+            for key in ["rerank_score", "rrf_score", "vector_score", "bm25_score", "score"]:
+                value = item.get(key)
+                if value is not None:
+                    try:
+                        parts.append(f"{key}={float(value):.4f}")
+                    except (TypeError, ValueError):
+                        parts.append(f"{key}={value}")
+            sources = item.get("retrieval_sources")
+            if sources:
+                parts.append(f"sources={','.join(str(source) for source in sources)}")
+            return " ".join(parts) if parts else "score=N/A"
 
         print(f"\n[L3 片段记忆] count={len(l3_fragments[:limit])}", flush=True)
         for index, item in enumerate(l3_fragments[:limit], start=1):
@@ -714,15 +960,6 @@ class Mem0Adapter:
             session_id = item.get("session_id") or ""
             print(
                 f"{index}. {_score_text(item)} session={session_id} time={timestamp}\n"
-                f"   {item.get('memory', '')}",
-                flush=True,
-            )
-
-        print(f"\n[session_graph 图记忆] count={len(session_graphs[:limit])}", flush=True)
-        for index, item in enumerate(session_graphs[:limit], start=1):
-            session_id = item.get("session_id") or ""
-            print(
-                f"{index}. {_score_text(item)} session={session_id}\n"
                 f"   {item.get('memory', '')}",
                 flush=True,
             )
@@ -738,7 +975,7 @@ class Mem0Adapter:
                 print(f"{index}. {item.get('memory', '')}", flush=True)
         print("=" * 72 + "\n", flush=True)
 
-    def search_relevant_context(self, user_id: str, query: str, limit: int = 3) -> Dict[str, Any]:
+    def search_relevant_context(self, user_id: str, query: str, limit: int = 6) -> Dict[str, Any]:
         search_limit = max(limit * 4, 12)
         vector_results: List[Dict[str, Any]] = []
         session_graphs: List[Dict[str, Any]] = []
@@ -748,24 +985,15 @@ class Mem0Adapter:
             with self._io_serialized():
                 results = self.client.search(query, user_id=user_id, limit=search_limit)
             for item in results.get("results", []):
-                metadata = item.get("metadata", {})
+                metadata = item.get("metadata", {}) if isinstance(item.get("metadata", {}), dict) else {}
                 memory_type = metadata.get("memory_type")
-                payload = {
-                    "memory": item.get("memory", ""),
-                    "score": item.get("score"),
-                    "session_id": metadata.get("session_id") or item.get("run_id"),
-                }
+                payload = self._payload_from_memory_item(item)
 
                 if memory_type == "l3_fragment":
-                    payload["timestamp"] = metadata.get("timestamp")
-                    payload["turn_index"] = metadata.get("turn_index")
                     vector_results.append(payload)
                 elif memory_type == "session_graph":
                     session_graphs.append(payload)
                 elif memory_type == "graph_relation":
-                    payload["source"] = metadata.get("source", "")
-                    payload["relationship"] = metadata.get("relation", "")
-                    payload["target"] = metadata.get("destination", "")
                     graph_relations.append(payload)
 
             for relation in results.get("relations", []) or []:
@@ -773,6 +1001,12 @@ class Mem0Adapter:
                     continue
                 graph_relations.append(
                     {
+                        "memory_type": "graph_relation",
+                        "memory": (
+                            f"图关系: {relation.get('source', '')} --"
+                            f"{relation.get('relationship', relation.get('relation', ''))}--> "
+                            f"{relation.get('target', relation.get('destination', ''))}"
+                        ),
                         "source": relation.get("source", ""),
                         "relationship": relation.get("relationship", relation.get("relation", "")),
                         "target": relation.get("target", relation.get("destination", "")),
@@ -784,23 +1018,14 @@ class Mem0Adapter:
                 with self._io_serialized(), self._graph_temporarily_disabled():
                     fallback_results = self.client.search(query, user_id=user_id, limit=search_limit)
                 for item in fallback_results.get("results", []):
-                    metadata = item.get("metadata", {})
+                    metadata = item.get("metadata", {}) if isinstance(item.get("metadata", {}), dict) else {}
                     memory_type = metadata.get("memory_type")
-                    payload = {
-                        "memory": item.get("memory", ""),
-                        "score": item.get("score"),
-                        "session_id": metadata.get("session_id") or item.get("run_id"),
-                    }
+                    payload = self._payload_from_memory_item(item)
                     if memory_type == "l3_fragment":
-                        payload["timestamp"] = metadata.get("timestamp")
-                        payload["turn_index"] = metadata.get("turn_index")
                         vector_results.append(payload)
                     elif memory_type == "session_graph":
                         session_graphs.append(payload)
                     elif memory_type == "graph_relation":
-                        payload["source"] = metadata.get("source", "")
-                        payload["relationship"] = metadata.get("relation", "")
-                        payload["target"] = metadata.get("destination", "")
                         graph_relations.append(payload)
             except Exception as fallback_exc:
                 logger.error("Fallback vector-only search failed: %s", fallback_exc)
@@ -808,45 +1033,71 @@ class Mem0Adapter:
         vector_results.sort(key=lambda item: -(item.get("score") or 0))
         session_graphs.sort(key=lambda item: -(item.get("score") or 0))
         graph_relations.sort(key=lambda item: -(item.get("score") or 0))
+
+        bm25_l3 = self._bm25_search(user_id, query, memory_type="l3_fragment", limit=search_limit)
+        bm25_graph_relations = self._bm25_search(user_id, query, memory_type="graph_relation", limit=search_limit)
+        vector_evidence = vector_results + graph_relations
+        bm25_evidence = bm25_l3 + bm25_graph_relations
+        fused_evidence = self._rrf_fuse(
+            [vector_evidence, bm25_evidence],
+            top_k=self._retrieval_candidate_top_k,
+        )
+        reranked_evidence = self._cross_encoder_rerank(query, fused_evidence, top_k=limit)
+        reranked_l3 = [item for item in reranked_evidence if item.get("memory_type") == "l3_fragment"]
+        reranked_graph_relations = [item for item in reranked_evidence if item.get("memory_type") == "graph_relation"]
+
         self._print_retrieval_debug(
             user_id=user_id,
             query=query,
-            l3_fragments=vector_results,
+            l3_fragments=reranked_l3,
             session_graphs=session_graphs,
-            graph_relations=graph_relations,
+            graph_relations=reranked_graph_relations,
             limit=limit,
         )
 
         sections: List[str] = []
-        if vector_results:
-            sections.append("【相关对话片段】")
-            sections.extend(
-                (
-                    f"[{(item.get('timestamp') or '')[:10]}] {item.get('memory', '')}"
-                    if item.get("timestamp")
-                    else item.get("memory", "")
-                )
-                for item in vector_results[:limit]
-            )
-        if session_graphs:
-            sections.append("【相关图记忆】")
-            sections.extend(item.get("memory", "") for item in session_graphs[:limit])
-        if graph_relations:
-            sections.append("【相关图关系】")
-            sections.extend(
-                (
-                    f"- {item.get('source', '')} --{item.get('relationship', '')}--> {item.get('target', '')}"
-                    if item.get("source") or item.get("target")
-                    else f"- {item.get('memory', '')}"
-                )
-                for item in graph_relations[:limit]
-            )
+        if reranked_evidence:
+            sections.append("【相关索引依据】")
+            for index, item in enumerate(reranked_evidence[:limit], start=1):
+                if item.get("memory_type") == "graph_relation" or item.get("source") or item.get("target"):
+                    text = (
+                        f"{item.get('source', '')} --{item.get('relationship', '')}--> {item.get('target', '')}"
+                        if item.get("source") or item.get("target")
+                        else str(item.get("memory", "") or "")
+                    )
+                else:
+                    text = (
+                        f"[{(item.get('timestamp') or '')[:10]}] {item.get('memory', '')}"
+                        if item.get("timestamp")
+                        else str(item.get("memory", "") or "")
+                    )
+                if text.strip():
+                    sections.append(f"{index}. {text.strip()}")
 
         return {
             "context_text": "\n".join(sections).strip(),
-            "l3_fragments": vector_results[:limit],
-            "session_graphs": session_graphs[:limit],
-            "graph_relations": graph_relations[:limit],
+            "l3_fragments": reranked_l3,
+            "session_graphs": [],
+            "graph_relations": reranked_graph_relations,
+            "ranked_evidence": reranked_evidence,
+            "retrieval_pipeline": {
+                "vector_top_k": search_limit,
+                "bm25_enabled": self._bm25_enabled,
+                "rrf_enabled": self._rrf_enabled,
+                "rrf_k": self._retrieval_rrf_k,
+                "candidate_top_k": self._retrieval_candidate_top_k,
+                "final_top_k": limit,
+                "cross_encoder_enabled": self._ensure_reranker(),
+                "cross_encoder_error": self._reranker_load_error or "",
+                "l3_vector_candidates": len(vector_results),
+                "l3_bm25_candidates": len(bm25_l3),
+                "graph_vector_candidates": len(graph_relations),
+                "graph_bm25_candidates": len(bm25_graph_relations),
+                "global_vector_candidates": len(vector_evidence),
+                "global_bm25_candidates": len(bm25_evidence),
+                "global_fused_candidates": len(fused_evidence),
+                "global_reranked_evidence": len(reranked_evidence),
+            },
         }
 
     def search_memories(self, user_id: str, query: str, limit: int = 5) -> Dict[str, Any]:

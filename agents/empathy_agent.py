@@ -3,14 +3,16 @@ import json
 import os
 import threading
 import time
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple
 
 from agents.supervisor import SupervisorAgent
 from agents.summary_agent import SummaryAgent
 from memory.graph_extractor import GraphExtractor
-from memory.mem0_adapter import Mem0Adapter
 from output_store import load_user_session_summaries, load_user_trends
 from utils.model_client import ChatClientProtocol, build_chat_client
+
+if TYPE_CHECKING:
+    from memory.mem0_adapter import Mem0Adapter
 
 
 SYSTEM_PROMPT = (
@@ -94,7 +96,7 @@ class EmpathyAgent:
             base_url=base_url,
             model=model,
         )
-        self._mem0: Optional[Mem0Adapter] = None
+        self._mem0: Optional["Mem0Adapter"] = None
         self.graph_extractor = GraphExtractor(
             model_backend=graph_model_backend or model_backend,
             model_mode=graph_model_mode or model_mode,
@@ -158,8 +160,10 @@ class EmpathyAgent:
         threading.Thread(target=_run, daemon=True, name="memagent-local-warmup").start()
 
     @property
-    def mem0(self) -> Mem0Adapter:
+    def mem0(self) -> "Mem0Adapter":
         if self._mem0 is None:
+            from memory.mem0_adapter import Mem0Adapter
+
             self._mem0 = Mem0Adapter()
         return self._mem0
 
@@ -408,6 +412,17 @@ class EmpathyAgent:
             return value.strip().lower() in {"true", "1", "yes", "y"}
         return bool(value)
 
+    def _coerce_confidence(self, value: Any) -> Optional[float]:
+        try:
+            confidence = float(value)
+        except (TypeError, ValueError):
+            return None
+        if confidence < 0:
+            return 0.0
+        if confidence > 1:
+            return confidence / 100.0 if confidence <= 100 else 1.0
+        return confidence
+
     def _print_retrieval_decision_debug(
         self,
         *,
@@ -431,8 +446,11 @@ class EmpathyAgent:
         confidence = decision.get("confidence", "")
         reason = decision.get("reason", "")
         focus = decision.get("retrieval_focus", "")
+        override_reason = decision.get("override_reason", "")
         print(f"confidence={confidence}", flush=True)
         print(f"reason={reason}", flush=True)
+        if override_reason:
+            print(f"override_reason={override_reason}", flush=True)
         print(f"retrieval_focus={focus}", flush=True)
         user_preview = user_input.strip().replace("\n", " ")[:300]
         print(f"user_input={user_preview}", flush=True)
@@ -472,6 +490,10 @@ class EmpathyAgent:
 
         decision = self._parse_retrieval_decision(decision_text)
         need_retrieval = self._coerce_retrieval_bool(decision.get("need_retrieval"))
+        confidence = self._coerce_confidence(decision.get("confidence"))
+        if not need_retrieval and (confidence is None or confidence < 0.6):
+            need_retrieval = True
+            decision["override_reason"] = "router 判为不检索，但置信度低于 0.6，按保守策略执行检索"
         if "retrieval_focus" in decision and isinstance(decision.get("retrieval_focus"), str):
             decision["retrieval_focus"] = str(decision.get("retrieval_focus", "")).strip()
         decision["need_retrieval"] = need_retrieval
