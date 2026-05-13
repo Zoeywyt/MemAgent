@@ -9,11 +9,21 @@ from typing import Dict, Iterable, Iterator, List, Optional, Tuple
 from dotenv import load_dotenv
 
 
+def _repair_bom_env_keys() -> None:
+    for key in list(os.environ.keys()):
+        if key.startswith("\ufeff"):
+            normalized = key.lstrip("\ufeff")
+            if normalized and normalized not in os.environ:
+                os.environ[normalized] = os.environ[key]
+
+
 def auto_load_dotenv(dotenv_path: Optional[str] = None) -> Optional[str]:
     if dotenv_path:
-        load_dotenv(dotenv_path)
+        load_dotenv(dotenv_path, encoding="utf-8-sig")
+        _repair_bom_env_keys()
         return dotenv_path
-    load_dotenv()
+    load_dotenv(encoding="utf-8-sig")
+    _repair_bom_env_keys()
     return os.getenv("DOTENV_PATH")
 
 
