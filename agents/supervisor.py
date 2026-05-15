@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from prompts.supervisor_prompts import TREATMENT_PROGRESS_PROMPT
 from utils.model_client import ChatClientProtocol, build_chat_client
+from utils.model_runtime import call_model
 
 if TYPE_CHECKING:
     from memory.mem0_adapter import Mem0Adapter
@@ -49,7 +50,11 @@ class SupervisorAgent:
             {"role": "system", "content": "你是一位心理咨询督导师，请根据提供的长期总结与会话摘要生成结构化治疗进展报告。"},
             {"role": "user", "content": prompt},
         ]
-        response_text, _usage = self.openai_client.chat(messages=messages)
+        response_text, _usage = call_model(
+            self.openai_client,
+            component="supervisor",
+            messages=messages,
+        )
         return response_text
 
     def retrieve_context_for_response(self, user_input: str) -> Dict[str, Any]:

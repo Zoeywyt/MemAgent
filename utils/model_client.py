@@ -512,6 +512,7 @@ def build_chat_client(
             base_url=base_url or os.getenv(f"{component_name}_BASE_URL", "") or os.getenv(str(preset.get("base_url_env", "")), "") or os.getenv("OPENAI_BASE_URL", "") or preset["base_url"],
             api_key=api_key or os.getenv(f"{component_name}_API_KEY", "") or os.getenv(str(preset.get("api_key_env", "")), "") or os.getenv("OPENAI_API_KEY", ""),
             model=model or os.getenv(f"{component_name}_MODEL", "") or os.getenv(str(preset.get("model_env", "")), "") or os.getenv("OPENAI_MODEL", preset["model"]) or preset["model"],
+            provider=resolved_backend,
             max_tokens=max_new_tokens or 1024,
         )
 
@@ -527,5 +528,6 @@ def build_chat_client(
         base_url=base_url or os.getenv(f"{component_name}_BASE_URL", "") or os.getenv("OPENAI_BASE_URL", ""),
         api_key=api_key or os.getenv(f"{component_name}_API_KEY", "") or os.getenv("OPENAI_API_KEY", ""),
         model=model or os.getenv(f"{component_name}_MODEL", "") or os.getenv("OPENAI_MODEL", "gpt-5.4"),
+        provider="gpt",
         max_tokens=max_new_tokens or 1024,
     )

@@ -53,7 +53,7 @@ def _is_safe_local_path(value: str) -> bool:
         return False
     if not path.is_absolute():
         return False
-    return all(ord(ch) < 128 for ch in str(path))
+    return True
 
 
 def _runtime_store_path(env_value: str, *, name: str, suffix: str = "") -> str:
@@ -563,6 +563,34 @@ class Mem0Adapter:
             logger.warning("Cross-Encoder rerank failed; using RRF order only: %s", exc)
             return candidates[:top_k]
 
+    def _ensure_l3_evidence(
+        self,
+        ranked_evidence: List[Dict[str, Any]],
+        bm25_l3: List[Dict[str, Any]],
+        *,
+        limit: int,
+    ) -> List[Dict[str, Any]]:
+        if any(item.get("memory_type") == "l3_fragment" for item in ranked_evidence):
+            return ranked_evidence[:limit]
+        if not bm25_l3:
+            return ranked_evidence[:limit]
+
+        merged: List[Dict[str, Any]] = []
+        seen = set()
+        for item in [bm25_l3[0], *ranked_evidence]:
+            key = self._retrieval_key(item)
+            if key in seen:
+                continue
+            seen.add(key)
+            payload = dict(item)
+            sources = set(payload.get("retrieval_sources", []))
+            sources.add("bm25")
+            payload["retrieval_sources"] = sorted(sources)
+            merged.append(payload)
+            if len(merged) >= limit:
+                break
+        return merged
+
     def _ingest_session_graph(self, graph_text: str, user_id: str, session_id: str) -> None:
         if not getattr(self.client, "enable_graph", False):
             return
@@ -975,7 +1003,7 @@ class Mem0Adapter:
                 print(f"{index}. {item.get('memory', '')}", flush=True)
         print("=" * 72 + "\n", flush=True)
 
-    def search_relevant_context(self, user_id: str, query: str, limit: int = 6) -> Dict[str, Any]:
+    def search_relevant_context(self, user_id: str, query: str, limit: int = 6, *, debug: bool = True) -> Dict[str, Any]:
         search_limit = max(limit * 4, 12)
         vector_results: List[Dict[str, Any]] = []
         session_graphs: List[Dict[str, Any]] = []
@@ -1043,17 +1071,19 @@ class Mem0Adapter:
             top_k=self._retrieval_candidate_top_k,
         )
         reranked_evidence = self._cross_encoder_rerank(query, fused_evidence, top_k=limit)
+        reranked_evidence = self._ensure_l3_evidence(reranked_evidence, bm25_l3, limit=limit)
         reranked_l3 = [item for item in reranked_evidence if item.get("memory_type") == "l3_fragment"]
         reranked_graph_relations = [item for item in reranked_evidence if item.get("memory_type") == "graph_relation"]
 
-        self._print_retrieval_debug(
-            user_id=user_id,
-            query=query,
-            l3_fragments=reranked_l3,
-            session_graphs=session_graphs,
-            graph_relations=reranked_graph_relations,
-            limit=limit,
-        )
+        if debug:
+            self._print_retrieval_debug(
+                user_id=user_id,
+                query=query,
+                l3_fragments=reranked_l3,
+                session_graphs=session_graphs,
+                graph_relations=reranked_graph_relations,
+                limit=limit,
+            )
 
         sections: List[str] = []
         if reranked_evidence:

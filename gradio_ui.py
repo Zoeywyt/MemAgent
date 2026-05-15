@@ -13,7 +13,7 @@ import hashlib
 import secrets
 import threading
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -55,12 +55,14 @@ from utils.openai_client import auto_load_dotenv
 
 ensure_output_dirs()
 REPORT_DIR = CONSULTING_REPORTS_DIR
+BACKGROUND_FINALIZE_DIR = CURRENT_DIR / "test_outputs" / "background_finalize_jobs"
 BACKGROUND_FINALIZE_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="memagent-finalize")
 BACKGROUND_FINALIZE_LOCK = threading.Lock()
 BACKGROUND_FINALIZE_JOBS: Dict[str, Dict[str, Any]] = {}
 MEMORY_WARMUP_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="memagent-memory-warmup")
 MEMORY_WARMUP_LOCK = threading.Lock()
 MEMORY_WARMUP_FUTURE = None
+MEMORY_WARMUP_DONE = False
 PHONE_CODE_LOCK = threading.Lock()
 PHONE_VERIFICATION_CODES: Dict[str, Dict[str, Any]] = {}
 PHONE_CODE_TTL_SECONDS = int(os.getenv("MEMAGENT_PHONE_CODE_TTL_SECONDS", "300"))
@@ -70,14 +72,15 @@ MODEL_BACKEND_CHOICES = [
     ("DeepSeek", "deepseek"),
     ("Qwen", "qwen"),
     ("Kimi", "kimi"),
-    ("Qwen2.5-3B + 3B LoRA", "qwen3b"),
+]
+
+AGENT_BACKEND_CHOICES = [
+    ("跟随统一 API", "gpt"),
     ("Qwen2.5-7B + 7B LoRA", "qwen7b"),
 ]
 
-AGENT_BACKEND_CHOICES = MODEL_BACKEND_CHOICES
-
 SUMMARY_BACKEND_CHOICES = [
-    ("GPT API", "gpt"),
+    ("跟随统一 API", "gpt"),
     ("Qwen2.5-3B + 3B LoRA", "qwen3b"),
 ]
 
@@ -392,8 +395,32 @@ def _normalize_model_backend(backend: str) -> str:
     return aliases.get(value, "gpt")
 
 
-def _bundle_model_backends(backend: str) -> Dict[str, str]:
+def _normalize_unified_api_backend(backend: str) -> str:
     normalized = _normalize_model_backend(backend)
+    if normalized in REMOTE_API_PRESETS or normalized == "gpt":
+        return normalized
+    return DEFAULT_API_PROVIDER
+
+
+def _normalize_empathy_backend(backend: str) -> str:
+    normalized = _normalize_model_backend(backend)
+    return "qwen7b" if normalized == "qwen7b" else "gpt"
+
+
+def _normalize_summary_backend(backend: str) -> str:
+    normalized = _normalize_model_backend(backend)
+    return "qwen3b" if normalized == "qwen3b" else "gpt"
+
+
+def _effective_backend(unified_api_backend: str, override_backend: str) -> str:
+    override = _normalize_model_backend(override_backend)
+    if override in LOCAL_MODEL_PRESETS:
+        return override
+    return _normalize_unified_api_backend(unified_api_backend)
+
+
+def _bundle_model_backends(backend: str) -> Dict[str, str]:
+    normalized = _normalize_unified_api_backend(backend)
     return {
         "config_model_backend": normalized,
         "config_agent_backend": normalized,
@@ -412,13 +439,18 @@ def _user_config_from_profile(profile: Dict[str, Any]) -> Dict[str, str]:
             config[key] = value
     if config.get("config_api_mode") not in {"own", "trial"}:
         config["config_api_mode"] = "own"
-    selected_model = _normalize_model_backend(config.get("config_agent_backend", "gpt"))
+    selected_model = _normalize_unified_api_backend(config.get("config_api_provider", DEFAULT_API_PROVIDER))
     key_map = _load_model_key_map(config.get("config_model_keys", "{}"))
     legacy_key = str(config.get("config_api_key", "") or "").strip()
     if legacy_key and selected_model not in key_map:
         key_map[selected_model] = legacy_key
     settings = _model_choice_settings(selected_model)
-    config.update(_bundle_model_backends(settings["choice"]))
+    config["config_model_backend"] = settings["choice"]
+    config["config_agent_backend"] = _normalize_empathy_backend(config.get("config_agent_backend", "gpt"))
+    config["config_summary_backend"] = _normalize_summary_backend(config.get("config_summary_backend", "gpt"))
+    config["config_supervisor_backend"] = settings["choice"]
+    config["config_graph_backend"] = settings["choice"]
+    config["config_router_backend"] = settings["choice"]
     config["config_api_provider"] = settings["provider"]
     config["config_api_base_url"] = settings["base_url"]
     config["config_model"] = settings["model"]
@@ -526,7 +558,7 @@ def _normalize_user_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     entry.setdefault("phone_verified_at", "")
     for key, value in DEFAULT_USER_CONFIG.items():
         entry.setdefault(key, value)
-    selected_model = _normalize_model_backend(str(entry.get("config_agent_backend", "gpt") or "gpt"))
+    selected_model = _normalize_unified_api_backend(str(entry.get("config_api_provider", DEFAULT_API_PROVIDER) or DEFAULT_API_PROVIDER))
     key_map = _load_model_key_map(entry.get("config_model_keys", "{}"))
     current_key = str(entry.get("config_api_key", "") or "").strip()
     if current_key and selected_model not in key_map:
@@ -652,7 +684,9 @@ def _verify_phone_code(phone: str, code: str, purpose: str, user_id: str = "") -
 def _server_trial_api_available(provider: str = DEFAULT_API_PROVIDER) -> bool:
     auto_load_dotenv()
     settings = _api_provider_settings(provider)
-    return bool(settings.get("base_url", "").strip() and _api_provider_env_api_key(provider))
+    normalized = _normalize_api_provider(provider)
+    has_base_url = bool(settings.get("base_url", "").strip()) or normalized == "gpt"
+    return bool(has_base_url and _api_provider_env_api_key(provider))
 
 
 def _trial_used_from_profile(profile: Dict[str, Any]) -> int:
@@ -662,14 +696,28 @@ def _trial_used_from_profile(profile: Dict[str, Any]) -> int:
         return 0
 
 
+def _is_trial_mode(profile_or_state: Dict[str, Any]) -> bool:
+    if not isinstance(profile_or_state, dict):
+        return False
+    config = profile_or_state.get("config")
+    if isinstance(config, dict):
+        return str(config.get("api_mode", "own") or "own").strip().lower() == "trial"
+    return str(
+        profile_or_state.get("api_mode", profile_or_state.get("config_api_mode", "own")) or "own"
+    ).strip().lower() == "trial"
+
+
 def _trial_quota_text(profile_or_state: Dict[str, Any]) -> str:
+    if not _is_trial_mode(profile_or_state):
+        return ""
     used = _trial_used_from_profile(profile_or_state)
     remaining = max(TRIAL_SESSION_LIMIT - used, 0)
     return f"试用额度：已使用 {used}/{TRIAL_SESSION_LIMIT} 次会话，剩余 {remaining} 次。"
 
 
 def _trial_quota_message(profile_or_state: Dict[str, Any]) -> str:
-    return _form_message(_trial_quota_text(profile_or_state), "ok")
+    text = _trial_quota_text(profile_or_state)
+    return _form_message(text, "ok") if text else ""
 
 
 def _find_registry_user(user_id: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
@@ -724,6 +772,22 @@ def collect_known_user_ids() -> List[str]:
     return sorted(user_ids)
 
 
+def collect_known_login_names() -> List[str]:
+    names = set()
+    registry = load_user_registry()
+    for item in registry.get("users", []):
+        if not isinstance(item, dict):
+            continue
+        _normalize_user_entry(item)
+        display_name = str(item.get("display_name", "") or "").strip()
+        user_id = str(item.get("user_id", "") or "").strip()
+        if display_name:
+            names.add(display_name)
+        elif user_id:
+            names.add(user_id)
+    return sorted(names)
+
+
 def default_login_user_id(choices: List[str]) -> Optional[str]:
     if "CP224_刘某" in choices:
         return "CP224_刘某"
@@ -733,22 +797,59 @@ def default_login_user_id(choices: List[str]) -> Optional[str]:
     return choices[0] if choices else None
 
 
-def resolve_existing_user_id(raw_value: str) -> str:
-    text = (raw_value or "").strip()
+def find_user_profile_by_display_name(display_name: str) -> Optional[Dict[str, Any]]:
+    text = (display_name or "").strip()
     if not text:
-        return ""
-    profile = find_user_profile(text)
-    if profile:
-        return str(profile.get("user_id") or text)
+        return None
     registry = load_user_registry()
     for item in registry.get("users", []):
         if not isinstance(item, dict):
             continue
-        user_id = str(item.get("user_id") or "")
-        display_name = str(item.get("display_name") or "")
-        if text == display_name or text in user_id or text in display_name:
-            return user_id
-    return sanitize_user_id(text)
+        _normalize_user_entry(item)
+        if str(item.get("display_name", "") or "").strip() == text:
+            return item
+    return None
+
+
+def login_name_exists(login_name: str, exclude_user_id: str = "") -> bool:
+    text = (login_name or "").strip()
+    if not text:
+        return False
+    registry = load_user_registry()
+    for item in registry.get("users", []):
+        if not isinstance(item, dict):
+            continue
+        _normalize_user_entry(item)
+        item_user_id = str(item.get("user_id", "") or "").strip()
+        if exclude_user_id and item_user_id == exclude_user_id:
+            continue
+        display_name = str(item.get("display_name", "") or "").strip()
+        # Reserve legacy internal ids too, because old imported users may still
+        # log in by their original user_id.
+        if text == display_name or text == item_user_id:
+            return True
+    return False
+
+
+def generate_system_user_id() -> str:
+    while True:
+        candidate = f"user_{uuid.uuid4().hex[:12]}"
+        if not find_user_profile(candidate):
+            return candidate
+
+
+def resolve_existing_user_id(raw_value: str) -> str:
+    text = (raw_value or "").strip()
+    if not text:
+        return ""
+    profile = find_user_profile_by_display_name(text)
+    if profile:
+        return str(profile.get("user_id") or "")
+    profile = find_user_profile(text)
+    if profile and str(profile.get("display_name", "") or "").strip() == text:
+        return str(profile.get("user_id") or text)
+    sanitized = sanitize_user_id(text)
+    return f"__login_name_not_found__{sanitized}"
 
 
 def ensure_seed_users() -> None:
@@ -790,18 +891,19 @@ def find_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def register_user(user_id: str, display_name: str, password: str) -> str:
-    user_id = sanitize_user_id(user_id)
+def register_user(login_name: str, display_name: str, password: str) -> str:
+    login_name = sanitize_user_id(login_name)
     if not password.strip():
         raise gr.Error("请为新账户设置密码。")
-    if find_user_profile(user_id):
-        raise gr.Error(f"用户 `{user_id}` 已存在，请直接登录。")
+    if login_name_exists(login_name):
+        raise gr.Error(f"用户 `{login_name}` 已存在，请直接登录。")
 
     registry = load_user_registry()
+    user_id = generate_system_user_id()
     profile = _normalize_user_entry(
         {
             "user_id": user_id,
-            "display_name": display_name.strip() or user_id,
+            "display_name": login_name,
             "created_at": datetime.now().isoformat(),
             "last_login_at": "",
             "source": "manual_register",
@@ -879,11 +981,11 @@ def _resolved_api_runtime_config(config: Dict[str, Any]) -> Dict[str, str]:
 
 
 def update_model_selection_preview(
-    model_backend: str,
+    api_provider: str,
     api_mode: str = "own",
     state: Optional[Dict[str, Any]] = None,
 ) -> Tuple[dict, dict]:
-    selection = _normalize_model_backend(model_backend)
+    selection = _normalize_unified_api_backend(api_provider)
     settings = _model_choice_settings(selection)
     api_mode = str(api_mode or "own").strip().lower()
     key_map = {}
@@ -891,7 +993,7 @@ def update_model_selection_preview(
         config = state.get("config", {})
         if isinstance(config, dict):
             key_map = _load_model_key_map(config.get("model_keys", config.get("config_model_keys", {})))
-    key_value = "" if api_mode == "trial" or selection in LOCAL_MODEL_PRESETS else key_map.get(selection, "")
+    key_value = "" if api_mode == "trial" else key_map.get(selection, "")
     model_label = settings["model"] or ""
     return gr.update(value=key_value), gr.update(value=model_label)
 
@@ -921,16 +1023,88 @@ def empty_state() -> Dict[str, Any]:
 
 def _background_job_status_label(stage: str) -> str:
     labels = {
-        "queued": "已进入后台队列",
-        "graph": "正在抽取图谱关系",
-        "summary": "正在生成本次会话总结",
-        "l1": "正在更新长期画像",
-        "report": "正在生成督导师报告",
-        "persist": "正在写入 test_outputs",
-        "done": "已完成后台归档",
-        "error": "后台归档失败",
+        "queued": "\u5df2\u8fdb\u5165\u540e\u53f0\u961f\u5217",
+        "graph_summary": "\u6b63\u5728\u6574\u7406\u672c\u6b21\u54a8\u8be2\u8bb0\u5f55",
+        "graph": "\u6b63\u5728\u5199\u5165\u56fe\u8c31\u5173\u7cfb",
+        "summary": "\u6b63\u5728\u751f\u6210\u6700\u65b0\u4f1a\u8bdd\u603b\u7ed3",
+        "l1": "\u6b63\u5728\u66f4\u65b0\u957f\u671f\u753b\u50cf",
+        "report": "\u6b63\u5728\u751f\u6210\u6700\u65b0\u7763\u5bfc\u5e08\u62a5\u544a",
+        "done": "\u540e\u53f0\u5f52\u6863\u5df2\u5b8c\u6210",
+        "error": "\u540e\u53f0\u5f52\u6863\u5931\u8d25",
     }
-    return labels.get(stage, stage or "处理中")
+    return labels.get(stage, stage or "\u5904\u7406\u4e2d")
+
+
+BACKGROUND_STEP_LABELS = {
+    "raw_saved": "\u539f\u59cb\u4f1a\u8bdd\u5df2\u4fdd\u5b58",
+    "l2_summary_done": "\u6700\u65b0\u4f1a\u8bdd\u603b\u7ed3",
+    "l1_updated": "\u957f\u671f\u753b\u50cf\u66f4\u65b0",
+    "report_done": "\u7763\u5bfc\u5e08\u62a5\u544a",
+    "graph_done": "\u56fe\u8c31\u5173\u7cfb\u5199\u5165",
+}
+BACKGROUND_STEP_ORDER = ["raw_saved", "l2_summary_done", "l1_updated", "report_done", "graph_done"]
+BACKGROUND_REFRESH_STEPS = ("l2_summary_done", "l1_updated", "report_done")
+
+
+def _background_step_status_label(status: str) -> str:
+    return {
+        "done": "\u5df2\u5b8c\u6210",
+        "running": "\u8fdb\u884c\u4e2d",
+        "failed": "\u5931\u8d25",
+        "pending": "\u7b49\u5f85\u4e2d",
+    }.get(status or "pending", "\u7b49\u5f85\u4e2d")
+
+
+def _merge_background_result(job_id: str, patch: Dict[str, Any]) -> None:
+    with BACKGROUND_FINALIZE_LOCK:
+        job = BACKGROUND_FINALIZE_JOBS.get(job_id)
+        if not job:
+            return
+        result = job.get("result", {}) if isinstance(job.get("result", {}), dict) else {}
+        result.update(patch)
+        job["result"] = result
+        job["updated_at"] = datetime.now().isoformat()
+    _persist_background_finalize_job(job_id)
+
+
+def _update_background_step(job_id: str, step: str, status: str, *, error: str = "") -> None:
+    with BACKGROUND_FINALIZE_LOCK:
+        job = BACKGROUND_FINALIZE_JOBS.get(job_id)
+        if not job:
+            return
+        steps = job.setdefault("steps", {})
+        info = steps.setdefault(step, {"status": "pending", "attempts": 0, "error": ""})
+        if status == "running":
+            info["attempts"] = int(info.get("attempts", 0) or 0) + 1
+        info["status"] = status
+        info["error"] = error
+        info["updated_at"] = datetime.now().isoformat()
+        job["updated_at"] = datetime.now().isoformat()
+    _persist_background_finalize_job(job_id)
+
+
+def _run_background_step(job_id: str, step: str, label: str, func):
+    max_retries = max(1, int(os.getenv("MEMAGENT_BACKGROUND_STEP_RETRIES", "2")))
+    last_error: Optional[BaseException] = None
+    for attempt in range(1, max_retries + 1):
+        started = time.perf_counter()
+        _update_background_step(job_id, step, "running")
+        print(f"[MemAgent Background] {step} attempt {attempt}/{max_retries} started", flush=True)
+        try:
+            result = func()
+            elapsed = time.perf_counter() - started
+            _update_background_step(job_id, step, "done")
+            print(f"[MemAgent Background] {step} done in {elapsed:.2f}s", flush=True)
+            return result
+        except BaseException as exc:
+            last_error = exc
+            elapsed = time.perf_counter() - started
+            _update_background_step(job_id, step, "failed", error=str(exc))
+            print(f"[MemAgent Background] {step} failed in {elapsed:.2f}s: {type(exc).__name__}: {exc}", flush=True)
+            if attempt >= max_retries:
+                break
+            time.sleep(min(2.0, 0.4 * attempt))
+    raise RuntimeError(f"{label}失败：{last_error}") from last_error
 
 
 def _register_background_finalize_job(snapshot: Dict[str, Any]) -> str:
@@ -945,10 +1119,18 @@ def _register_background_finalize_job(snapshot: Dict[str, Any]) -> str:
             "status": "queued",
             "error": "",
             "done": False,
+            "steps": {
+                "raw_saved": {"status": "done", "attempts": 1, "error": ""},
+                "l2_summary_done": {"status": "pending", "attempts": 0, "error": ""},
+                "graph_done": {"status": "pending", "attempts": 0, "error": ""},
+                "l1_updated": {"status": "pending", "attempts": 0, "error": ""},
+                "report_done": {"status": "pending", "attempts": 0, "error": ""},
+            },
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat(),
             "result": {},
         }
+    _persist_background_finalize_job(job_id, snapshot)
     return job_id
 
 
@@ -957,6 +1139,16 @@ def _update_background_finalize_job(job_id: str, *, stage: str, detail: str = ""
         job = BACKGROUND_FINALIZE_JOBS.get(job_id)
         if not job:
             return
+        job.setdefault(
+            "steps",
+            {
+                "raw_saved": {"status": "done", "attempts": 1, "error": ""},
+                "l2_summary_done": {"status": "pending", "attempts": 0, "error": ""},
+                "graph_done": {"status": "pending", "attempts": 0, "error": ""},
+                "l1_updated": {"status": "pending", "attempts": 0, "error": ""},
+                "report_done": {"status": "pending", "attempts": 0, "error": ""},
+            },
+        )
         job["stage"] = stage
         job["detail"] = detail
         job["status"] = "done" if done else ("error" if error else "running")
@@ -965,6 +1157,7 @@ def _update_background_finalize_job(job_id: str, *, stage: str, detail: str = ""
         if result is not None:
             job["result"] = result
         job["updated_at"] = datetime.now().isoformat()
+    _persist_background_finalize_job(job_id)
 
 
 def _get_background_finalize_job(job_id: str) -> Optional[Dict[str, Any]]:
@@ -973,12 +1166,117 @@ def _get_background_finalize_job(job_id: str) -> Optional[Dict[str, Any]]:
         return dict(job) if job else None
 
 
+def _background_finalize_job_path(job_id: str) -> Path:
+    return BACKGROUND_FINALIZE_DIR / f"{safe_user_id(job_id)}.json"
+
+
+def _persist_background_finalize_job(job_id: str, snapshot: Optional[Dict[str, Any]] = None) -> None:
+    with BACKGROUND_FINALIZE_LOCK:
+        job = dict(BACKGROUND_FINALIZE_JOBS.get(job_id, {}))
+    if not job:
+        return
+    if snapshot is not None:
+        job["snapshot"] = snapshot
+    path = _background_finalize_job_path(job_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(job, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+
+
+def _resume_pending_background_finalize_jobs(state: Dict[str, Any], agent: "EmpathyAgent") -> None:
+    if not state.get("authenticated") or not state.get("user_id") or not BACKGROUND_FINALIZE_DIR.exists():
+        return
+    user_id = str(state.get("user_id", "") or "")
+    pending = list(state.get("background_finalize_jobs", []))
+    for path in sorted(BACKGROUND_FINALIZE_DIR.glob("*.json")):
+        try:
+            job = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(job, dict) or job.get("user_id") != user_id or job.get("done"):
+            continue
+        job_id = str(job.get("job_id") or path.stem)
+        snapshot = job.get("snapshot", {})
+        if not isinstance(snapshot, dict) or not snapshot.get("session_messages"):
+            continue
+        if job_id in pending:
+            continue
+        raw_start_time = snapshot.get("session_start_time")
+        if isinstance(raw_start_time, str) and raw_start_time:
+            try:
+                snapshot["session_start_time"] = datetime.fromisoformat(raw_start_time)
+            except Exception:
+                pass
+        job["stage"] = "queued"
+        job["status"] = "queued"
+        job["done"] = False
+        with BACKGROUND_FINALIZE_LOCK:
+            if job_id in BACKGROUND_FINALIZE_JOBS:
+                continue
+            BACKGROUND_FINALIZE_JOBS[job_id] = job
+        BACKGROUND_FINALIZE_EXECUTOR.submit(_run_background_finalize_job, job_id, snapshot, agent)
+        pending.append(job_id)
+    state["background_finalize_jobs"] = pending
+
+
+def _restore_background_finalize_job_state(state: Dict[str, Any]) -> None:
+    if not state.get("authenticated") or not state.get("user_id") or not BACKGROUND_FINALIZE_DIR.exists():
+        return
+    user_id = str(state.get("user_id", "") or "")
+    pending = list(state.get("background_finalize_jobs", [])) if isinstance(state.get("background_finalize_jobs", []), list) else []
+    for path in sorted(BACKGROUND_FINALIZE_DIR.glob("*.json"), key=lambda item: item.stat().st_mtime, reverse=True):
+        try:
+            job = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(job, dict) or job.get("user_id") != user_id:
+            continue
+        job_id = str(job.get("job_id") or path.stem)
+        if job_id not in pending and not job.get("done"):
+            pending.append(job_id)
+        with BACKGROUND_FINALIZE_LOCK:
+            BACKGROUND_FINALIZE_JOBS.setdefault(job_id, job)
+    state["background_finalize_jobs"] = pending
+
+
 def _format_background_finalize_status(job: Dict[str, Any], queue_size: int) -> str:
-    status = _background_job_status_label(str(job.get("stage", "")))
+    steps = job.get("steps", {}) if isinstance(job.get("steps", {}), dict) else {}
+    done_count = 0
+    lines = []
+    for step in BACKGROUND_STEP_ORDER:
+        info = steps.get(step, {}) if isinstance(steps.get(step, {}), dict) else {}
+        status = str(info.get("status", "pending") or "pending")
+        if status == "done":
+            done_count += 1
+        attempts = int(info.get("attempts", 0) or 0)
+        attempt_text = f"\uff08\u5df2\u5c1d\u8bd5 {attempts} \u6b21\uff09" if attempts and status in {"running", "failed"} else ""
+        error = str(info.get("error", "") or "")
+        error_text = f"\uff1a{error[:80]}" if error and status == "failed" else ""
+        lines.append(f"{BACKGROUND_STEP_LABELS.get(step, step)}\uff1a{_background_step_status_label(status)}{attempt_text}{error_text}")
+    total = len(BACKGROUND_STEP_ORDER)
+    header = f"\u540e\u53f0\u5f52\u6863\u8fdb\u5ea6\uff1a{done_count}/{total}\n\u5f53\u524d\u9636\u6bb5\uff1a{_background_job_status_label(str(job.get('stage', '')))}"
     detail = str(job.get("detail", "") or "")
-    suffix = f"\n{detail}" if detail else ""
-    queue_text = f"\n后台队列中还有 {max(queue_size - 1, 0)} 个任务。" if queue_size > 1 else ""
-    return f"后台归档：{status}{suffix}{queue_text}"
+    if detail:
+        header = f"{header}\n{detail}"
+    queue_text = f"\n\u540e\u53f0\u961f\u5217\u4e2d\u8fd8\u6709 {max(queue_size - 1, 0)} \u4e2a\u4efb\u52a1\u3002" if queue_size > 1 else ""
+    return f"{header}\n" + "\n".join(lines) + queue_text
+
+
+def _background_done_steps(job: Dict[str, Any]) -> List[str]:
+    steps = job.get("steps", {}) if isinstance(job.get("steps", {}), dict) else {}
+    done_steps: List[str] = []
+    for step in BACKGROUND_REFRESH_STEPS:
+        info = steps.get(step, {}) if isinstance(steps.get(step, {}), dict) else {}
+        if str(info.get("status", "") or "") == "done":
+            done_steps.append(step)
+    return done_steps
+
+
+def _background_refresh_notice(step: str) -> str:
+    return {
+        "l2_summary_done": "最新会话总结已生成并写入记录。",
+        "l1_updated": "长期画像已更新。",
+        "report_done": "最新督导师报告已生成并写入记录。",
+    }.get(step, "")
 
 
 def _session_snapshot_from_state(state: Dict[str, Any], agent: "EmpathyAgent") -> Dict[str, Any]:
@@ -1012,74 +1310,172 @@ def _format_snapshot_session_for_graph(session_messages: List[Dict[str, str]]) -
     return "\n".join(lines)
 
 
-def _run_background_finalize_job(job_id: str, snapshot: Dict[str, Any], agent: "EmpathyAgent") -> None:
-    try:
-        _update_background_finalize_job(job_id, stage="graph", detail="正在抽取图谱关系")
-        conversation_text = _format_snapshot_session_for_graph(snapshot["session_messages"])
-        graph_data = agent.graph_extractor.extract_graph(conversation_text, user_id=snapshot["user_id"])
-        if agent.enable_mem0_runtime:
-            agent.mem0.add_graph_data(
-                snapshot["user_id"],
-                snapshot["run_session_id"],
-                graph_data,
-                source_text=conversation_text,
-            )
-
-        _update_background_finalize_job(job_id, stage="summary", detail="正在生成本次会话总结")
-        l2_summary = agent.summary_agent.generate_l2_summary(snapshot["session_messages"])
-        if agent.enable_mem0_runtime:
-            agent.mem0.save_l2_summary(
-                snapshot["user_id"],
-                snapshot["run_session_id"],
-                l2_summary,
-                snapshot["session_start_time"],
-                datetime.now(),
-                len(snapshot["session_messages"]) // 2,
-            )
-
-        _update_background_finalize_job(job_id, stage="l1", detail="正在更新长期画像")
-        new_l1 = agent.summary_agent.update_l1_summary(snapshot["user_id"], l2_summary)
-        summary_doc = load_user_session_summaries(snapshot["user_id"])
-        all_l2 = summary_doc.get("sessions", []) if isinstance(summary_doc.get("sessions", []), list) else []
-        all_l2.insert(
-            0,
+def _compact_l2_items(items: List[Dict[str, Any]], limit: int = 12) -> List[Dict[str, Any]]:
+    compacted: List[Dict[str, Any]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        summary = item.get("summary", "")
+        topic = item.get("topic", "")
+        if isinstance(summary, dict):
+            topic = topic or summary.get("topic", "") or summary.get("主题", "")
+            summary = summary.get("summary", "") or summary.get("会话总结", "") or summary.get("总结", "")
+        compacted.append(
             {
-                "session_id": snapshot["run_session_id"],
-                "topic": l2_summary.get("topic", ""),
-                "summary": l2_summary.get("summary", ""),
-                "start_time": snapshot["session_start_time"].isoformat() if hasattr(snapshot["session_start_time"], "isoformat") else datetime.now().isoformat(),
-            },
+                "session_id": str(item.get("session_id", "") or "")[:80],
+                "topic": str(topic or "")[:120],
+                "summary": str(summary or "")[:800],
+            }
         )
-        _update_background_finalize_job(job_id, stage="report", detail="正在生成督导师报告")
-        report = agent.supervisor.generate_treatment_report(new_l1, all_l2)
-        if agent.enable_mem0_runtime:
-            agent.mem0.save_treatment_report(snapshot["user_id"], report)
+        if len(compacted) >= limit:
+            break
+    return compacted
 
-        _update_background_finalize_job(job_id, stage="persist", detail="正在写入 test_outputs")
-        output_paths = record_session_outputs(
-            user_id=snapshot["user_id"],
-            display_name=snapshot["display_name"],
-            run_session_id=snapshot["run_session_id"],
-            chat_pairs=snapshot["chat_pairs"],
-            l2_summary=l2_summary,
-            treatment_report=report,
-            l1_summary=new_l1,
-            archived_at=datetime.now().isoformat(),
+
+def _run_graph_finalize(snapshot: Dict[str, Any], agent: "EmpathyAgent") -> Dict[str, Any]:
+    conversation_text = _format_snapshot_session_for_graph(snapshot["session_messages"])
+    graph_data = agent.graph_extractor.extract_graph(conversation_text, user_id=snapshot["user_id"])
+    if agent.enable_mem0_runtime:
+        agent.mem0.add_graph_data(
+            snapshot["user_id"],
+            snapshot["run_session_id"],
+            graph_data,
+            source_text=conversation_text,
         )
+    return graph_data
+
+
+def _run_l2_finalize(snapshot: Dict[str, Any], agent: "EmpathyAgent") -> Dict[str, Any]:
+    l2_summary = agent.summary_agent.generate_l2_summary(snapshot["session_messages"])
+    if agent.enable_mem0_runtime:
+        agent.mem0.save_l2_summary(
+            snapshot["user_id"],
+            snapshot["run_session_id"],
+            l2_summary,
+            snapshot["session_start_time"],
+            datetime.now(),
+            len(snapshot["session_messages"]) // 2,
+        )
+    return l2_summary
+
+
+def _run_background_finalize_job(job_id: str, snapshot: Dict[str, Any], agent: "EmpathyAgent") -> None:
+    initial_output_paths = snapshot.get("initial_output_paths", {}) if isinstance(snapshot.get("initial_output_paths", {}), dict) else {}
+    graph_data: Dict[str, Any] = {}
+    l2_summary: Dict[str, Any] = {}
+    new_l1: Dict[str, Any] = {}
+    report: Dict[str, Any] = {}
+    output_paths: Dict[str, Any] = initial_output_paths
+
+    try:
+        _update_background_finalize_job(job_id, stage="graph_summary", detail="后台正在整理本次咨询记录。")
+
+        def graph_task() -> Dict[str, Any]:
+            return _run_graph_finalize(snapshot, agent)
+
+        def l2_task() -> Dict[str, Any]:
+            return _run_l2_finalize(snapshot, agent)
+
+        with ThreadPoolExecutor(max_workers=2, thread_name_prefix=f"memagent-finalize-{job_id[:6]}") as executor:
+            futures = {
+                executor.submit(_run_background_step, job_id, "graph_done", "图谱抽取", graph_task): "graph",
+                executor.submit(_run_background_step, job_id, "l2_summary_done", "会话总结", l2_task): "summary",
+            }
+            for future in as_completed(futures):
+                task_name = futures[future]
+                if task_name == "summary":
+                    _update_background_finalize_job(job_id, stage="summary", detail="最新会话总结已完成，正在写入记录。")
+                    l2_summary = future.result()
+                    output_paths = record_session_outputs(
+                        user_id=snapshot["user_id"],
+                        display_name=snapshot["display_name"],
+                        run_session_id=snapshot["run_session_id"],
+                        chat_pairs=snapshot["chat_pairs"],
+                        l2_summary=l2_summary,
+                        treatment_report=None,
+                        l1_summary=None,
+                        archived_at=datetime.now().isoformat(),
+                        update_l2=True,
+                        update_report=False,
+                    )
+                    _merge_background_result(job_id, {"l2_summary": l2_summary, "output_paths": output_paths})
+
+                    def l1_task() -> Dict[str, Any]:
+                        return agent.summary_agent.update_l1_summary(snapshot["user_id"], l2_summary)
+
+                    _update_background_finalize_job(job_id, stage="l1", detail="最新会话总结已写入，正在更新长期画像。")
+                    new_l1 = _run_background_step(job_id, "l1_updated", "长期画像更新", l1_task)
+                    output_paths = record_session_outputs(
+                        user_id=snapshot["user_id"],
+                        display_name=snapshot["display_name"],
+                        run_session_id=snapshot["run_session_id"],
+                        chat_pairs=snapshot["chat_pairs"],
+                        l2_summary=l2_summary,
+                        treatment_report=None,
+                        l1_summary=new_l1,
+                        archived_at=datetime.now().isoformat(),
+                        update_l2=True,
+                        update_report=False,
+                    )
+                    _merge_background_result(job_id, {"l1_summary": new_l1, "output_paths": output_paths})
+
+                    summary_doc = load_user_session_summaries(snapshot["user_id"])
+                    all_l2 = summary_doc.get("sessions", []) if isinstance(summary_doc.get("sessions", []), list) else []
+                    all_l2 = _compact_l2_items(
+                        [
+                            {
+                                "session_id": snapshot["run_session_id"],
+                                "topic": l2_summary.get("topic", ""),
+                                "summary": l2_summary.get("summary", ""),
+                                "start_time": snapshot["session_start_time"].isoformat() if hasattr(snapshot["session_start_time"], "isoformat") else datetime.now().isoformat(),
+                            }
+                        ]
+                        + all_l2,
+                        limit=5,
+                    )
+
+                    def report_task() -> Dict[str, Any]:
+                        generated_report = agent.supervisor.generate_treatment_report(new_l1, all_l2)
+                        if agent.enable_mem0_runtime:
+                            agent.mem0.save_treatment_report(snapshot["user_id"], generated_report)
+                        return generated_report
+
+                    _update_background_finalize_job(job_id, stage="report", detail="长期画像已更新，正在生成最新督导师报告。")
+                    report = _run_background_step(job_id, "report_done", "督导师报告", report_task)
+                    output_paths = record_session_outputs(
+                        user_id=snapshot["user_id"],
+                        display_name=snapshot["display_name"],
+                        run_session_id=snapshot["run_session_id"],
+                        chat_pairs=snapshot["chat_pairs"],
+                        l2_summary=l2_summary,
+                        treatment_report=report,
+                        l1_summary=new_l1,
+                        archived_at=datetime.now().isoformat(),
+                        update_l2=True,
+                        update_report=True,
+                    )
+                    _merge_background_result(job_id, {"treatment_report": report, "output_paths": output_paths})
+                else:
+                    _update_background_finalize_job(job_id, stage="graph", detail="图谱关系已完成，正在写入记忆库。")
+                    graph_data = future.result()
+                    _merge_background_result(job_id, {"graph_data": graph_data})
+
         _update_background_finalize_job(
             job_id,
             stage="done",
-            detail="后台归档完成",
+            detail="后台归档已完成。",
             done=True,
             result={
                 "graph_data": graph_data,
                 "l2_summary": l2_summary,
                 "l1_summary": new_l1,
                 "treatment_report": report,
-                "output_paths": output_paths,
+                "output_paths": output_paths or initial_output_paths,
             },
         )
     except Exception as exc:
+        existing_result = _get_background_finalize_job(job_id) or {}
+        partial_result = existing_result.get("result", {}) if isinstance(existing_result.get("result", {}), dict) else {}
         with BACKGROUND_FINALIZE_LOCK:
             job = BACKGROUND_FINALIZE_JOBS.get(job_id)
             if job is not None:
@@ -1088,16 +1484,41 @@ def _run_background_finalize_job(job_id: str, snapshot: Dict[str, Any], agent: "
                 job["status"] = "error"
                 job["done"] = True
                 job["updated_at"] = datetime.now().isoformat()
-        _update_background_finalize_job(job_id, stage="error", detail=str(exc), error=str(exc), done=True)
+        _update_background_finalize_job(job_id, stage="error", detail=str(exc), error=str(exc), done=True, result=partial_result)
+        try:
+            record_session_outputs(
+                user_id=snapshot["user_id"],
+                display_name=snapshot["display_name"],
+                run_session_id=snapshot["run_session_id"],
+                chat_pairs=snapshot["chat_pairs"],
+                l2_summary=partial_result.get("l2_summary") or l2_summary or {},
+                treatment_report=partial_result.get("treatment_report") or report or {},
+                l1_summary=partial_result.get("l1_summary") or new_l1 or None,
+                archived_at=datetime.now().isoformat(),
+                update_l2=bool(partial_result.get("l2_summary") or l2_summary),
+                update_report=bool(partial_result.get("treatment_report") or report),
+            )
+        except Exception:
+            pass
 
 
 def _schedule_background_finalize(state: Dict[str, Any], agent: "EmpathyAgent") -> str:
     snapshot = _session_snapshot_from_state(state, agent)
+    initial_output_paths = record_session_outputs(
+        user_id=snapshot["user_id"],
+        display_name=snapshot["display_name"],
+        run_session_id=snapshot["run_session_id"],
+        chat_pairs=snapshot["chat_pairs"],
+        l2_summary={},
+        treatment_report={},
+        l1_summary=None,
+        archived_at=datetime.now().isoformat(),
+    )
+    snapshot["initial_output_paths"] = initial_output_paths
     job_id = _register_background_finalize_job(snapshot)
     BACKGROUND_FINALIZE_EXECUTOR.submit(_run_background_finalize_job, job_id, snapshot, agent)
     pending = list(state.get("background_finalize_jobs", []))
     pending.append(job_id)
-    state["background_finalize_jobs"] = pending
     state["background_finalize_message"] = f"后台归档已排队：{snapshot['run_session_id']}"
     return job_id
 
@@ -1106,8 +1527,8 @@ def refresh_background_finalize_state(state: Dict[str, Any]) -> Tuple[Dict[str, 
     if not state.get("authenticated") or not state.get("user_id"):
         return state, "", "", ""
 
+    _restore_background_finalize_job_state(state)
     pending = list(state.get("background_finalize_jobs", []))
-    status_text = str(state.get("background_finalize_message", "") or "")
     status_update = gr.skip()
     memory_html = gr.skip()
     retrieval_html = gr.skip()
@@ -1118,8 +1539,65 @@ def refresh_background_finalize_state(state: Dict[str, Any]) -> Tuple[Dict[str, 
         if job:
             status_text = _format_background_finalize_status(job, len(pending))
             status_update = status_text
+            result = job.get("result", {}) if isinstance(job.get("result", {}), dict) else {}
+            seen_key = f"_background_seen_{job_id}"
+            seen = state.get(seen_key, {}) if isinstance(state.get(seen_key, {}), dict) else {}
+            changed = False
+
+            for step in _background_done_steps(job):
+                if not seen.get(step):
+                    seen[step] = True
+                    changed = True
+                    notice = _background_refresh_notice(step)
+                    if notice:
+                        try:
+                            gr.Info(notice)
+                        except Exception:
+                            pass
+
+            if result.get("l1_summary") or result.get("l2_summary") or result.get("treatment_report"):
+                context = dict(state.get("preloaded_session_context", {}) or {})
+                if result.get("l1_summary"):
+                    context["l1_summary"] = result.get("l1_summary")
+                if result.get("treatment_report"):
+                    context["treatment_report"] = result.get("treatment_report")
+                context.setdefault("preloaded_context_text", "")
+                state["preloaded_session_context"] = context
+                if state.get("agent") is not None:
+                    state["agent"].preloaded_session_context = context
+
+                if result.get("output_paths"):
+                    state["last_output_paths"] = result["output_paths"]
+
+                if result.get("l2_summary") and not seen.get("l2_summary"):
+                    seen["l2_summary"] = True
+                    changed = True
+                    try:
+                        gr.Info("\u6700\u65b0\u4f1a\u8bdd\u603b\u7ed3\u5df2\u751f\u6210\u5e76\u5199\u5165\u8bb0\u5f55\u3002")
+                    except Exception:
+                        pass
+                if result.get("l1_summary") and not seen.get("l1_summary"):
+                    seen["l1_summary"] = True
+                    changed = True
+                    try:
+                        gr.Info("\u957f\u671f\u753b\u50cf\u5df2\u66f4\u65b0\u3002")
+                    except Exception:
+                        pass
+                if result.get("treatment_report") and not seen.get("treatment_report"):
+                    seen["treatment_report"] = True
+                    changed = True
+                    try:
+                        gr.Info("\u6700\u65b0\u7763\u5bfc\u5e08\u62a5\u544a\u5df2\u751f\u6210\u5e76\u5199\u5165\u8bb0\u5f55\u3002")
+                    except Exception:
+                        pass
+            state[seen_key] = seen
+            if changed:
+                memory_html = build_session_memory_panel(state["user_id"], state.get("display_name", ""))
+                retrieval_html = render_retrieval_records(state.get("retrieval_records", []), state.get("display_name", ""))
+                state["background_finalize_message"] = status_text
+
             if str(job.get("status", "")) == "error":
-                status_text = f"后台归档失败：{job.get('error', '')}"
+                status_text = f"\u540e\u53f0\u5f52\u6863\u5931\u8d25\uff1a{job.get('error', '')}"
                 status_update = status_text
                 state["background_finalize_message"] = status_text
                 try:
@@ -1131,28 +1609,16 @@ def refresh_background_finalize_state(state: Dict[str, Any]) -> Tuple[Dict[str, 
             elif job.get("done"):
                 pending.pop(0)
                 state["background_finalize_jobs"] = pending
-                result = job.get("result", {}) if isinstance(job.get("result", {}), dict) else {}
-                if result:
-                    latest_summary = result.get("l1_summary", {})
-                    latest_report = result.get("treatment_report", {})
-                    state["preloaded_session_context"] = {
-                        "l1_summary": latest_summary,
-                        "treatment_report": latest_report,
-                        "preloaded_context_text": "",
-                    }
-                    if state.get("agent") is not None:
-                        state["agent"].preloaded_session_context = state["preloaded_session_context"]
-                    if result.get("output_paths"):
-                        state["last_output_paths"] = result["output_paths"]
-                status_text = "后台归档已完成，最新会话总结和最新督导师报告已更新。"
+                state.pop(seen_key, None)
+                status_text = "\u540e\u53f0\u5f52\u6863\u5df2\u5b8c\u6210\uff0c\u6700\u65b0\u4f1a\u8bdd\u603b\u7ed3\u548c\u6700\u65b0\u7763\u5bfc\u5e08\u62a5\u544a\u5df2\u66f4\u65b0\u3002"
                 status_update = status_text
                 state["background_finalize_message"] = status_text
                 try:
-                    gr.Info("后台归档已完成，最新会话总结和最新督导师报告已更新。")
+                    gr.Info(status_text)
                 except Exception:
                     pass
                 if pending:
-                    status_text = f"{status_text}\n后台队列中还有 {len(pending)} 个任务。"
+                    status_text = f"{status_text}\n\u540e\u53f0\u961f\u5217\u4e2d\u8fd8\u6709 {len(pending)} \u4e2a\u4efb\u52a1\u3002"
                     status_update = status_text
                 memory_html = build_session_memory_panel(state["user_id"], state.get("display_name", ""))
                 retrieval_html = render_retrieval_records(state.get("retrieval_records", []), state.get("display_name", ""))
@@ -1274,6 +1740,7 @@ def _login_success_response(profile: Dict[str, Any], user_id: str, message_prefi
         _trial_quota_message(profile),
         gr.update(value=phone_number),
         _form_message(f"当前已绑定：{_masked_phone(phone_number)}。", "ok") if phone_number and phone_verified_at else "",
+        gr.update(value=state["display_name"]),
         render_retrieval_records(state.get("retrieval_records", []), state["display_name"]),
         gr.update(value=state["chatbot"], visible=True),
     )
@@ -1287,7 +1754,7 @@ def login_user(
     selected_user_id = (selected_user_id or "").strip()
     typed_user_id = (typed_user_id or "").strip()
     password = (password or "").strip()
-    user_id = resolve_existing_user_id(typed_user_id) if typed_user_id else selected_user_id
+    user_id = resolve_existing_user_id(typed_user_id) if typed_user_id else resolve_existing_user_id(selected_user_id)
 
     def fail(message: str) -> Tuple[Any, ...]:
         return (
@@ -1318,6 +1785,7 @@ def login_user(
             _trial_quota_message({"trial_sessions_used": 0}),
             gr.update(value=""),
             "",
+            gr.update(value=""),
             render_retrieval_records([], ""),
             gr.update(value=[], visible=True),
         )
@@ -1383,22 +1851,22 @@ def _active_chatbot_messages(state: Dict[str, Any]) -> List[Dict[str, str]]:
 
 
 def register_and_refresh(user_id: str, display_name: str, password: str, confirm_password: str) -> Tuple[str, dict, dict, dict, dict, str, str, str, str]:
-    user_id, error = _safe_sanitize_user_id(user_id)
+    login_name, error = _safe_sanitize_user_id(user_id)
     if error:
-        return _form_message(error), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), "", display_name or "", "", ""
+        return _form_message(error), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), "", "", "", ""
     if not password.strip():
-        return _form_message("请为新账户设置密码。"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
+        return _form_message("请为新账户设置密码。"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), login_name, "", "", ""
     if password != (confirm_password or ""):
-        return _form_message("两次输入的密码不一致。"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
-    if find_user_profile(user_id):
-        return _form_message(f"用户 `{user_id}` 已存在，请直接登录。"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
+        return _form_message("两次输入的密码不一致。"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), login_name, "", "", ""
+    if login_name_exists(login_name):
+        return _form_message(f"用户 `{login_name}` 已存在，请直接登录。"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), login_name, "", "", ""
     try:
-        user_id = register_user(user_id, display_name, password)
+        register_user(login_name, login_name, password)
     except Exception as exc:
-        return _form_message(f"注册失败：{exc}"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), user_id, display_name or "", "", ""
+        return _form_message(f"注册失败：{exc}"), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(visible=True), login_name, "", "", ""
     return (
-        _form_message(f"注册成功：{user_id}，请返回登录。", "ok"),
-        gr.update(choices=collect_known_user_ids(), value=None),
+        _form_message(f"注册成功：{login_name}，请返回登录。", "ok"),
+        gr.update(choices=collect_known_login_names(), value=None),
         gr.update(visible=True),
         gr.update(visible=True),
         gr.update(visible=False),
@@ -1479,6 +1947,50 @@ def change_password(
             return _form_message("密码修改成功。", "ok"), "", "", ""
     return _form_message("账号信息不存在，请重新登录。"), "", "", ""
 
+
+
+def change_display_name(state: Dict[str, Any], new_display_name: str) -> Tuple[Any, ...]:
+    if not state.get("authenticated") or not state.get("user_id"):
+        return state, _form_message("请先登录后再修改名称。"), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+    user_id = str(state.get("user_id", "") or "").strip()
+    new_login_name, error = _safe_sanitize_user_id(new_display_name)
+    if error:
+        return state, _form_message(error), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+    if len(new_login_name) > 32:
+        return state, _form_message("用户名称不建议超过 32 个字符。"), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+    current_login_name = str(state.get("display_name", "") or user_id).strip()
+    if new_login_name == current_login_name:
+        return state, _form_message("用户名称未变化。", "ok"), gr.update(value=new_login_name), gr.update(value=f"我的咨询 · {new_login_name}"), gr.update(), gr.update(), gr.update(), _browser_session_payload(state)
+    if login_name_exists(new_login_name, exclude_user_id=user_id):
+        return state, _form_message(f"用户 `{new_login_name}` 已存在，请换一个名称。"), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+
+    registry = load_user_registry()
+    users = registry.get("users", [])
+    for item in users:
+        if isinstance(item, dict) and item.get("user_id") == user_id:
+            _normalize_user_entry(item)
+            item["display_name"] = new_login_name
+            save_user_registry(registry)
+            state["display_name"] = new_login_name
+            memory_html = build_session_memory_panel(user_id, new_login_name)
+            choices = session_choices(user_id)
+            selected_session = dropdown_value(str(state.get("history_session_id", "") or ""), choices) or latest_choice_value(choices)
+            hub_section = str(state.get("hub_section", "overview") or "overview")
+            if hub_section not in {"overview", "report", "history"}:
+                hub_section = "overview"
+            hub_html, _, _ = render_consultation_hub(user_id, hub_section, selected_session)
+            retrieval_html = render_retrieval_records(state.get("retrieval_records", []), new_login_name)
+            return (
+                state,
+                _form_message(f"用户名称已修改为：{new_login_name}。下次请使用新名称登录。", "ok"),
+                gr.update(value=new_login_name),
+                gr.update(value=f"我的咨询 · {new_login_name}"),
+                memory_html,
+                hub_html,
+                retrieval_html,
+                _browser_session_payload(state),
+            )
+    return state, _form_message("账号信息不存在，请重新登录后再试。"), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
 
 def request_phone_login_code(phone: str) -> str:
     phone, error = _validate_phone_number(phone)
@@ -1616,7 +2128,8 @@ def bind_phone_number(state: Dict[str, Any], phone: str, code: str) -> Tuple[Dic
 
 def save_model_config(
     state: Dict[str, Any],
-    model_backend: str,
+    agent_backend: str,
+    summary_backend: str,
     api_mode: str,
     api_provider: str,
     api_key: str,
@@ -1624,8 +2137,10 @@ def save_model_config(
 ) -> Tuple[Dict[str, Any], str, dict, dict, str]:
     if not state.get("authenticated") or not state.get("user_id"):
         return state, _form_message("请先登录后再保存配置。"), gr.update(), gr.update(), _trial_quota_message(state)
-    model_backend = _normalize_model_backend(model_backend)
-    model_settings = _model_choice_settings(model_backend)
+    unified_backend = _normalize_unified_api_backend(api_provider)
+    agent_backend = _normalize_empathy_backend(agent_backend)
+    summary_backend = _normalize_summary_backend(summary_backend)
+    model_settings = _model_choice_settings(unified_backend)
     api_mode = (api_mode or "own").strip().lower()
     if api_mode not in {"own", "trial"}:
         api_mode = "own"
@@ -1635,27 +2150,24 @@ def save_model_config(
     model = provider_settings["model"]
     base_url = provider_settings["base_url"]
     key_map = _load_model_key_map(state.get("config", {}).get("config_model_keys", "{}") if isinstance(state.get("config", {}), dict) else "{}")
-    if _needs_remote_api(model_backend):
-        if api_mode == "own" and not api_key and not _api_provider_env_api_key(api_provider):
-            return state, _form_message("当前选择了 API 模型，请先填写自己的 API Key，或在 .env 中配置对应供应商的默认 Key。"), gr.update(), gr.update(), _trial_quota_message(state)
-        if api_mode == "trial":
-            if not _server_trial_api_available(api_provider):
-                key_env = provider_settings.get("api_key_env", "OPENAI_API_KEY")
-                return state, _form_message(f"服务器试用 Key 未配置，请先在 .env 中填写 {key_env}。"), gr.update(), gr.update(), _trial_quota_message(state)
-            api_key = ""
-        if api_key:
-            key_map[model_backend] = api_key
-    else:
+    if api_mode == "own" and not api_key and not _api_provider_env_api_key(api_provider):
+        return state, _form_message("当前选择了 API 模型，请先填写自己的 API Key，或在 .env 中配置对应供应商的默认 Key。"), gr.update(), gr.update(), _trial_quota_message(state)
+    if api_mode == "trial":
+        if not _server_trial_api_available(api_provider):
+            key_env = provider_settings.get("api_key_env", "OPENAI_API_KEY")
+            return state, _form_message(f"服务器试用 Key 未配置，请先在 .env 中填写 {key_env}。"), gr.update(), gr.update(), _trial_quota_message(state)
         api_key = ""
-    key_value = "" if api_mode == "trial" or model_backend in LOCAL_MODEL_PRESETS else key_map.get(model_backend, "")
-    user_bundle = _bundle_model_backends(model_backend)
+    if api_key:
+        key_map[unified_backend] = api_key
+    key_value = "" if api_mode == "trial" else key_map.get(unified_backend, "")
+    previous_config = state.get("config", {}) if isinstance(state.get("config", {}), dict) else {}
     user_config = {
-        "model_backend": user_bundle["config_model_backend"],
-        "agent_backend": user_bundle["config_agent_backend"],
-        "summary_backend": user_bundle["config_summary_backend"],
-        "supervisor_backend": user_bundle["config_supervisor_backend"],
-        "graph_backend": user_bundle["config_graph_backend"],
-        "router_backend": user_bundle["config_router_backend"],
+        "model_backend": unified_backend,
+        "agent_backend": agent_backend,
+        "summary_backend": summary_backend,
+        "supervisor_backend": unified_backend,
+        "graph_backend": unified_backend,
+        "router_backend": unified_backend,
         "api_mode": api_mode,
         "api_provider": api_provider,
         "api_base_url": base_url,
@@ -1663,6 +2175,19 @@ def save_model_config(
         "model": model,
         "config_model_keys": _dump_model_key_map(key_map),
     }
+    config_changed = any(
+        str(previous_config.get(key, "") or "") != str(user_config.get(key, "") or "")
+        for key in [
+            "model_backend",
+            "agent_backend",
+            "summary_backend",
+            "api_mode",
+            "api_provider",
+            "api_base_url",
+            "api_key",
+            "model",
+        ]
+    )
     state["config"] = dict(user_config)
     registry = load_user_registry()
     updated = False
@@ -1686,7 +2211,8 @@ def save_model_config(
     if not updated:
         return state, _form_message("账号信息不存在，配置未保存，请重新登录后再试。"), gr.update(), gr.update(), _trial_quota_message(state)
     save_user_registry(registry)
-    if not state.get("chatbot"):
+    active_messages = list(getattr(state.get("agent"), "session_messages", []) or [])
+    if config_changed and not active_messages:
         state["agent"] = None
         state["agent_ready"] = False
         state["current_session_id"] = ""
@@ -1855,6 +2381,10 @@ def _browser_session_payload(
         "active_chatbot_start_index": 0,
         "retrieval_records": _clean_retrieval_records(state.get("retrieval_records", [])),
         "l3_records": state.get("l3_records", []) if isinstance(state.get("l3_records", []), list) else [],
+        "background_finalize_jobs": list(state.get("background_finalize_jobs", []))
+        if isinstance(state.get("background_finalize_jobs", []), list)
+        else [],
+        "background_finalize_message": str(state.get("background_finalize_message", "") or ""),
     }
 
 
@@ -1889,7 +2419,7 @@ def restore_browser_session(browser_payload: Dict[str, Any]) -> Tuple[Any, ...]:
         # "logged out" layout here can race with a quick first login and hide
         # the chat view after login succeeds, so an empty browser session is a
         # true no-op.
-        return tuple(gr.skip() for _ in range(34))
+        return tuple(gr.skip() for _ in range(35))
 
     _normalize_user_entry(profile)
     user_config = _user_config_from_profile(profile)
@@ -1946,6 +2476,10 @@ def restore_browser_session(browser_payload: Dict[str, Any]) -> Tuple[Any, ...]:
     state["retrieval_records"] = restored_retrieval_records
     state["l3_records"] = restored_l3_records
     state["current_session_id"] = restored_session_id
+    restored_jobs = payload.get("background_finalize_jobs", [])
+    if isinstance(restored_jobs, list):
+        state["background_finalize_jobs"] = [str(item) for item in restored_jobs if str(item or "").strip()]
+    state["background_finalize_message"] = str(payload.get("background_finalize_message", "") or "")
     if restored_active_chatbot:
         state = ensure_agent_ready(state)
         agent = state.get("agent")
@@ -1978,6 +2512,11 @@ def restore_browser_session(browser_payload: Dict[str, Any]) -> Tuple[Any, ...]:
     page = str(payload.get("page", "chat") or "chat")
     show_consult = page == "consult"
     memory_html = build_session_memory_panel(user_id, state["display_name"])
+    state, background_status, background_memory_html, background_retrieval_html = refresh_background_finalize_state(state)
+    if not isinstance(background_status, dict) and background_status:
+        consult_status = str(background_status)
+    if not isinstance(background_memory_html, dict) and background_memory_html:
+        memory_html = str(background_memory_html)
     browser_update = _browser_session_payload(
         state,
         page="consult" if show_consult else "chat",
@@ -2013,6 +2552,7 @@ def restore_browser_session(browser_payload: Dict[str, Any]) -> Tuple[Any, ...]:
         _trial_quota_message(profile),
         gr.update(value=phone_number),
         _form_message(f"当前已绑定：{_masked_phone(phone_number)}。", "ok") if phone_number and phone_verified_at else "",
+        gr.update(value=state["display_name"]),
         render_retrieval_records(state.get("retrieval_records", []), state["display_name"]),
         gr.update(visible=hub_section == "report" and show_consult),
         gr.update(visible=False),
@@ -2037,20 +2577,25 @@ def ensure_agent_ready(state: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(config, dict):
         config = {}
     api_runtime = _resolved_api_runtime_config(config)
-    primary_backend = str(config.get("model_backend", config.get("agent_backend", "gpt")) or "gpt")
+    unified_backend = _normalize_unified_api_backend(str(config.get("model_backend", config.get("api_provider", DEFAULT_API_PROVIDER)) or DEFAULT_API_PROVIDER))
+    agent_backend = _effective_backend(unified_backend, str(config.get("agent_backend", "gpt") or "gpt"))
+    summary_backend = _effective_backend(unified_backend, str(config.get("summary_backend", "gpt") or "gpt"))
+    supervisor_backend = unified_backend
+    graph_backend = unified_backend
+    router_backend = unified_backend
     api_error = _require_api_key_if_needed(
         state,
-        primary_backend,
+        unified_backend,
     )
     if api_error:
         raise gr.Error(api_error)
     started = time.perf_counter()
     agent = build_agent(
-        primary_backend,
-        primary_backend,
-        primary_backend,
-        primary_backend,
-        primary_backend,
+        agent_backend,
+        summary_backend,
+        supervisor_backend,
+        graph_backend,
+        router_backend,
         api_key=api_runtime["api_key"],
         base_url=api_runtime["base_url"],
         model=api_runtime["model"],
@@ -2071,6 +2616,7 @@ def ensure_agent_ready(state: Dict[str, Any]) -> Dict[str, Any]:
     }
     state["agent_ready"] = True
     state["agent_ready_timings"] = timings
+    _resume_pending_background_finalize_jobs(state, agent)
     return state
 
 
@@ -2078,9 +2624,11 @@ def charge_trial_session_if_needed(state: Dict[str, Any]) -> Dict[str, Any]:
     config = state.get("config", {}) if isinstance(state.get("config", {}), dict) else {}
     if str(config.get("api_mode", "own") or "own").strip().lower() != "trial":
         return state
-    if not _needs_remote_api(str(config.get("model_backend", config.get("agent_backend", "gpt")) or "gpt")):
+    provider = _normalize_api_provider(str(config.get("api_provider", DEFAULT_API_PROVIDER) or DEFAULT_API_PROVIDER))
+    unified_backend = _normalize_unified_api_backend(str(config.get("model_backend", provider) or provider))
+    if not _needs_remote_api(unified_backend):
         return state
-    if not _server_trial_api_available():
+    if not _server_trial_api_available(provider):
         raise gr.Error("服务器试用 Key 未配置，暂时不能使用试用模式。")
 
     session_id = str(state.get("current_session_id", "") or "")
@@ -2104,8 +2652,39 @@ def format_agent_ready_timings(state: Dict[str, Any]) -> str:
     timings = state.get("agent_ready_timings", [])
     if not timings:
         return ""
-    detail = "，".join(f"{label}={elapsed:.2f}s" for label, elapsed in timings)
-    return f"预加载耗时：{detail}"
+    total = sum(float(elapsed or 0.0) for _, elapsed in timings)
+    return f"系统准备耗时：{total:.2f}s"
+
+
+def format_turn_timings(result: Dict[str, Any]) -> str:
+    retrieval_meta = result.get("retrieval_meta", {}) if isinstance(result, dict) else {}
+    timings = retrieval_meta.get("timings", {}) if isinstance(retrieval_meta, dict) else {}
+    if not isinstance(timings, dict):
+        return ""
+
+    def seconds(name: str) -> float:
+        try:
+            return max(0.0, float(timings.get(name, 0.0) or 0.0))
+        except (TypeError, ValueError):
+            return 0.0
+
+    retrieval_seconds = seconds("retrieval_seconds")
+    response_seconds = seconds("response_seconds")
+    parts = []
+    if retrieval_seconds > 0:
+        parts.append(f"检索时间 {retrieval_seconds:.2f}s")
+    if response_seconds > 0:
+        parts.append(f"回答时间 {response_seconds:.2f}s")
+    return f"本轮耗时：{'，'.join(parts)}" if parts else ""
+
+
+def display_session_label(state: Dict[str, Any]) -> str:
+    session_id = str(state.get("current_session_id", "") or "")
+    display_name = str(state.get("display_name", "") or "").strip()
+    user_id = str(state.get("user_id", "") or "").strip()
+    if display_name and user_id and session_id.startswith(f"{user_id}_"):
+        return f"{display_name}_{session_id[len(user_id) + 1:]}"
+    return session_id
 
 
 def _html_escape(value: Any) -> str:
@@ -2197,6 +2776,95 @@ def normalize_retrieval_evidence(retrieval_meta: Dict[str, Any]) -> Dict[str, An
         "ranked_evidence": ranked_evidence if isinstance(ranked_evidence, list) else [],
     }
 
+
+def retrieval_evidence_has_items(evidence: Dict[str, Any]) -> bool:
+    if not isinstance(evidence, dict):
+        return False
+    for key in ("ranked_evidence", "l3_fragments", "graph_relations"):
+        value = evidence.get(key, [])
+        if isinstance(value, list) and value:
+            return True
+    context_text = evidence.get("context_text", "")
+    return isinstance(context_text, str) and bool(context_text.strip())
+
+
+def refill_retrieval_evidence_if_empty(
+    agent: "EmpathyAgent",
+    retrieval_meta: Dict[str, Any],
+    evidence: Dict[str, Any],
+) -> Dict[str, Any]:
+    if not isinstance(retrieval_meta, dict) or retrieval_evidence_has_items(evidence):
+        return evidence
+    if not bool(retrieval_meta.get("should_retrieve", False)):
+        return evidence
+
+    query = str(retrieval_meta.get("retrieval_query", "") or "").strip()
+    if not query:
+        return evidence
+
+    supervisor = getattr(agent, "supervisor", None)
+    retrieve_context = getattr(supervisor, "retrieve_context_for_response", None)
+    if not callable(retrieve_context):
+        return evidence
+
+    try:
+        repaired = retrieve_context(query)
+    except Exception as exc:
+        print(f"[MemAgent Retrieval] evidence refill failed: {type(exc).__name__}: {exc}", flush=True)
+        return evidence
+
+    if isinstance(repaired, dict):
+        retrieval_meta["retrieval"] = dict(repaired)
+        return normalize_retrieval_evidence(retrieval_meta)
+    return evidence
+
+
+def build_retrieval_record(
+    *,
+    turn_index: int,
+    user_input: str,
+    assistant_text: str,
+    retrieval_meta: Dict[str, Any],
+    evidence: Dict[str, Any],
+) -> Dict[str, Any]:
+    return {
+        "turn_index": turn_index,
+        "created_at": datetime.now().isoformat(),
+        "user": user_input,
+        "assistant": assistant_text,
+        "route": {
+            "need_retrieval": bool(retrieval_meta.get("should_retrieve", False)),
+            "intent": (retrieval_meta.get("retrieval_plan", {}) or {}).get("intent", ""),
+            "retrieval_focus": (retrieval_meta.get("retrieval_plan", {}) or {}).get("retrieval_focus", ""),
+        },
+        "retrieval_query": retrieval_meta.get("retrieval_query", ""),
+        "timings": retrieval_meta.get("timings", {}),
+        "evidence": {
+            "context_text": evidence.get("context_text", ""),
+            "l3_fragments": evidence.get("l3_fragments", []),
+            "graph_relations": evidence.get("graph_relations", []),
+            "ranked_evidence": evidence.get("ranked_evidence", []),
+        },
+    }
+
+
+def print_retrieval_panel_debug(record: Dict[str, Any]) -> None:
+    enabled = os.getenv("MEMAGENT_DEBUG_RETRIEVAL", "0").strip().lower()
+    if enabled in {"0", "false", "no", "off"}:
+        return
+    evidence = record.get("evidence", {}) if isinstance(record.get("evidence", {}), dict) else {}
+    ranked = evidence.get("ranked_evidence", []) if isinstance(evidence.get("ranked_evidence", []), list) else []
+    l3 = evidence.get("l3_fragments", []) if isinstance(evidence.get("l3_fragments", []), list) else []
+    graph = evidence.get("graph_relations", []) if isinstance(evidence.get("graph_relations", []), list) else []
+    route = record.get("route", {}) if isinstance(record.get("route", {}), dict) else {}
+    print(
+        "[MemAgent UI Retrieval] "
+        f"retrieved={route.get('need_retrieval')} "
+        f"ranked={len(ranked)} l3={len(l3)} graph={len(graph)} "
+        f"has_items={retrieval_evidence_has_items(evidence)}",
+        flush=True,
+    )
+
 def _compact_relation_text(item: Dict[str, Any]) -> str:
     if not isinstance(item, dict):
         return ""
@@ -2268,18 +2936,9 @@ def render_retrieval_records(records: List[Dict[str, Any]], display_name: str = 
     for recent_index, record in enumerate(recent_records, start=1):
         if not isinstance(record, dict):
             continue
-        route = record.get("route", {}) if isinstance(record.get("route", {}), dict) else {}
         evidence = record.get("evidence", {}) if isinstance(record.get("evidence", {}), dict) else {}
         evidence_items = _combined_retrieval_evidence_items(evidence, limit=6)
-        payload = {
-            "路由判决": {
-                "是否检索": "\u662f" if bool(route.get("need_retrieval", False)) else "\u5426",
-                "置信度": route.get("confidence", ""),
-                "原因": route.get("reason", ""),
-                "检索焦点": route.get("retrieval_focus", ""),
-            },
-            "索引证据": evidence_items or ["暂无内容"],
-        }
+        payload = {"索引证据": evidence_items or ["暂无内容"]}
         recent_label = _chinese_ordinal(recent_index)
         title = f"最近{recent_label}轮索引"
         original_turn = record.get("turn_index", "")
@@ -2584,17 +3243,54 @@ def send_message(user_input: str, state: Dict[str, Any]):
     chatbot.append({"role": "user", "content": user_input.strip()})
     chatbot.append({"role": "assistant", "content": ""})
     state["chatbot"] = chatbot
-    yield "", state, chatbot, f"正在生成回复：{state.get('current_session_id', '')}", retrieval_panel_html, gr.skip()
+    yield "", state, chatbot, f"正在生成回复：{display_session_label(state)}", retrieval_panel_html, gr.skip()
 
     result: Dict[str, Any] = {}
-    for chunk in agent.generate_response_stream(user_input.strip()):
-        if not isinstance(chunk, dict):
-            continue
-        result = chunk
-        chatbot[-1]["content"] = str(chunk.get("response", chatbot[-1]["content"]) or "")
+    pending_retrieval_record: Optional[Dict[str, Any]] = None
+    fallback_notice_shown = False
+    try:
+        for chunk in agent.generate_response_stream(user_input.strip()):
+            if not isinstance(chunk, dict):
+                continue
+            result = chunk
+            chatbot[-1]["content"] = str(chunk.get("response", chatbot[-1]["content"]) or "")
+            state["chatbot"] = chatbot
+            chunk_retrieval_meta = chunk.get("retrieval_meta", {}) if isinstance(chunk.get("retrieval_meta", {}), dict) else {}
+            fallback_notice = str(chunk_retrieval_meta.get("api_fallback_notice", "") or "")
+            if fallback_notice and not fallback_notice_shown:
+                gr.Warning(fallback_notice)
+                fallback_notice_shown = True
+            if pending_retrieval_record is None and chunk_retrieval_meta:
+                chunk_retrieval = normalize_retrieval_evidence(chunk_retrieval_meta)
+                chunk_retrieval = refill_retrieval_evidence_if_empty(agent, chunk_retrieval_meta, chunk_retrieval)
+                pending_retrieval_record = build_retrieval_record(
+                    turn_index=len(list(state.get("retrieval_records", []))) + 1,
+                    user_input=user_input.strip(),
+                    assistant_text="",
+                    retrieval_meta=chunk_retrieval_meta,
+                    evidence=chunk_retrieval,
+                )
+                print_retrieval_panel_debug(pending_retrieval_record)
+                preview_records = _clean_retrieval_records(list(state.get("retrieval_records", [])) + [pending_retrieval_record])
+                retrieval_panel_html = render_retrieval_records(preview_records, state.get("display_name", ""))
+            if not chunk.get("done"):
+                status_text = f"正在生成回复：{display_session_label(state)}"
+                if fallback_notice:
+                    status_text = f"{fallback_notice}\n{status_text}"
+                yield "", state, chatbot, status_text, retrieval_panel_html, gr.skip()
+    except Exception as exc:
+        error_text = str(exc)
+        friendly = "模型连接异常，已尝试切换其他已配置接口但仍未成功。请稍后重试，或检查 API Key / 网络连接。"
+        gr.Warning(friendly)
+        if chatbot and chatbot[-1].get("role") == "assistant" and not str(chatbot[-1].get("content", "")).strip():
+            chatbot[-1]["content"] = friendly
+        elif chatbot and chatbot[-1].get("role") == "assistant":
+            chatbot[-1]["content"] = f"{chatbot[-1].get('content', '')}\n\n{friendly}"
         state["chatbot"] = chatbot
-        if not chunk.get("done"):
-            yield "", state, chatbot, f"正在生成回复：{state.get('current_session_id', '')}", retrieval_panel_html, gr.skip()
+        print(f"[MemAgent API Error] {error_text}", flush=True)
+        yield "", state, chatbot, f"{friendly}\n错误信息：{error_text[:300]}", retrieval_panel_html, gr.skip()
+        return
+
 
     response_text = str(result.get("response", "") or "").strip()
     l3_records = list(state.get("l3_records", []))
@@ -2611,38 +3307,34 @@ def send_message(user_input: str, state: Dict[str, Any]):
 
     retrieval_meta = result.get("retrieval_meta", {}) if isinstance(result.get("retrieval_meta", {}), dict) else {}
     retrieval = normalize_retrieval_evidence(retrieval_meta)
+    retrieval = refill_retrieval_evidence_if_empty(agent, retrieval_meta, retrieval)
     retrieval_records = list(state.get("retrieval_records", []))
-    retrieval_records.append(
-        {
-            "turn_index": len(retrieval_records) + 1,
-            "created_at": datetime.now().isoformat(),
-            "user": user_input.strip(),
-            "assistant": response_text,
-            "route": {
-                "need_retrieval": bool(retrieval_meta.get("should_retrieve", False)),
-                "confidence": (retrieval_meta.get("decision", {}) or {}).get("confidence", ""),
-                "reason": (retrieval_meta.get("decision", {}) or {}).get("reason", ""),
-                "retrieval_focus": (retrieval_meta.get("decision", {}) or {}).get("retrieval_focus", ""),
-            },
-            "retrieval_query": retrieval_meta.get("retrieval_query", ""),
-              "evidence": {
-                "context_text": retrieval.get("context_text", ""),
-                "l3_fragments": retrieval.get("l3_fragments", []),
-                "graph_relations": retrieval.get("graph_relations", []),
-                "ranked_evidence": retrieval.get("ranked_evidence", []),
-              },
-        }
+    final_retrieval_record = build_retrieval_record(
+        turn_index=len(retrieval_records) + 1,
+        user_input=user_input.strip(),
+        assistant_text=response_text,
+        retrieval_meta=retrieval_meta,
+        evidence=retrieval,
     )
+    print_retrieval_panel_debug(final_retrieval_record)
+    retrieval_records.append(final_retrieval_record)
     state["retrieval_records"] = _clean_retrieval_records(retrieval_records)
     save_recent_retrieval_records(state.get("user_id", ""), state["retrieval_records"])
     retrieval_panel_html = render_retrieval_records(state["retrieval_records"], state.get("display_name", ""))
 
     timing_text = format_agent_ready_timings(state)
-    status = f"已回复。当前会话：{state.get('current_session_id', '')}"
+    turn_timing_text = format_turn_timings(result)
+    status = f"已回复。当前会话：{display_session_label(state)}"
+    fallback_notice = str(retrieval_meta.get("api_fallback_notice", "") or "")
+    if fallback_notice:
+        status = f"{fallback_notice}\n{status}"
+    if turn_timing_text:
+        status = f"{status}\n{turn_timing_text}"
     if timing_text:
         status = f"{status}\n{timing_text}"
-    if str((state.get("config", {}) or {}).get("api_mode", "own")) == "trial":
-        status = f"{status}\n{_trial_quota_text(state)}"
+    trial_text = _trial_quota_text(state)
+    if trial_text:
+        status = f"{status}\n{trial_text}"
     yield "", state, chatbot, status, retrieval_panel_html, _browser_session_payload(state)
 
 
@@ -2889,11 +3581,12 @@ def show_history_sessions(state: Dict[str, Any]) -> Tuple[str, str, dict, dict, 
     return render_history_sessions(state["user_id"]), "已加载历史会话。", *resource_button_updates("history")
 
 
-def open_chat_page(state: Dict[str, Any]) -> Tuple[dict, dict, str]:
+def open_chat_page(state: Dict[str, Any]) -> Tuple[Dict[str, Any], dict, dict, str]:
     if not state.get("authenticated") or not state.get("user_id"):
         raise gr.Error("请先登录。")
     state, _, _, _ = refresh_background_finalize_state(state)
-    return gr.update(visible=True), gr.update(visible=False), "已返回咨询对话。"
+    status = state.get("background_finalize_message", "") or "已返回咨询对话。"
+    return state, gr.update(visible=True), gr.update(visible=False), status
 
 
 def activate_chat_view(state: Dict[str, Any]) -> Tuple[dict, dict, Any]:
@@ -2902,7 +3595,7 @@ def activate_chat_view(state: Dict[str, Any]) -> Tuple[dict, dict, Any]:
     return gr.update(visible=True), gr.update(visible=False), gr.update()
 
 
-def open_consultation_hub(state: Dict[str, Any]) -> Tuple[dict, dict, str, dict, dict, str, dict, dict, dict, dict, dict]:
+def open_consultation_hub(state: Dict[str, Any]) -> Tuple[Dict[str, Any], dict, dict, str, dict, dict, str, dict, dict, dict, dict, dict]:
     if not state.get("authenticated") or not state.get("user_id"):
         raise gr.Error("请先登录。")
     state, _, _, _ = refresh_background_finalize_state(state)
@@ -2912,6 +3605,7 @@ def open_consultation_hub(state: Dict[str, Any]) -> Tuple[dict, dict, str, dict,
     state["hub_section"] = "overview"
     state["history_session_id"] = dropdown_value(meta.get("history_session_id", selected), choices) or ""
     return (
+        state,
         gr.update(visible=False),
         gr.update(visible=True),
         html_text,
@@ -3024,15 +3718,32 @@ def end_session(state: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Dict[str, s
     agent: Optional[EmpathyAgent] = state.get("agent")
     active_messages = list(getattr(agent, "session_messages", []) or []) if agent is not None else []
     if not active_messages:
+        state, status_update, memory_update, retrieval_update = refresh_background_finalize_state(state)
         memory_html = build_session_memory_panel(state["user_id"], state["display_name"]) if state.get("user_id") else ""
         retrieval_html = render_retrieval_records(state.get("retrieval_records", []), state.get("display_name", ""))
-        return state, state.get("chatbot", []), "当前没有新的对话内容，本次不会写入记忆或会话记录。", memory_html, retrieval_html, _browser_session_payload(state)
+        if not isinstance(memory_update, dict) and memory_update:
+            memory_html = str(memory_update)
+        if not isinstance(retrieval_update, dict) and retrieval_update:
+            retrieval_html = str(retrieval_update)
+        status_text = (
+            str(status_update)
+            if not isinstance(status_update, dict) and status_update
+            else state.get("background_finalize_message", "")
+        )
+        if not status_text:
+            status_text = "当前没有新的对话内容，本次不会写入记忆或会话记录。"
+        return state, state.get("chatbot", []), status_text, memory_html, retrieval_html, _browser_session_payload(state)
     agent = state["agent"]
     latest_session_chatbot = _active_chatbot_messages(state)
     if not latest_session_chatbot:
         latest_session_chatbot = _session_messages_to_chatbot(active_messages)
     job_id = _schedule_background_finalize(state, agent)
-    state["background_finalize_message"] = f"上一会话已进入后台归档：{state['current_session_id']}"
+    queued_job = _get_background_finalize_job(job_id) or {}
+    state["background_finalize_message"] = (
+        _format_background_finalize_status(queued_job, 1)
+        if queued_job
+        else f"后台归档已排队：{state['current_session_id']}"
+    )
 
     state["chatbot"] = latest_session_chatbot
     state["active_chatbot_start_index"] = len(latest_session_chatbot)
@@ -3058,7 +3769,7 @@ def end_session(state: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Dict[str, s
     return (
         state,
         state.get("chatbot", []),
-        f"当前会话已结束，新会话已开启。后台归档任务：{job_id}",
+        state["background_finalize_message"],
         memory_html,
         retrieval_html,
         _browser_session_payload(state),
@@ -3066,8 +3777,9 @@ def end_session(state: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Dict[str, s
 
 
 def start_background_memory_warmup() -> None:
-    global MEMORY_WARMUP_FUTURE
+    global MEMORY_WARMUP_DONE, MEMORY_WARMUP_FUTURE
 
+    auto_load_dotenv()
     enabled = os.getenv("MEMAGENT_BACKGROUND_MEMORY_WARMUP", "1").strip().lower()
     if enabled in {"0", "false", "no", "off"}:
         return
@@ -3075,15 +3787,21 @@ def start_background_memory_warmup() -> None:
         return
 
     with MEMORY_WARMUP_LOCK:
+        if MEMORY_WARMUP_DONE:
+            return
         if MEMORY_WARMUP_FUTURE is not None and not MEMORY_WARMUP_FUTURE.done():
             return
 
         def _run() -> None:
+            global MEMORY_WARMUP_DONE
             try:
+                print("[MemAgent] memory retrieval warmup started.", flush=True)
                 from memory.mem0_adapter import Mem0Adapter
 
-                Mem0Adapter()
-                print("[MemAgent] 记忆检索模块已完成后台初始化。", flush=True)
+                adapter = Mem0Adapter()
+                adapter.search_relevant_context("__warmup__", "memory warmup", limit=1, debug=False)
+                print("[MemAgent] memory retrieval warmup completed.", flush=True)
+                MEMORY_WARMUP_DONE = True
             except Exception as exc:
                 print(f"[MemAgent] 记忆检索模块后台初始化失败：{type(exc).__name__}: {exc}", flush=True)
 
@@ -3093,6 +3811,21 @@ def start_background_memory_warmup() -> None:
 def warmup_ui_callback() -> None:
     start_background_memory_warmup()
     return None
+
+
+def schedule_startup_memory_warmup(delay: Optional[float] = None) -> None:
+    auto_load_dotenv()
+    enabled = os.getenv("MEMAGENT_BACKGROUND_MEMORY_WARMUP", "1").strip().lower()
+    if enabled in {"0", "false", "no", "off"}:
+        return
+    if delay is None:
+        delay = float(os.getenv("MEMAGENT_STARTUP_MEMORY_WARMUP_DELAY_SECONDS", "0.0"))
+    if delay <= 0:
+        start_background_memory_warmup()
+        return
+    timer = threading.Timer(max(0.0, delay), start_background_memory_warmup)
+    timer.daemon = True
+    timer.start()
 
 
 APP_CSS = """
@@ -3758,6 +4491,25 @@ APP_CSS = """
   min-height: 44px;
 }
 
+.api-provider-radio [role="radiogroup"] {
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+}
+
+.api-provider-radio label {
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  font-weight: 700;
+}
+
+.api-provider-radio label:has(input:checked) {
+  border-color: #2263ae !important;
+  background: #edf6ff !important;
+  color: #174a86 !important;
+}
+
 .doc-card {
   margin: 0 0 14px;
   padding: 18px;
@@ -3953,7 +4705,7 @@ APP_CSS = """
 def build_app() -> gr.Blocks:
     migrate_legacy_session_tree()
     ensure_seed_users()
-    login_user_choices = collect_known_user_ids()
+    login_user_choices = collect_known_login_names()
     with gr.Blocks(title="MemAgent Chat") as demo:
         state = gr.State(empty_state())
         browser_session = gr.BrowserState({}, storage_key="memagent_browser_session_v1")
@@ -4024,8 +4776,8 @@ def build_app() -> gr.Blocks:
                 with gr.Group(elem_classes=["auth-section", "user-section"]):
                     gr.HTML('<div class="auth-section-title">注册账户</div>')
                     with gr.Row(elem_classes=["auth-grid", "login-grid"]):
-                        register_user_id = gr.Textbox(label="用户名 / 用户 ID", interactive=True)
-                        register_display_name = gr.Textbox(label="显示名称", interactive=True)
+                        register_user_id = gr.Textbox(label="用户名称", interactive=True)
+                        register_display_name = gr.Textbox(label="显示名称", interactive=True, visible=False)
                     with gr.Row(elem_classes=["auth-grid", "login-grid"]):
                         register_password = gr.Textbox(label="密码", type="password", interactive=True)
                         register_confirm_password = gr.Textbox(label="确认密码", type="password", interactive=True)
@@ -4103,23 +4855,27 @@ def build_app() -> gr.Blocks:
                 with gr.Accordion("模型配置", open=True, elem_classes=["change-password-panel"]):
                     with gr.Row(elem_classes=["auth-grid", "model-choice-row"]):
                         config_agent_backend = gr.Radio(
-                            choices=MODEL_BACKEND_CHOICES,
+                            choices=AGENT_BACKEND_CHOICES,
                             value="gpt",
-                            label="完整模型选择",
+                            label="\u5171\u60c5 Agent \u6a21\u578b",
                             elem_classes=["model-choice-radio"],
                         )
-                        config_summary_backend = gr.Dropdown(SUMMARY_BACKEND_CHOICES, value="gpt", label="Summary Agent", visible=False)
+                        config_summary_backend = gr.Radio(SUMMARY_BACKEND_CHOICES, value="gpt", label="\u603b\u7ed3 Agent \u6a21\u578b")
                     with gr.Row(elem_classes=["auth-grid", "login-grid"]):
-                        config_graph_backend = gr.Dropdown(AGENT_BACKEND_CHOICES, value="gpt", label="Graph Extractor", visible=False)
-                        config_router_backend = gr.Dropdown(AGENT_BACKEND_CHOICES, value="gpt", label="路由模型", visible=False)
+                        config_graph_backend = gr.Dropdown(MODEL_BACKEND_CHOICES, value="gpt", label="Graph Extractor", visible=False)
+                        config_router_backend = gr.Dropdown(MODEL_BACKEND_CHOICES, value="gpt", label="路由模型", visible=False)
                     config_api_mode = gr.Radio(
                         choices=API_MODE_CHOICES,
                         value="own",
                         label="API 使用方式",
                         elem_classes=["api-mode-radio"],
                     )
-                    with gr.Row(elem_classes=["auth-grid", "login-grid"]):
-                        config_api_provider = gr.Dropdown(API_PROVIDER_CHOICES, value=DEFAULT_API_PROVIDER, label="API 提供方", visible=False)
+                    config_api_provider = gr.Radio(
+                        choices=API_PROVIDER_CHOICES,
+                        value=DEFAULT_API_PROVIDER,
+                        label="\u7edf\u4e00 API \u6a21\u578b",
+                        elem_classes=["model-choice-radio", "api-provider-radio"],
+                    )
                     trial_quota_status = gr.HTML(_trial_quota_message({"trial_sessions_used": 0}), elem_classes=["field-message"])
                     with gr.Row(elem_classes=["auth-grid", "login-grid"]):
                         config_api_key = gr.Textbox(label="API Key", type="password", interactive=True)
@@ -4132,20 +4888,25 @@ def build_app() -> gr.Blocks:
                     config_status = gr.HTML(elem_classes=["field-message"])
                     with gr.Row(elem_classes=["action-row"]):
                         save_config_btn = gr.Button("保存配置", variant="primary")
-                    config_agent_backend.change(
+                    config_api_provider.change(
                         fn=update_model_selection_preview,
-                        inputs=[config_agent_backend, config_api_mode, state],
+                        inputs=[config_api_provider, config_api_mode, state],
                         outputs=[config_api_key, config_model_name],
                         queue=False,
                     )
                     config_api_mode.change(
                         fn=update_model_selection_preview,
-                        inputs=[config_agent_backend, config_api_mode, state],
+                        inputs=[config_api_provider, config_api_mode, state],
                         outputs=[config_api_key, config_model_name],
                         queue=False,
                     )
             with gr.Group(elem_classes=["auth-section", "account-section"]):
                 gr.HTML('<div class="auth-section-title">账号管理</div>')
+                with gr.Accordion("修改用户名称", open=False, elem_classes=["change-password-panel"]):
+                    display_name_input = gr.Textbox(label="用户名称", interactive=True)
+                    display_name_message = gr.HTML(elem_classes=["field-message"])
+                    with gr.Row(elem_classes=["action-row"]):
+                        submit_display_name_btn = gr.Button("保存名称", variant="primary")
                 with gr.Accordion("修改密码", open=False, elem_classes=["change-password-panel"]):
                     with gr.Row(elem_classes=["auth-grid", "login-grid"]):
                         old_password = gr.Textbox(label="原密码", type="password", interactive=True)
@@ -4164,7 +4925,7 @@ def build_app() -> gr.Blocks:
                 with gr.Row(elem_classes=["action-row"]):
                     logout_btn = gr.Button("退出登录")
 
-        background_timer = gr.Timer(4.0)
+        background_timer = gr.Timer(2.0)
 
         background_timer.tick(
             fn=poll_background_finalize_state,
@@ -4204,6 +4965,7 @@ def build_app() -> gr.Blocks:
                 trial_quota_status,
                 bind_phone_input,
                 bind_phone_message,
+                display_name_input,
                 retrieval_panel,
                 chatbot,
             ],
@@ -4248,6 +5010,7 @@ def build_app() -> gr.Blocks:
                 trial_quota_status,
                 bind_phone_input,
                 bind_phone_message,
+                display_name_input,
                 retrieval_panel,
                 chatbot,
             ],
@@ -4295,6 +5058,21 @@ def build_app() -> gr.Blocks:
             outputs=[change_password_message, old_password, new_password, confirm_new_password],
             queue=False,
         )
+        submit_display_name_btn.click(
+            fn=change_display_name,
+            inputs=[state, display_name_input],
+            outputs=[
+                state,
+                display_name_message,
+                current_user,
+                consult_nav_btn,
+                resource_panel,
+                consult_panel,
+                retrieval_panel,
+                browser_session,
+            ],
+            queue=False,
+        )
         send_bind_phone_code_btn.click(
             fn=request_bind_phone_code,
             inputs=[state, bind_phone_input],
@@ -4312,6 +5090,7 @@ def build_app() -> gr.Blocks:
             inputs=[
                 state,
                 config_agent_backend,
+                config_summary_backend,
                 config_api_mode,
                 config_api_provider,
                 config_api_key,
@@ -4370,7 +5149,7 @@ def build_app() -> gr.Blocks:
         chat_nav_event = chat_nav_btn.click(
             fn=open_chat_page,
             inputs=[state],
-            outputs=[chat_page, consult_page, chat_status],
+            outputs=[state, chat_page, consult_page, chat_status],
             queue=False,
             show_progress="hidden",
         )
@@ -4379,6 +5158,7 @@ def build_app() -> gr.Blocks:
             fn=open_consultation_hub,
             inputs=[state],
             outputs=[
+                state,
                 chat_page,
                 consult_page,
                 consult_panel,
@@ -4516,6 +5296,7 @@ def build_app() -> gr.Blocks:
                 trial_quota_status,
                 bind_phone_input,
                 bind_phone_message,
+                display_name_input,
                 retrieval_panel,
                 export_html_area,
                 export_confirm_panel,
@@ -4542,6 +5323,7 @@ def find_available_port(host: str, preferred_port: int, attempts: int = 20) -> i
 
 
 def launch_app() -> None:
+    schedule_startup_memory_warmup()
     demo = build_app()
     public_mode = os.getenv("MEMAGENT_PUBLIC", "0").strip().lower() in {"1", "true", "yes"}
     server_name = os.getenv("GRADIO_SERVER_NAME", "0.0.0.0" if public_mode else "127.0.0.1")

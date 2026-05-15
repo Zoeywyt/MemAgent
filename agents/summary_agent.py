@@ -1,9 +1,12 @@
+import importlib.util
 import json
+import os
 from typing import Any, Dict, List, Optional
 
 from memory.user_summary_store import UserSummaryStore
 from prompts.summary_prompts import INTEGRATED_SUMMARY_INSTRUCTION, L2_SESSION_SUMMARY_PROMPT
 from utils.model_client import ChatClientProtocol, build_chat_client
+from utils.model_runtime import call_model
 
 
 class SummaryAgent:
@@ -18,6 +21,12 @@ class SummaryAgent:
         base_url: Optional[str] = None,
         model: Optional[str] = None,
     ):
+        self.model_backend = model_backend
+        self.model_mode = model_mode
+        self.api_key = api_key
+        self.base_url = base_url
+        self.model = model
+        self._fallback_client: Optional[ChatClientProtocol] = None
         self.openai_client = openai_client or build_chat_client(
             "SUMMARY_AGENT",
             backend=model_backend,
@@ -31,12 +40,71 @@ class SummaryAgent:
         )
         self.summary_store = UserSummaryStore()
 
+    def _is_local_summary_backend(self) -> bool:
+        backend = str(self.model_backend or "").strip().lower().replace("-", "").replace("_", "")
+        mode = str(self.model_mode or "").strip().lower()
+        return backend in {"qwen3b", "qwen7b", "local"} or mode in {"local", "hf", "huggingface"}
+
+    def _local_summary_allowed(self) -> bool:
+        if not self._is_local_summary_backend():
+            return True
+        if os.getenv("MEMAGENT_ALLOW_CPU_SUMMARY_LOCAL", "0").strip().lower() in {"1", "true", "yes", "on"}:
+            return True
+        if importlib.util.find_spec("torch") is None:
+            return False
+        try:
+            import torch
+
+            return bool(torch.cuda.is_available())
+        except Exception:
+            return False
+
+    def _get_fallback_client(self) -> ChatClientProtocol:
+        if self._fallback_client is None:
+            self._fallback_client = build_chat_client(
+                "SUMMARY_AGENT_FALLBACK",
+                backend="gpt",
+                api_key=self.api_key,
+                base_url=self.base_url,
+                model=self.model,
+                max_new_tokens=512,
+            )
+        return self._fallback_client
+
     def _call_model(self, prompt: str) -> str:
         messages = [
             {"role": "system", "content": "你是一个擅长心理咨询总结与结构化信息提取的助手，输出尽量遵循用户要求。"},
             {"role": "user", "content": prompt},
         ]
-        response_text, _usage = self.openai_client.chat(messages=messages)
+        if not self._local_summary_allowed():
+            print(
+                "[MemAgent Summary] local summary model is skipped because CUDA is unavailable; fallback to unified API.",
+                flush=True,
+            )
+            response_text, _usage = call_model(
+                self._get_fallback_client(),
+                component="summary_fallback",
+                messages=messages,
+            )
+            return response_text
+        try:
+            response_text, _usage = call_model(
+                self.openai_client,
+                component="summary",
+                messages=messages,
+            )
+        except BaseException as exc:
+            if not self._is_local_summary_backend():
+                raise
+            print(
+                f"[MemAgent Summary] local summary model failed ({type(exc).__name__}: {exc}); fallback to unified API.",
+                flush=True,
+            )
+            response_text, _usage = call_model(
+                self._get_fallback_client(),
+                component="summary_fallback",
+                messages=messages,
+            )
         return response_text
 
     def _parse_json(self, response: str) -> Optional[Dict[str, Any]]:

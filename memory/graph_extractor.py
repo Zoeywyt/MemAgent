@@ -15,6 +15,7 @@ from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 
 from utils.model_client import ChatClientProtocol, build_chat_client, resolve_model_mode
+from utils.model_runtime import call_model
 
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,9 @@ class GraphExtractor:
             return {"entities": [], "relations": []}
 
         try:
-            response_text, _usage = self.client.chat(
+            response_text, _usage = call_model(
+                self.client,
+                component="graph",
                 messages=[
                     {
                         "role": "system",

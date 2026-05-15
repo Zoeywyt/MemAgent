@@ -10,6 +10,7 @@ from agents.summary_agent import SummaryAgent
 from memory.graph_extractor import GraphExtractor
 from output_store import load_user_session_summaries, load_user_trends
 from utils.model_client import ChatClientProtocol, build_chat_client
+from utils.model_runtime import call_model, stream_model
 
 if TYPE_CHECKING:
     from memory.mem0_adapter import Mem0Adapter
@@ -28,23 +29,17 @@ SYSTEM_PROMPT = (
 
 L1_SUMMARY_KEYS = ("主题", "背景", "会话总结")
 TREATMENT_REPORT_KEYS = ("emotion_trend", "key_progress", "risk_note", "treatment_phase", "next_focus")
-RETRIEVAL_DECISION_PROMPT = """你是一个咨询记忆路由器，任务只有一个：判断当前是否需要额外检索长期记忆。
+RETRIEVAL_FOCUS_PROMPT = """你是一个轻量咨询记忆检索焦点生成器，不判断是否检索。
 
-请结合以下信息判断：
-1. 用户当前输入。
-2. 最近几轮对话。
-3. 用户长期画像。
-4. 当前咨询状态。
-
-当用户明显在提到以前的人、事、时间、关系、症状变化、反复出现的问题、未解决目标，或者当前问题需要回看历史脉络时，倾向于检索。
-当用户只是做当下情绪表达、一般性倾诉、简单确认、短问短答时，不需要检索。
+你的任务：
+1. 根据最近对话和当前输入，识别用户当前咨询意图。
+2. 生成更适合记忆库召回的检索焦点。
+3. 输出内容会同时提供给记忆检索模块和共情交互模型。
 
 只输出 JSON，不要解释，不要加多余文本。格式如下：
 {
-  "need_retrieval": true,
-  "confidence": 0.0,
-  "reason": "一句简短原因",
-  "retrieval_focus": "如需检索，写一句搜索焦点；否则留空"
+  "intent": "一句话概括用户当前意图",
+  "retrieval_focus": "一句具体、简洁、适合检索片段记忆和图关系的焦点"
 }
 """
 
@@ -89,9 +84,9 @@ class EmpathyAgent:
         )
         self.summary_agent = SummaryAgent(
             model_backend=summary_model_backend or model_backend,
-            model_mode=summary_model_mode or model_mode,
-            local_model_path=summary_local_model_path or local_model_path,
-            local_base_model_path=summary_local_base_model_path or local_base_model_path,
+            model_mode=summary_model_mode,
+            local_model_path=summary_local_model_path,
+            local_base_model_path=summary_local_base_model_path,
             api_key=api_key,
             base_url=base_url,
             model=model,
@@ -99,9 +94,9 @@ class EmpathyAgent:
         self._mem0: Optional["Mem0Adapter"] = None
         self.graph_extractor = GraphExtractor(
             model_backend=graph_model_backend or model_backend,
-            model_mode=graph_model_mode or model_mode,
-            local_model_path=graph_local_model_path or local_model_path,
-            local_base_model_path=graph_local_base_model_path or local_base_model_path,
+            model_mode=graph_model_mode,
+            local_model_path=graph_local_model_path,
+            local_base_model_path=graph_local_base_model_path,
             api_key=api_key,
             base_url=base_url,
             model=model,
@@ -120,9 +115,9 @@ class EmpathyAgent:
         )
         self.supervisor: Optional[SupervisorAgent] = None
         self._supervisor_model_backend = supervisor_model_backend or model_backend
-        self._supervisor_model_mode = supervisor_model_mode or model_mode
-        self._supervisor_local_model_path = supervisor_local_model_path or local_model_path
-        self._supervisor_local_base_model_path = supervisor_local_base_model_path or local_base_model_path
+        self._supervisor_model_mode = supervisor_model_mode
+        self._supervisor_local_model_path = supervisor_local_model_path
+        self._supervisor_local_base_model_path = supervisor_local_base_model_path
         self._api_key = api_key
         self._base_url = base_url
         self._api_model = model
@@ -140,7 +135,6 @@ class EmpathyAgent:
     def _warmup_local_clients_async(self) -> None:
         clients = [
             self.openai_client,
-            self.summary_agent.openai_client,
             self.graph_extractor.client,
             self.router_client,
             self.supervisor.openai_client if self.supervisor else None,
@@ -366,28 +360,48 @@ class EmpathyAgent:
                 lines.append(f"咨询师：{assistant_msg.get('content', '')}")
         return "\n".join(lines).strip()
 
-    def _build_retrieval_decision_messages(self, user_input: str) -> List[Dict[str, str]]:
-        context = self.preloaded_session_context or {}
-        l1_summary = self._flatten_text(context.get("l1_summary", {}))
-        treatment_report = self._flatten_text(context.get("treatment_report", {}))
+    def _build_retrieval_focus_messages(self, user_input: str) -> List[Dict[str, str]]:
         recent_history = self._recent_history_text()
         prompt = (
-            "请判断本轮是否需要检索额外长期记忆。"
-            "你要像一个会自我察觉的咨询智能体一样，只在确实需要补充历史上下文时再请求检索。"
-            "\n\n【长期画像】\n"
-            f"{l1_summary or '无'}"
-            "\n\n【当前咨询状态】\n"
-            f"{treatment_report or '无'}"
-            "\n\n【最近对话】\n"
-            f"{recent_history or '无'}"
-            "\n\n【当前输入】\n"
+            "请只根据最近对话和本轮输入，生成轻量的咨询意图与记忆检索焦点。\n"
+            "目标是让检索更容易召回相关的片段记忆和图关系。\n"
+            "只输出 JSON，不要解释。格式：\n"
+            '{"intent":"一句话概括用户当前意图","retrieval_focus":"一句具体、简洁的检索焦点"}\n\n'
+            "【最近对话】\n"
+            f"{recent_history or '无'}\n\n"
+            "【本轮输入】\n"
             f"{user_input.strip()}"
-            "\n\n请只输出 JSON。"
         )
         return [
-            {"role": "system", "content": RETRIEVAL_DECISION_PROMPT},
+            {"role": "system", "content": RETRIEVAL_FOCUS_PROMPT},
             {"role": "user", "content": prompt},
         ]
+
+    def _plan_retrieval_focus(self, user_input: str) -> Dict[str, str]:
+        intent_enabled = os.getenv("MEMAGENT_ENABLE_INTENT_RECOGNITION", "1").strip().lower()
+        focus_policy = os.getenv("MEMAGENT_RETRIEVAL_FOCUS_POLICY", "rewrite").strip().lower()
+        fallback = {
+            "intent": user_input.strip()[:120],
+            "retrieval_focus": user_input.strip()[:160],
+        }
+        if intent_enabled in {"0", "false", "no", "off"} or focus_policy in {"input", "off", "none", "0", "false", "no"}:
+            return fallback
+        try:
+            response_text, _usage = call_model(
+                self.router_client,
+                component="router_focus",
+                messages=self._build_retrieval_focus_messages(user_input),
+            )
+            parsed = self._parse_retrieval_decision(response_text)
+            intent = str(parsed.get("intent", "") or "").strip()
+            focus = str(parsed.get("retrieval_focus", "") or "").strip()
+            return {
+                "intent": intent[:160] if intent else fallback["intent"],
+                "retrieval_focus": focus[:240] if focus else fallback["retrieval_focus"],
+            }
+        except Exception as exc:
+            print(f"[MemAgent Intent] retrieval focus planning failed: {type(exc).__name__}: {exc}", flush=True)
+            return fallback
 
     def _parse_retrieval_decision(self, text: str) -> Dict[str, Any]:
         raw = (text or "").strip()
@@ -405,31 +419,11 @@ class EmpathyAgent:
                     return {}
         return {}
 
-    def _coerce_retrieval_bool(self, value: Any) -> bool:
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "1", "yes", "y"}
-        return bool(value)
-
-    def _coerce_confidence(self, value: Any) -> Optional[float]:
-        try:
-            confidence = float(value)
-        except (TypeError, ValueError):
-            return None
-        if confidence < 0:
-            return 0.0
-        if confidence > 1:
-            return confidence / 100.0 if confidence <= 100 else 1.0
-        return confidence
-
-    def _print_retrieval_decision_debug(
+    def _print_retrieval_focus_debug(
         self,
         *,
         user_input: str,
-        need_retrieval: bool,
-        decision: Dict[str, Any],
-        raw_text: str = "",
+        plan: Dict[str, str],
         skipped_reason: str = "",
     ) -> None:
         enabled = os.getenv("MEMAGENT_DEBUG_RETRIEVAL", "1").strip().lower()
@@ -437,73 +431,38 @@ class EmpathyAgent:
             return
 
         print("\n" + "-" * 72, flush=True)
-        print("[MemAgent Router] 检索路由判决", flush=True)
+        print("[MemAgent Intent] 检索意图与焦点", flush=True)
         if self.current_user_id:
             print(f"user={self.current_user_id} session={self.session_id or ''}", flush=True)
-        print(f"need_retrieval={need_retrieval}", flush=True)
         if skipped_reason:
             print(f"skipped_reason={skipped_reason}", flush=True)
-        confidence = decision.get("confidence", "")
-        reason = decision.get("reason", "")
-        focus = decision.get("retrieval_focus", "")
-        override_reason = decision.get("override_reason", "")
-        print(f"confidence={confidence}", flush=True)
-        print(f"reason={reason}", flush=True)
-        if override_reason:
-            print(f"override_reason={override_reason}", flush=True)
+        print(f"intent={plan.get('intent', '')}", flush=True)
+        focus = plan.get("retrieval_focus", "")
         print(f"retrieval_focus={focus}", flush=True)
         user_preview = user_input.strip().replace("\n", " ")[:300]
         print(f"user_input={user_preview}", flush=True)
-        if raw_text and not decision:
-            print(f"raw_router_output={raw_text.strip()[:500]}", flush=True)
         print("-" * 72 + "\n", flush=True)
 
-    def _decide_retrieval(self, user_input: str) -> Tuple[bool, Dict[str, Any]]:
+    def _build_retrieval_plan(self, user_input: str) -> Tuple[bool, Dict[str, str]]:
         if not self.enable_mem0_runtime:
-            self._print_retrieval_decision_debug(
+            plan = {"intent": "", "retrieval_focus": ""}
+            self._print_retrieval_focus_debug(
                 user_input=user_input,
-                need_retrieval=False,
-                decision={},
+                plan=plan,
                 skipped_reason="MEMAGENT_ENABLE_MEM0_RUNTIME 未开启",
             )
-            return False, {}
+            return False, plan
         if not self.supervisor:
-            self._print_retrieval_decision_debug(
+            plan = {"intent": "", "retrieval_focus": ""}
+            self._print_retrieval_focus_debug(
                 user_input=user_input,
-                need_retrieval=False,
-                decision={},
+                plan=plan,
                 skipped_reason="supervisor 未初始化",
             )
-            return False, {}
-
-        messages = self._build_retrieval_decision_messages(user_input)
-        try:
-            decision_text, _usage = self.router_client.chat(messages=messages)
-        except Exception as exc:
-            self._print_retrieval_decision_debug(
-                user_input=user_input,
-                need_retrieval=False,
-                decision={"reason": f"路由模型调用失败：{exc}"},
-                skipped_reason="router_error",
-            )
-            return False, {}
-
-        decision = self._parse_retrieval_decision(decision_text)
-        need_retrieval = self._coerce_retrieval_bool(decision.get("need_retrieval"))
-        confidence = self._coerce_confidence(decision.get("confidence"))
-        if not need_retrieval and (confidence is None or confidence < 0.6):
-            need_retrieval = True
-            decision["override_reason"] = "router 判为不检索，但置信度低于 0.6，按保守策略执行检索"
-        if "retrieval_focus" in decision and isinstance(decision.get("retrieval_focus"), str):
-            decision["retrieval_focus"] = str(decision.get("retrieval_focus", "")).strip()
-        decision["need_retrieval"] = need_retrieval
-        self._print_retrieval_decision_debug(
-            user_input=user_input,
-            need_retrieval=need_retrieval,
-            decision=decision,
-            raw_text=decision_text,
-        )
-        return need_retrieval, decision
+            return False, plan
+        plan = self._plan_retrieval_focus(user_input)
+        self._print_retrieval_focus_debug(user_input=user_input, plan=plan)
+        return True, plan
 
     def _build_history_text(self) -> str:
         if not self.session_messages:
@@ -521,21 +480,32 @@ class EmpathyAgent:
 
     def _build_response_messages(self, user_input: str) -> Tuple[List[Dict[str, str]], str, Dict[str, Any]]:
         retrieval_text = ""
+        timings: Dict[str, float] = {
+            "retrieval_seconds": 0.0,
+            "response_seconds": 0.0,
+        }
         retrieval_meta: Dict[str, Any] = {
             "should_retrieve": False,
-            "decision": {},
+            "retrieval_plan": {},
             "retrieval_query": "",
             "retrieval": {},
+            "timings": timings,
         }
-        should_retrieve, decision = self._decide_retrieval(user_input)
+        intent_enabled = os.getenv("MEMAGENT_ENABLE_INTENT_RECOGNITION", "1").strip().lower()
+        intent_started = time.perf_counter()
+        should_retrieve, retrieval_plan = self._build_retrieval_plan(user_input)
+        if intent_enabled not in {"0", "false", "no", "off"}:
+            timings["intent_seconds"] = time.perf_counter() - intent_started
         retrieval_meta["should_retrieve"] = should_retrieve
-        retrieval_meta["decision"] = dict(decision)
+        retrieval_meta["retrieval_plan"] = dict(retrieval_plan)
         if should_retrieve and self.supervisor:
             retrieval_query = user_input.strip()
-            retrieval_focus = str(decision.get("retrieval_focus", "") or "").strip()
+            retrieval_focus = str(retrieval_plan.get("retrieval_focus", "") or "").strip()
             if retrieval_focus:
                 retrieval_query = f"{retrieval_query}\n{retrieval_focus}"
+            retrieval_started = time.perf_counter()
             retrieval = self.supervisor.retrieve_context_for_response(retrieval_query)
+            timings["retrieval_seconds"] = time.perf_counter() - retrieval_started
             retrieval_meta["retrieval_query"] = retrieval_query
             retrieval_meta["retrieval"] = dict(retrieval)
             retrieval_text = retrieval.get("context_text", "")
@@ -552,6 +522,9 @@ class EmpathyAgent:
             f"{retrieval_text}"
             "请根据以下内容生成专业心理咨询回复。\n"
             "回复时必须在回答开始前用 [策略] 标注本轮采用的主要咨询策略。\n\n"
+            "【本轮意图与检索焦点】\n"
+            f"用户意图：{retrieval_plan.get('intent', '') or '未识别'}\n"
+            f"检索焦点：{retrieval_plan.get('retrieval_focus', '') or '无'}\n\n"
             "【本次会话上下文】\n"
             "历史对话：\n"
             f"{history_text}\n\n"
@@ -595,7 +568,16 @@ class EmpathyAgent:
             raise RuntimeError("请先调用 start_session(user_id)")
 
         messages, retrieval_context, retrieval_meta = self._build_response_messages(user_input)
-        response_text, _usage = self.openai_client.chat(messages=messages)
+        response_started = time.perf_counter()
+        response_text, _usage = call_model(
+            self.openai_client,
+            component="empathy",
+            messages=messages,
+        )
+        retrieval_meta.setdefault("timings", {})["response_seconds"] = time.perf_counter() - response_started
+        fallback_notice = str(getattr(self.openai_client, "last_fallback_notice", "") or "")
+        if fallback_notice:
+            retrieval_meta["api_fallback_notice"] = fallback_notice
         return self._finalize_response_turn(user_input, response_text, retrieval_context, retrieval_meta)
 
     def generate_response_stream(self, user_input: str) -> Iterator[Dict[str, Any]]:
@@ -609,9 +591,13 @@ class EmpathyAgent:
             return
 
         response_parts: List[str] = []
-        for piece in stream_chat(messages):
+        response_started = time.perf_counter()
+        for piece in stream_model(self.openai_client, component="empathy", messages=messages):
             if not piece:
                 continue
+            fallback_notice = str(getattr(self.openai_client, "last_fallback_notice", "") or "")
+            if fallback_notice:
+                retrieval_meta["api_fallback_notice"] = fallback_notice
             response_parts.append(piece)
             yield {
                 "delta": piece,
@@ -622,6 +608,10 @@ class EmpathyAgent:
             }
 
         response_text = "".join(response_parts).strip()
+        retrieval_meta.setdefault("timings", {})["response_seconds"] = time.perf_counter() - response_started
+        fallback_notice = str(getattr(self.openai_client, "last_fallback_notice", "") or "")
+        if fallback_notice:
+            retrieval_meta["api_fallback_notice"] = fallback_notice
         final_result = self._finalize_response_turn(user_input, response_text, retrieval_context, retrieval_meta)
         final_result["done"] = True
         yield final_result
